@@ -1,14 +1,18 @@
+import os
+import shutil
+
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
 
-from  hypergol.model import Member
-from  hypergol.model import DataModelType
+from hypergol.model import DataModelType
+from hypergol.model import Member
+from hypergol.model import Project
 
 
 BUILTIN_TYPES = {'str', 'int'}
 
 
-class Render:
+class Renderer:
 
     def __init__(self, templateFolderPath):
         self.templateFolderPath = templateFolderPath
