@@ -2,7 +2,7 @@ import logging
 
 import fire
 
-from hypergol.renderer import Renderer
+from src.hypergol.renderer import Renderer
 
 # TODO(Rhys): move this elsewhere (ideally some kind of core library!)
 root_logger = logging.getLogger('')
@@ -43,5 +43,4 @@ def generate_datamodel(className, *declarations, targetDirectoryPath=None, expec
 
 if __name__ == "__main__":
     fire.Fire(generate_project)
-    fire.Fire(generate_project)
-    fire.Fire(generate_project)
+    fire.Fire(generate_datamodel)

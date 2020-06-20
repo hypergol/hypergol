@@ -1,4 +1,4 @@
-from jinja2 import Enviroment
+from jinja2 import Environment
 from jinja2 import FileSystemLoader
 
 from  hypergol.model import Member
@@ -12,7 +12,7 @@ class Render:
 
     def __init__(self, templateFolderPath):
         self.templateFolderPath = templateFolderPath
-        self.jinjaEnviroment = Enviroment(loader=FileSystemLoader(searchpath=self.templateFolderPath))
+        self.jinjaEnvironment = Environment(loader=FileSystemLoader(searchpath=self.templateFolderPath))
 
     # TODO(Rhys): These util functions are weird to have here - this should just be a list of render_* methods
     @staticmethod
@@ -56,12 +56,12 @@ class Render:
         self.render_datamodel(datamodelType=datamodelType)
 
     def render_datamodel(self, datamodelType):
-        template = self.jinjaEnviroment.get_template(name='datamodel/datamodel.py.j2')
+        template = self.jinjaEnvironment.get_template(name='datamodel/datamodel.py.j2')
         with open(f'datamodel/{get_filename(datamodelType.name)}', 'wt') as f:
             f.write(template.render(datamodelType=datamodelType) + '\n')
 
     def render_readme(self, project):
-        template = self.jinjaEnviroment.get_template(name='README.md.j2')
+        template = self.jinjaEnvironment.get_template(name='README.md.j2')
         with open(f'{project.name}/README.md', 'wt') as f:
             f.write(template.render(project=project))
 
