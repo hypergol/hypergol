@@ -1,2 +1,2 @@
 #!/bin/sh
-python hypergol src/test_projects/alpha
+python hypergol.py src/test_projects/alpha
