@@ -1,13 +1,15 @@
 language: python
 python:
   - 3.7
-before_install:
-  - python --version
-  - pip install -U pip
-  - pip install -U nose2
+install:
+  - pip install tox-travis
 jobs: 
   include:
-    - stage: unittests
-      script: nose2 -s src/
-    - stage: project-tests
-      script: ./run_project_tests.sh
+    - name: "Run unittests"
+      env:
+      - TOXENV=unittest
+    - name: "Run project tests"
+      env:
+      - TOXENV=projecttest
+script:
+  - tox
