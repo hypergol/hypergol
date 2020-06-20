@@ -1,2 +1,2 @@
 #!/bin/sh
-python hypergol.py --generate src/test_projects/alpha
+python3.8 hypergol.py --project-description-file-path src/test_projects/alpha
