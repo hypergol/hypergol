@@ -5,4 +5,9 @@ before_install:
   - python --version
   - pip install -U pip
   - pip install -U nose2
-script: nose2 -s src/
+jobs: 
+  include:
+    - stage: unittests
+      script: nose2 -s src/
+    - stage: project-tests
+      script: ./run_project_tests.sh
