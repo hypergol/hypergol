@@ -18,4 +18,4 @@ class ExampleTestCasse(HypergolTestCase):
         pass
 
     def test_example(self):
-        self.assertEqual(self.example.add(7, 5), 11)
+        self.assertEqual(self.example.add(7, 5), 12)
