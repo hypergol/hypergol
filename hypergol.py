@@ -9,7 +9,7 @@ def log(message):
     root_logger.log(msg=message, level=logging.CRITICAL)
 
 
-def generate_project(projectDescriptionFilePath, target_directory_path=None, expectedOutputDirectoryPath=None):
+def generate_project(projectDescriptionFilePath, targetDirectoryPath=None, expectedOutputDirectoryPath=None):
     # NOTE(Rhys): I'd build a docker image here with a mounted container so that we can compare what's generated in the container to what we have on the local machine
     # For now just generate in line
 
