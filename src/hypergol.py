@@ -14,33 +14,23 @@ def log(message):
 def generate_project(projectName, targetDirectoryPath=None, expectedOutputDirectoryPath=None):
     # NOTE(Rhys): I'd build a docker image here with a mounted container so that we can compare what's generated in the container to what we have on the local machine
     # For now just generate in line
-
-    # Generate project
-    log(message=f'Generating {projectName}...')
-    renderer = Renderer(templateFolderPath='src/hypergol/render/templates')
+    log(message=f'Generating project {projectName}...')
+    renderer = Renderer(templateFolderPath='src/hypergol/renderer/templates')
     renderer.render_project(projectName=projectName)
-
     if expectedOutputDirectoryPath:
         log(message=f'Comparing to {expectedOutputDirectoryPath}...')
         # TODO(Rhys): run diff
         pass
 
-def generate_datamodel(className, *declarations, targetDirectoryPath=None, expectedOutputDirectoryPath=None):
+
+def generate_datamodel(projectName, className, *declarations):
     # NOTE(Rhys): I'd build a docker image here with a mounted container so that we can compare what's generated in the container to what we have on the local machine
     # For now just generate in line
-
-    # Generate project
-    log(message=f'Generating {projectName}...')
-    renderer = Renderer(templateFolderPath='src/hypergol/render/templates')
-    datamodelType = renderer.pre_render_datamodel(className, *declarations)
-    renderer.render_datamodel(datamodelType=datamodelType)
-
-    if expectedOutputDirectoryPath:
-        log(message=f'Comparing to {expectedOutputDirectoryPath}...')
-        # TODO(Rhys): run diff
-        pass
+    log(message=f'Generating datamodel {className} in project {projectName}...')
+    renderer = Renderer(templateFolderPath='src/hypergol/renderer/templates')
+    datamodelType = renderer.pre_render_datamodel(className=className, declarations=declarations)
+    renderer.render_datamodel(projectName=projectName, datamodelType=datamodelType)
 
 
 if __name__ == "__main__":
-    fire.Fire(generate_project)
-    fire.Fire(generate_datamodel)
+    fire.Fire()

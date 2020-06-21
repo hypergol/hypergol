@@ -1,5 +1,7 @@
 import os
+import stat
 import shutil
+import re
 
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
@@ -25,6 +27,7 @@ class Renderer:
         if os.getuid() == fileStat.st_uid:
             os.chmod(filePath, fileStat.st_mode | stat.S_IXUSR)
 
+    @staticmethod
     def get_filename(className, withExtension=True):
         fileName = re.sub(r'([a-z])([A-Z])', r'\1_\2', className).lower()
         if withExtension:
@@ -32,12 +35,15 @@ class Renderer:
         return fileName
 
     # TODO(Rhys): This needs to move elsewhere - I need to think about the project structure
-    def pre_render_datamodel(className, *declarations):
+    def pre_render_datamodel(self, className, declarations):
         members = []
         dependencies = []
         doAddList: bool = False
         for declaration in declarations:
-            name, strType_ = declaration.split(':')
+            splitDeclaration = declaration.split(':')
+            if len(splitDeclaration) != 2:
+                raise Exception(f'Found declaration that doesn\'t match the format "name:type" - {declaration}')
+            name, strType_ = splitDeclaration
             # TODO(Laszlo): handle Dicts if needed at all
             type_ = next(iter(re.findall(r'^List\[(.+)\]$', strType_)), None)
             member = Member(name=name, type=strType_)
@@ -49,25 +55,37 @@ class Renderer:
                 type_ = strType_
             # TODO(Laszlo): maybe importlib.util.find_spec can solve this nicer
             if os.path.exists(f'datamodel/{type_.lower()}.py'):
-                importName = get_filename(type_, withExtension=False)
+                importName = self.get_filename(type_, withExtension=False)
                 self.dependencies.append({'importName': importName, 'name': type_})
                 member.needConversion = True
             elif type_ not in BUILTIN_TYPES:
                 raise ValueError(f'Unknown type: {type_} must be in {BUILTIN_TYPES} or in datamodel')
             members.append(member)
-            datamodelType.add_member(declaration=declaration)
-        datamodelType = DataModelType(name=className, doAddList=doAddList, dependencies=dependencies, members=members)
-        self.render_datamodel(datamodelType=datamodelType)
+        return DataModelType(name=className, doAddList=doAddList, dependencies=dependencies, members=members)
 
-    def render_datamodel(self, datamodelType):
+    def render_datamodel(self, projectName, datamodelType):
         template = self.jinjaEnvironment.get_template(name='datamodel/datamodel.py.j2')
-        with open(f'datamodel/{get_filename(datamodelType.name)}', 'wt') as f:
+        with open(f'{projectName}/datamodel/{self.get_filename(datamodelType.name)}', 'w+') as f:
             f.write(template.render(datamodelType=datamodelType) + '\n')
 
     def render_readme(self, project):
         template = self.jinjaEnvironment.get_template(name='README.md.j2')
         with open(f'{project.name}/README.md', 'wt') as f:
             f.write(template.render(project=project))
+
+    def render_directory(self, templateDirectoryPath, outputDirectoryPath, jinjaVariables):
+        for path, _, files in os.walk(os.path.join(self.templateFolderPath), templateDirectoryPath):
+            templateRelativePath = path.replace(self.templateFolderPath, '')
+            for filename in files:
+                tempaltePath = os.path.join(templateRelativePath, filename)
+                template = self.jinjaEnvironment.get_template(name=tempaltePath)
+                if filename.endswith('.j2'):
+                    targetFilePath = os.path.join(outputDirectoryPath, filename[:3])
+                    with open(targetFilePath, 'w+') as targetFile:
+                        targetFile.write(template.render(**jinjaVariables))
+                else:
+                    raise Exception('All templates must end in .j2')
+
 
     def render_project(self, projectName):
         project = Project(name=projectName)
@@ -85,8 +103,9 @@ class Renderer:
         ]
         for directory in directories:
             os.mkdir(f'{project.name}/{directory}')
-        shutil.copy(f'{self.templateFolderPath}/requirements.txt', f'{project.name}/requirements.txt')
-        shutil.copy(f'{self.templateFolderPath}/.gitignore', f'{project.name}/.gitignore')
-        shutil.copy(f'{self.templateFolderPath}/makevenv.sh', f'{project.name}/makevenv.sh')
-        make_file_executable(f'{project.name}/makevenv.sh')
-        render_readme(project=project)
+        self.render_directory(templateDirectoryPath='project', outputDirectoryPath=project.name, jinjaVariables={'project': project})
+        # shutil.copy(f'{self.templateFolderPath}/requirements.txt', f'{project.name}/requirements.txt')
+        # shutil.copy(f'{self.templateFolderPath}/.gitignore', f'{project.name}/.gitignore')
+        # shutil.copy(f'{self.templateFolderPath}/makevenv.sh', f'{project.name}/makevenv.sh')
+        # self.make_file_executable(f'{project.name}/makevenv.sh')
+        # self.render_readme(project=project)
