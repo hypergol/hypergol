@@ -1,2 +1,3 @@
 #!/bin/sh
-python hypergol.py src/test_projects/alpha
+python src/hypergol.py create_project exampleProject
+python src/hypergol.py create_datamodel exampleProject exampleDatamodel a:int
