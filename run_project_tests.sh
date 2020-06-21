@@ -1,3 +1,3 @@
 #!/bin/sh
-python src/hypergol.py generate_project example2
-python src/hypergol.py generate_datamodel example2 example2 a:int
+python src/hypergol.py create_project exampleProject
+python src/hypergol.py create_datamodel exampleProject exampleDatamodel a:int

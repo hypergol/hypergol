@@ -47,9 +47,9 @@ class Renderer:
             elif type_ not in BUILTIN_TYPES:
                 raise ValueError(f'Unknown type: {type_} must be in {BUILTIN_TYPES} or in datamodel')
             members.append(member)
-        return DataModelType(name=className, doAddList=doAddList, dependencies=dependencies, members=members)
+        return DataModelType(name=className.capitalize(), doAddList=doAddList, dependencies=dependencies, members=members)
 
-    def render_directory(self, templateDirectoryPath, outputDirectoryPath, jinjaVariables):
+    def render_directory(self, templateDirectoryPath, outputDirectoryPath, jinjaVariables, pathVariables):
         for path, _, files in os.walk(os.path.join(self.templateFolderPath, templateDirectoryPath)):
             templateRelativePath = path.replace(self.templateFolderPath, '')
             for filename in files:
@@ -57,6 +57,9 @@ class Renderer:
                 template = self.jinjaEnvironment.get_template(name=tempaltePath)
                 if filename.endswith('.j2'):
                     targetFilePath = os.path.join(outputDirectoryPath, filename[:-3])
+                    for variableName, value in pathVariables.items():
+                        if f'{variableName}' in targetFilePath:
+                            targetFilePath = targetFilePath.format(**{variableName: value})
                     with open(targetFilePath, 'w+') as targetFile:
                         targetFile.write(template.render(**jinjaVariables))
                 else:
@@ -77,7 +80,8 @@ class Renderer:
         return fileName
 
     def render_datamodel(self, projectName, datamodelType):
-        self.render_directory(templateDirectoryPath='datamodel', outputDirectoryPath=f'{projectName}/datamodel', jinjaVariables={'datamodelType': datamodelType})
+        # TODO(Rhys): we need formattable string objects if we are going to have classes with names with than one word, e.g. 'word token'
+        self.render_directory(templateDirectoryPath='datamodel', outputDirectoryPath=f'{projectName}/datamodel', jinjaVariables={'datamodelType': datamodelType}, pathVariables={'datamodel': datamodelType.name.lower()})
 
     def render_project(self, projectName):
         project = Project(name=projectName)
@@ -95,4 +99,4 @@ class Renderer:
         for directory in directories:
             os.mkdir(f'{project.name}/{directory}')
         self.render_directory(templateDirectoryPath='project', outputDirectoryPath=project.name, jinjaVariables={'project': project})
-        self.make_file_executables(filePath=f'{project.name}/makevenv.sh')
+        self.make_file_executable(filePath=f'{project.name}/makevenv.sh')
