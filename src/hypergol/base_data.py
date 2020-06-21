@@ -43,7 +43,7 @@ class BaseData:
                 if v != self.__dict__[k]:
                     raise AssertionError(f'{self.__class__.__name__}.from_data() does not deserialise: {k}: {v} != {self.__dict__[k]}')
             if not isinstance(self, type(selfCopy)):
-                raise AssertionError(f'{self.__class__.__name__}.from_data() does not return the correct type: {self.__class__.__name__} vs {selfCopy.__class__.__name__}')'
+                raise AssertionError(f'{self.__class__.__name__}.from_data() does not return the correct type: {self.__class__.__name__} vs {selfCopy.__class__.__name__}')
             return True
         except TypeError as ex:
             raise TypeError(f'{self.__class__.__name__} self test failed: {ex}')
