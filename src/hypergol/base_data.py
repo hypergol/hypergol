@@ -46,7 +46,7 @@ class BaseData:
         return True
 
     def test_from_data(self):
-        selfCopy = self.from_data(json.loads(json.dumps(self.to_data())))
+        selfCopy = self.from_data(self.to_data())
         if not isinstance(self, type(selfCopy)):
             raise AssertionError(f'{self.__class__.__name__}.from_data() does not return the correct type: {self.__class__.__name__} vs {selfCopy.__class__.__name__}, from_data() return value should be "cls(**data)"')
         for k, v in selfCopy.__dict__.items():
