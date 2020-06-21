@@ -110,7 +110,6 @@ class TestBaseData(TestCase):
             dateValue=self.datetimeValue.date(),
             timeValue=self.datetimeValue.time()
         )
-        self.dataClassWithSelfChangingToData.test()
 
     def test_given_when_then(self):
         self.assertEqual(1, 1)
