@@ -5,7 +5,6 @@ import fire
 # TODO(Rhys): move this elsewhere (ideally some kind of core library!)
 root_logger = logging.getLogger('')
 
-
 def log(message):
     root_logger.log(msg=message, level=logging.CRITICAL)
 
