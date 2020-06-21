@@ -55,8 +55,3 @@ class BaseData:
                     raise AssertionError(f'{self.__class__.__name__}.from_data() returns keys as values: {k}: {v} != {self.__dict__[k]}, from_data() return value should be "cls(**data)"')
                 raise AssertionError(f'{self.__class__.__name__}.from_data() does not deserialise: {k}: {v} != {self.__dict__[k]}')
         return True
-
-    def test_serialisation(self):
-        self.test_to_data()
-        self.test_from_data()
-        return True
