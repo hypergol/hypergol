@@ -100,4 +100,8 @@ class Renderer:
         for directory in directories:
             os.mkdir(f'{project.name}/{directory}')
         self.render_directory(templateDirectoryPath='project', outputDirectoryPath=project.name, jinjaVariables={'project': project})
+        self.render_directory(templateDirectoryPath='pipelines', outputDirectoryPath=f'{project.name}/pipelines', jinjaVariables={})
+        self.render_directory(templateDirectoryPath='scripts', outputDirectoryPath=f'{project.name}/scripts', jinjaVariables={})
+        self.render_directory(templateDirectoryPath='tasks', outputDirectoryPath=f'{project.name}/tasks', jinjaVariables={})
+        self.render_directory(templateDirectoryPath='tests', outputDirectoryPath=f'{project.name}/tests', jinjaVariables={})
         self.make_file_executable(filePath=f'{project.name}/makevenv.sh')
