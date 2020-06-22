@@ -82,7 +82,7 @@ class Renderer:
 
     def render_datamodel(self, projectName, datamodelType):
         # TODO(Rhys): we need formattable string objects if we are going to have classes with names with than one word, e.g. 'word token'
-        self.render_directory(templateDirectoryPath='datamodel', outputDirectoryPath=f'{projectName}/datamodel', jinjaVariables={'datamodelType': datamodelType}, pathVariables={'datamodel': datamodelType.name.lower()})
+        self.render_directory(templateDirectoryPath='datamodel', outputDirectoryPath=f'{projectName}/datamodels', jinjaVariables={'datamodelType': datamodelType}, pathVariables={'datamodel': datamodelType.name.lower()})
 
     def render_project(self, projectName):
         project = Project(name=projectName)
@@ -91,7 +91,7 @@ class Renderer:
         os.mkdir(project.name)
         # TODO(Laszlo): datasets??, models, deploys at the respective command
         directories = [
-            'datamodel',
+            'datamodels',
             'tasks',
             'pipelines',
             'scripts',
@@ -101,6 +101,7 @@ class Renderer:
             os.mkdir(f'{project.name}/{directory}')
         self.render_directory(templateDirectoryPath='project', outputDirectoryPath=project.name, jinjaVariables={'project': project})
         self.render_directory(templateDirectoryPath='pipelines', outputDirectoryPath=f'{project.name}/pipelines', jinjaVariables={})
+        self.render_directory(templateDirectoryPath='datamodels', outputDirectoryPath=f'{project.name}/datamodels', jinjaVariables={})
         self.render_directory(templateDirectoryPath='scripts', outputDirectoryPath=f'{project.name}/scripts', jinjaVariables={})
         self.render_directory(templateDirectoryPath='tasks', outputDirectoryPath=f'{project.name}/tasks', jinjaVariables={})
         self.render_directory(templateDirectoryPath='tests', outputDirectoryPath=f'{project.name}/tests', jinjaVariables={})
