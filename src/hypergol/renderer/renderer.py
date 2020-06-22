@@ -18,7 +18,7 @@ class Renderer:
 
     def __init__(self, templateFolderPath):
         self.templateFolderPath = templateFolderPath
-        self.jinjaEnvironment = Environment(loader=FileSystemLoader(searchpath=self.templateFolderPath))
+        self.jinjaEnvironment = Environment(loader=FileSystemLoader(searchpath=self.templateFolderPath), keep_trailing_newline=True)
 
     # TODO(Rhys): This needs to move elsewhere - I need to think about the project structure
     def pre_render_datamodel(self, className, declarations):
