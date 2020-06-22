@@ -18,7 +18,7 @@ ignore-patterns=
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-init-hook="import sys; import os; print(os.path.join(os.environ['TRAVIS_BUILD_DIR'], '/hypergol/src')); sys.path.append(os.path.join(os.environ['TRAVIS_BUILD_DIR'], '/hypergol/src'))"
+init-hook=
 
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use.
