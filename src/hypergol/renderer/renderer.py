@@ -49,7 +49,7 @@ class Renderer:
             members.append(member)
         return DataModelType(name=className.capitalize(), doAddList=doAddList, dependencies=dependencies, members=members)
 
-    def render_directory(self, templateDirectoryPath, outputDirectoryPath, jinjaVariables, pathVariables):
+    def render_directory(self, templateDirectoryPath, outputDirectoryPath, jinjaVariables, pathVariables=None):
         for path, _, files in os.walk(os.path.join(self.templateFolderPath, templateDirectoryPath)):
             templateRelativePath = path.replace(self.templateFolderPath, '')
             for filename in files:
@@ -57,9 +57,10 @@ class Renderer:
                 template = self.jinjaEnvironment.get_template(name=tempaltePath)
                 if filename.endswith('.j2'):
                     targetFilePath = os.path.join(outputDirectoryPath, filename[:-3])
-                    for variableName, value in pathVariables.items():
-                        if f'{variableName}' in targetFilePath:
-                            targetFilePath = targetFilePath.format(**{variableName: value})
+                    if pathVariables is not None:
+                        for variableName, value in pathVariables.items():
+                            if f'{variableName}' in targetFilePath:
+                                targetFilePath = targetFilePath.format(**{variableName: value})
                     with open(targetFilePath, 'w+') as targetFile:
                         targetFile.write(template.render(**jinjaVariables))
                 else:
