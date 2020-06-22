@@ -38,16 +38,13 @@ class BaseData:
         return cls(**data)
 
     def test_get_id(self):
-        noIdExceptionThrown = False
-        tupleReturnValue = False
         try:
             classId = self.get_id()
-            if not isinstance(classId, tuple):
-                raise ValueError(f'Return of get_id must be a tuple instead of f{isinstance(classId, tuple)}')
-            tupleReturnValue = True
         except NoIdException:
-            noIdExceptionThrown = True
-        return noIdExceptionThrown or tupleReturnValue
+            return True
+        if not isinstance(classId, tuple):
+            raise ValueError(f'Return of get_id must be a tuple instead of f{isinstance(classId, tuple)}')
+        return True
 
     def test_to_data(self):
         originalData = self.__dict__.copy()
