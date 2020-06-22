@@ -58,7 +58,13 @@ class TestDataset(TestCase):
             self.datasetNew.delete()
         try:
             os.rmdir(f'{self.dataset.location}/{self.dataset.project}/{self.dataset.branch}')
+        except FileNotFoundError:
+            pass
+        try:
             os.rmdir(f'{self.dataset.location}/{self.dataset.project}')
+        except FileNotFoundError:
+            pass
+        try:
             os.rmdir(f'{self.dataset.location}')
         except FileNotFoundError:
             pass
