@@ -3,6 +3,10 @@ import json
 MAX_MEMBER_REPR_LENGTH = 100
 
 
+class NoIdException(Exception):
+    pass
+
+
 class BaseData:
 
     def __repr__(self):
@@ -24,7 +28,7 @@ class BaseData:
             return False
 
     def get_id(self):
-        raise ValueError(f"{self.__class__.__name__} doesn't have an id")
+        raise NoIdException(f"{self.__class__.__name__} doesn't have an id")
 
     def to_data(self):
         return self.__dict__.copy()
@@ -32,6 +36,15 @@ class BaseData:
     @classmethod
     def from_data(cls, data):
         return cls(**data)
+
+    def test_get_id(self):
+        try:
+            classId = self.get_id()
+        except NoIdException:
+            return True
+        if not isinstance(classId, tuple):
+            raise ValueError(f'Return of get_id must be a tuple instead of f{type(classId)}')
+        return True
 
     def test_to_data(self):
         originalData = self.__dict__.copy()
