@@ -11,11 +11,15 @@ from hypergol.utils import Repr
 VALID_CHUNKS = {16: 1, 256: 2, 4096: 3}
 
 
-class DatasetNotExistException(Exception):
+class DatasetDoesNotExistException(Exception):
     pass
 
 
-class DatasetAlreadyExistException(Exception):
+class DatasetAlreadyExistsException(Exception):
+    pass
+
+
+class DatasetDefFileDoesNotMatchException(Exception):
     pass
 
 
@@ -85,16 +89,16 @@ class Dataset(Repr):
             newDefData = self.__dict__.copy()
             newDefData['dataType'] = newDefData['dataType'].__name__
             if oldDefData != newDefData:
-                raise ValueError(f'The defintion of the dataset class does not match the def file {set(newDefData.items()) ^ set(oldDefData.items())}')
+                raise DatasetDefFileDoesNotMatchException(f'The defintion of the dataset class does not match the def file {set(newDefData.items()) ^ set(oldDefData.items())}')
 
     def init(self, mode):
         if mode == 'w':
             if self.exists():
-                raise DatasetAlreadyExistException(f"Dataset {self.defFilename} already exist, delete the dataset first with Dataset.delete()")
+                raise DatasetAlreadyExistsException(f"Dataset {self.defFilename} already exist, delete the dataset first with Dataset.delete()")
             self._make_def_file()
         elif mode == 'r':
             if not self.exists():
-                raise DatasetNotExistException(f'Dataset {self.name} does not exist')
+                raise DatasetDoesNotExistException(f'Dataset {self.name} does not exist')
             self._check_def_file()
         else:
             raise ValueError(f'Invalid mode: {mode} in {self.name}')
@@ -119,7 +123,7 @@ class Dataset(Repr):
 
     def delete(self):
         if not self.exists():
-            raise DatasetNotExistException(f'Dataset {self.name} does not exist')
+            raise DatasetDoesNotExistException(f'Dataset {self.name} does not exist')
         for filename in glob.glob(f'{self.directory}/*'):
             os.remove(filename)
         os.rmdir(self.directory)

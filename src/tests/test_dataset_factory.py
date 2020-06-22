@@ -36,4 +36,5 @@ class TestDatasetFactory(TestCase):
             chunks=self.expectedDataset.chunks
         )
         dataset = datasetFactory.get(dataType=DataClass, name='data_class')
+        self.assertEqual(type(dataset), Dataset)
         self.assertDictContainsSubset(self.expectedDataset.__dict__, dataset.__dict__)

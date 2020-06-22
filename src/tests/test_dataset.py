@@ -1,8 +1,14 @@
 import os
+from pathlib import PosixPath
 from unittest import TestCase
 
 from hypergol.base_data import BaseData
 from hypergol.dataset import Dataset
+from hypergol.dataset import DatasetWriter
+from hypergol.dataset import DatasetReader
+from hypergol.dataset import DatasetDoesNotExistException
+from hypergol.dataset import DatasetAlreadyExistsException
+from hypergol.dataset import DatasetDefFileDoesNotMatchException
 
 
 class DataClass(BaseData):
@@ -14,61 +20,127 @@ class DataClass(BaseData):
     def get_id(self):
         return (self.id_, )
 
+    def __hash__(self):
+        return self.id_
+
 
 class TestDataset(TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        dataset = Dataset(
+    def setUp(self):
+        super().setUp()
+        self.dataset = Dataset(
             dataType=DataClass,
-            location='.',
+            location='test_location',
             project='test_x',
             branch='branch',
             name='data_class',
             chunks=16
         )
-        if not dataset.exists():
-            with dataset.open('w') as ds:
-                for k in range(100):
-                    ds.append(DataClass(id_=1, value=k))
-
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        dataset = Dataset(
+        self.expectedObjects = {DataClass(id_=k, value=k) for k in range(100)}
+        if not self.dataset.exists():
+            with self.dataset.open('w') as ds:
+                for v in self.expectedObjects:
+                    ds.append(v)
+        self.datasetNew = Dataset(
             dataType=DataClass,
-            location='.',
+            location='test_location',
             project='test_x',
             branch='branch',
-            name='data_class',
+            name='data_class_new',
             chunks=16
         )
-        if dataset.exists():
-            dataset.delete()
-        os.rmdir(f'{dataset.location}/{dataset.project}/{dataset.branch}')
-        os.rmdir(f'{dataset.location}/{dataset.project}')
 
-    def test_hello_world(self):
-        self.assertEqual(True, True)
+    def tearDown(self):
+        super().tearDown()
+        if self.dataset.exists():
+            self.dataset.delete()
+        if self.datasetNew.exists():
+            self.datasetNew.delete()
+        try:
+            os.rmdir(f'{self.dataset.location}/{self.dataset.project}/{self.dataset.branch}')
+            os.rmdir(f'{self.dataset.location}/{self.dataset.project}')
+            os.rmdir(f'{self.dataset.location}')
+        except FileNotFoundError:
+            pass
 
-    def test_open_returns_the_correct_objects(self):
-        pass
+    def test_dataset_directory_returns_correctly(self):
+        self.assertEqual(self.dataset.directory, PosixPath('test_location/test_x/branch/data_class'))
+
+    def test_dataset_correctly_locates_def_file(self):
+        self.assertEqual(self.dataset.defFilename, 'test_location/test_x/branch/data_class/data_class.def')
+
+    def test_dataset_exists_returns_true_if_exists(self):
+        self.assertEqual(self.dataset.exists(), True)
+
+    def test_dataset_exists_returns_false_if_does_not_exists(self):
+        self.assertEqual(self.datasetNew.exists(), False)
+
+    def test_open_returns_datawriter_and_opened_chunks_if_w_mode(self):
+        datasetWriter = self.datasetNew.open('w')
+        expectedFilenames = {f'{k:0x}': f'{self.datasetNew.directory}/data_class_new_{k:0x}.json.gz' for k in range(16)}
+        filenames = {chunkId: chunk.file.name for chunkId, chunk in datasetWriter.chunks.items()}
+        self.assertEqual(type(datasetWriter), DatasetWriter)
+        self.assertEqual(datasetWriter.dataset, self.datasetNew)
+        self.assertEqual(expectedFilenames, filenames)
+
+    def test_open_returns_datareader_and_unopened_chunks_if_r_mode(self):
+        datasetReader = self.dataset.open('r')
+        expectedChunkIds = {f'{k:0x}' for k in range(16)}
+        self.assertEqual(type(datasetReader), DatasetReader)
+        self.assertEqual(datasetReader.dataset, self.dataset)
+        for chunk in datasetReader.chunks:
+            self.assertIsNone(chunk.file)
+        self.assertSetEqual({chunk.chunkId for chunk in datasetReader.chunks}, expectedChunkIds)
 
     def test_init_in_read_mode_fails_if_dataset_does_not_exist(self):
-        pass
+        with self.assertRaises(DatasetDoesNotExistException):
+            self.datasetNew.init(mode='r')
 
     def test_init_in_read_mode_fails_if_existing_dataset_def_does_not_match(self):
-        pass
-
-    def test_get_chunks_returns_the_right_chunks(self):
-        pass
+        differentDataset = Dataset(
+            dataType=DataClass,
+            location='test_location',
+            project='test_x',
+            branch='branch',
+            name='data_class',
+            chunks=256
+        )
+        with self.assertRaises(DatasetDefFileDoesNotMatchException):
+            differentDataset.init(mode='r')
 
     def test_init_in_write_mode_fails_if_dataset_already_exist(self):
-        pass
+        with self.assertRaises(DatasetAlreadyExistsException):
+            self.dataset.init(mode='w')
 
-    def test_delete_fails_if_dataset_does_not_exist(self):
-        pass
+    def test_get_chunks_returns_the_right_chunks(self):
+        chunks = self.dataset.get_chunks(mode='r')
+        for chunk in chunks:
+            self.assertEqual(chunk.dataset, self.dataset)
+            self.assertIsNone(chunk.file)
+        self.assertSetEqual({chunk.chunkId for chunk in chunks}, {f'{k:0x}' for k in range(16)})
 
-    def test_get_object_chunk_id_returns_the_correct_hash(self):
-        pass
+    def test_dataset_reader_reads_correctly(self):
+        objects = set(self.dataset.open('r'))
+        self.assertSetEqual(objects, self.expectedObjects)
+
+    def test_dataset_reader_reads_correctly_with_context_manager(self):
+        objects = set()
+        with self.dataset.open('r') as datasetReader:
+            for value in datasetReader:
+                objects.add(value)
+        self.assertSetEqual(objects, self.expectedObjects)
+
+    def test_dataset_writer_writes_correctly_with_context_manager(self):
+        with self.datasetNew.open('w') as datasetWriter:
+            for value in self.expectedObjects:
+                datasetWriter.append(value)
+        objects = set(self.dataset.open('r'))
+        self.assertSetEqual(objects, self.expectedObjects)
+
+    def test_delete_fails_if_dataset_not_exist(self):
+        with self.assertRaises(DatasetDoesNotExistException):
+            self.datasetNew.delete()
+
+    def test_delete_deletes_files_and_directory(self):
+        self.dataset.delete()
+        self.assertEqual(os.path.exists(self.dataset.directory), False)
