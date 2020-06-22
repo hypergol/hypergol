@@ -39,7 +39,7 @@ class BaseData:
 
     def test_get_id(self):
         try:
-            classId = self.get_id()
+            classId = self.get_id()  # pylint: disable=assignment-from-no-return
         except NoIdException:
             return True
         if not isinstance(classId, tuple):

@@ -1,6 +1,5 @@
 import os
 import stat
-import shutil
 import re
 
 from jinja2 import Environment
@@ -18,7 +17,7 @@ class Renderer:
 
     def __init__(self, templateFolderPath):
         self.templateFolderPath = templateFolderPath
-        self.jinjaEnvironment = Environment(loader=FileSystemLoader(searchpath=self.templateFolderPath))
+        self.jinjaEnvironment = Environment(loader=FileSystemLoader(searchpath=self.templateFolderPath), keep_trailing_newline=True)
 
     # TODO(Rhys): This needs to move elsewhere - I need to think about the project structure
     def pre_render_datamodel(self, className, declarations):
@@ -42,14 +41,14 @@ class Renderer:
             # TODO(Laszlo): maybe importlib.util.find_spec can solve this nicer
             if os.path.exists(f'datamodel/{type_.lower()}.py'):
                 importName = self.get_filename(type_, withExtension=False)
-                self.dependencies.append({'importName': importName, 'name': type_})
+                dependencies.append({'importName': importName, 'name': type_})
                 member.needConversion = True
             elif type_ not in BUILTIN_TYPES:
                 raise ValueError(f'Unknown type: {type_} must be in {BUILTIN_TYPES} or in datamodel')
             members.append(member)
         return DataModelType(name=className.capitalize(), doAddList=doAddList, dependencies=dependencies, members=members)
 
-    def render_directory(self, templateDirectoryPath, outputDirectoryPath, jinjaVariables, pathVariables):
+    def render_directory(self, templateDirectoryPath, outputDirectoryPath, jinjaVariables, pathVariables=None):
         for path, _, files in os.walk(os.path.join(self.templateFolderPath, templateDirectoryPath)):
             templateRelativePath = path.replace(self.templateFolderPath, '')
             for filename in files:
@@ -57,9 +56,10 @@ class Renderer:
                 template = self.jinjaEnvironment.get_template(name=tempaltePath)
                 if filename.endswith('.j2'):
                     targetFilePath = os.path.join(outputDirectoryPath, filename[:-3])
-                    for variableName, value in pathVariables.items():
-                        if f'{variableName}' in targetFilePath:
-                            targetFilePath = targetFilePath.format(**{variableName: value})
+                    if pathVariables is not None:
+                        for variableName, value in pathVariables.items():
+                            if f'{variableName}' in targetFilePath:
+                                targetFilePath = targetFilePath.format(**{variableName: value})
                     with open(targetFilePath, 'w+') as targetFile:
                         targetFile.write(template.render(**jinjaVariables))
                 else:
@@ -81,7 +81,7 @@ class Renderer:
 
     def render_datamodel(self, projectName, datamodelType):
         # TODO(Rhys): we need formattable string objects if we are going to have classes with names with than one word, e.g. 'word token'
-        self.render_directory(templateDirectoryPath='datamodel', outputDirectoryPath=f'{projectName}/datamodel', jinjaVariables={'datamodelType': datamodelType}, pathVariables={'datamodel': datamodelType.name.lower()})
+        self.render_directory(templateDirectoryPath='datamodel', outputDirectoryPath=f'{projectName}/datamodels', jinjaVariables={'datamodelType': datamodelType}, pathVariables={'datamodel': datamodelType.name.lower()})
 
     def render_project(self, projectName):
         project = Project(name=projectName)
@@ -90,7 +90,7 @@ class Renderer:
         os.mkdir(project.name)
         # TODO(Laszlo): datasets??, models, deploys at the respective command
         directories = [
-            'datamodel',
+            'datamodels',
             'tasks',
             'pipelines',
             'scripts',
@@ -99,4 +99,9 @@ class Renderer:
         for directory in directories:
             os.mkdir(f'{project.name}/{directory}')
         self.render_directory(templateDirectoryPath='project', outputDirectoryPath=project.name, jinjaVariables={'project': project})
+        self.render_directory(templateDirectoryPath='pipelines', outputDirectoryPath=f'{project.name}/pipelines', jinjaVariables={})
+        self.render_directory(templateDirectoryPath='datamodels', outputDirectoryPath=f'{project.name}/datamodels', jinjaVariables={})
+        self.render_directory(templateDirectoryPath='scripts', outputDirectoryPath=f'{project.name}/scripts', jinjaVariables={})
+        self.render_directory(templateDirectoryPath='tasks', outputDirectoryPath=f'{project.name}/tasks', jinjaVariables={})
+        self.render_directory(templateDirectoryPath='tests', outputDirectoryPath=f'{project.name}/tests', jinjaVariables={})
         self.make_file_executable(filePath=f'{project.name}/makevenv.sh')

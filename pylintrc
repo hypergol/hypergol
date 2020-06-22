@@ -18,7 +18,7 @@ ignore-patterns=
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-#init-hook=
+init-hook=
 
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use.
@@ -143,7 +143,12 @@ disable=print-statement,
         missing-function-docstring,
         invalid-name,
         line-too-long,
-        missing-class-docstring
+        missing-class-docstring,
+        too-many-arguments,
+        fixme,
+        too-few-public-methods,
+        too-many-locals,
+        too-many-nested-blocks
 
 
 # Enable the message, report, category or checker with the given id(s). You can

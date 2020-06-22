@@ -106,10 +106,9 @@ class Dataset(Repr):
     def open(self, mode):
         if mode == 'w':
             return DatasetWriter(dataset=self)
-        elif mode == 'r':
+        if mode == 'r':
             return DatasetReader(dataset=self)
-        else:
-            raise ValueError(f'Invalid mode: {mode} in {self.name}')
+        raise ValueError(f'Invalid mode: {mode} in {self.name}')
 
     def get_chunks(self, mode):
         def _get_chunk_ids():
