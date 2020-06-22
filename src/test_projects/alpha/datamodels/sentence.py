@@ -8,7 +8,3 @@ class Sentence(BaseData):
         self.endChar = endChar
         self.articleId = articleId
         self.sentenceId = sentenceId
-
-    @classmethod
-    def from_data(cls, data):
-        return cls(**data)

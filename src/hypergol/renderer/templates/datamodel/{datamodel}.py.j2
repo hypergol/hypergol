@@ -12,16 +12,3 @@ class {{ datamodelType.name }}(BaseData):
 {%- for member in datamodelType.members %}
         self.{{ member.name }} = {{ member.name }}
 {%- endfor %}
-
-    @classmethod
-    def from_data(cls, data):
-        {%- for member in datamodelType.members -%}
-            {%- if member.needConversion %}
-                {%- if member.innerType == "" %}
-        data['{{ member.name}}'] = {{ member.type }}.from_data(data['{{ member.name}}'])
-                {%- else %}
-        data['{{ member.name}}'] = [{{ member.innerType }}.from_data(v) for v in data['{{ member.name}}']]
-            {%- endif %}
-        {%- endif %}
-        {%- endfor %}
-        return cls(**data)

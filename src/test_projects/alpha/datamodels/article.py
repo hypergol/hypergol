@@ -8,7 +8,3 @@ class Article(BaseData):
         self.url = url
         self.title = title
         self.text = text
-
-    @classmethod
-    def from_data(cls, data):
-        return cls(**data)
