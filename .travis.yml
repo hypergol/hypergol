@@ -8,6 +8,9 @@ jobs:
     - name: "Run unittests"
       env:
       - TOXENV=unittest
+    - name: "Run lint"
+      env:
+      - TOXENV=lint
     - name: "Run project tests"
       env:
       - TOXENV=projecttest

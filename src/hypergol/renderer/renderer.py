@@ -1,6 +1,5 @@
 import os
 import stat
-import shutil
 import re
 
 from jinja2 import Environment
@@ -42,7 +41,7 @@ class Renderer:
             # TODO(Laszlo): maybe importlib.util.find_spec can solve this nicer
             if os.path.exists(f'datamodel/{type_.lower()}.py'):
                 importName = self.get_filename(type_, withExtension=False)
-                self.dependencies.append({'importName': importName, 'name': type_})
+                dependencies.append({'importName': importName, 'name': type_})
                 member.needConversion = True
             elif type_ not in BUILTIN_TYPES:
                 raise ValueError(f'Unknown type: {type_} must be in {BUILTIN_TYPES} or in datamodel')
