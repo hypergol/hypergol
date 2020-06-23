@@ -22,7 +22,7 @@ class DataClass(BaseData):
         return (self.id_, )
 
     def __hash__(self):
-        return self.id_
+        return hash(self.id_)
 
 
 class OtherDataClass(BaseData):

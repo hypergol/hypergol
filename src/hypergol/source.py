@@ -10,7 +10,7 @@ class Source(Repr):
 
     def __init__(self, outputDataset):
         self.outputDataset = outputDataset
-        # test that run returns the same class as the type of the dataset (runtime)
+        # TODO(Laszlo): test that run returns the same class as the type of the dataset (runtime)
 
     def source_iterator(self):
         raise NotImplementedError(f'f{self.__class__.__name__} must implement source_iterator()')
