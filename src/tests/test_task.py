@@ -52,10 +52,10 @@ class TaskExample(Task):
         )
 
 
-class TestDataset(HypergolTestCase):
+class TestTask(HypergolTestCase):
 
     def __init__(self, methodName='runTest'):
-        super(TestDataset, self).__init__(
+        super(TestTask, self).__init__(
             location='test_task_location',
             project='test_task',
             branch='branch',
