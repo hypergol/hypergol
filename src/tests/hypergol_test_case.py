@@ -5,9 +5,6 @@ from hypergol.base_data import BaseData
 from hypergol.dataset import DatasetFactory
 
 
-# TODO(Laszlo): move all the dataset make/clean code here
-
-
 class DataClass1(BaseData):
 
     def __init__(self, id_: int, value1: int):
@@ -51,9 +48,6 @@ class HypergolTestCase(TestCase):
             branch=self.branch,
             chunks=self.chunks
         )
-
-    def tearDown(self):
-        super().tearDown()
 
     @staticmethod
     def create_test_dataset(dataset, content):
