@@ -9,6 +9,7 @@ from hypergol.dataset import DatasetReader
 from hypergol.dataset import DatasetDoesNotExistException
 from hypergol.dataset import DatasetAlreadyExistsException
 from hypergol.dataset import DatasetDefFileDoesNotMatchException
+from hypergol.dataset import DatasetTypeDoesNotMatchDataTypeException
 
 
 class DataClass(BaseData):
@@ -21,7 +22,17 @@ class DataClass(BaseData):
         return (self.id_, )
 
     def __hash__(self):
-        return self.id_
+        return hash(self.id_)
+
+
+class OtherDataClass(BaseData):
+
+    def __init__(self, id_: int, value: int):
+        self.id_ = id_
+        self.value = value
+
+    def get_id(self):
+        return (self.id_, )
 
 
 class TestDataset(TestCase):
@@ -30,8 +41,8 @@ class TestDataset(TestCase):
         super().setUp()
         self.dataset = Dataset(
             dataType=DataClass,
-            location='test_location',
-            project='test_x',
+            location='test_dataset_location',
+            project='test_dataset',
             branch='branch',
             name='data_class',
             chunks=16
@@ -43,8 +54,8 @@ class TestDataset(TestCase):
                     ds.append(v)
         self.datasetNew = Dataset(
             dataType=DataClass,
-            location='test_location',
-            project='test_x',
+            location='test_dataset_location',
+            project='test_dataset',
             branch='branch',
             name='data_class_new',
             chunks=16
@@ -70,10 +81,10 @@ class TestDataset(TestCase):
             pass
 
     def test_dataset_directory_returns_correctly(self):
-        self.assertEqual(self.dataset.directory, PosixPath('test_location/test_x/branch/data_class'))
+        self.assertEqual(self.dataset.directory, PosixPath('test_dataset_location/test_dataset/branch/data_class'))
 
     def test_dataset_correctly_locates_def_file(self):
-        self.assertEqual(self.dataset.defFilename, 'test_location/test_x/branch/data_class/data_class.def')
+        self.assertEqual(self.dataset.defFilename, 'test_dataset_location/test_dataset/branch/data_class/data_class.def')
 
     def test_dataset_exists_returns_true_if_exists(self):
         self.assertEqual(self.dataset.exists(), True)
@@ -105,8 +116,8 @@ class TestDataset(TestCase):
     def test_init_in_read_mode_fails_if_existing_dataset_def_does_not_match(self):
         differentDataset = Dataset(
             dataType=DataClass,
-            location='test_location',
-            project='test_x',
+            location='test_dataset_location',
+            project='test_dataset',
             branch='branch',
             name='data_class',
             chunks=256
@@ -150,3 +161,8 @@ class TestDataset(TestCase):
     def test_delete_deletes_files_and_directory(self):
         self.dataset.delete()
         self.assertEqual(os.path.exists(self.dataset.directory), False)
+
+    def test_data_chunk_append_raises_error_if_type_does_not_match(self):
+        with self.assertRaises(DatasetTypeDoesNotMatchDataTypeException):
+            with self.datasetNew.open('w') as datasetWriter:
+                datasetWriter.append(OtherDataClass(id_=0, value=0))
