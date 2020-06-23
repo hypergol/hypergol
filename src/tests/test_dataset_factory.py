@@ -1,18 +1,9 @@
 from unittest import TestCase
 
+from tests.hypergol_test_case import DataClass1
 from hypergol.base_data import BaseData
 from hypergol.dataset import Dataset
 from hypergol.dataset import DatasetFactory
-
-
-class DataClass(BaseData):
-
-    def __init__(self, id_: int, value: int):
-        self.id_ = id_
-        self.value = value
-
-    def get_id(self):
-        return (self.id_, )
 
 
 class TestDatasetFactory(TestCase):
@@ -20,7 +11,7 @@ class TestDatasetFactory(TestCase):
     def setUp(self):
         super().setUp()
         self.expectedDataset = Dataset(
-            dataType=DataClass,
+            dataType=DataClass1,
             location='.',
             project='test_x',
             branch='branch',
@@ -35,6 +26,6 @@ class TestDatasetFactory(TestCase):
             branch=self.expectedDataset.branch,
             chunks=self.expectedDataset.chunks
         )
-        dataset = datasetFactory.get(dataType=DataClass, name='data_class')
+        dataset = datasetFactory.get(dataType=DataClass1, name='data_class')
         self.assertEqual(type(dataset), Dataset)
         self.assertDictContainsSubset(self.expectedDataset.__dict__, dataset.__dict__)

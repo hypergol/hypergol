@@ -1,9 +1,9 @@
 import os
 from pathlib import PosixPath
-from unittest import TestCase
 
-from hypergol.base_data import BaseData
-from hypergol.dataset import Dataset
+from tests.hypergol_test_case import HypergolTestCase
+from tests.hypergol_test_case import DataClass1
+from tests.hypergol_test_case import DataClass2
 from hypergol.dataset import DatasetWriter
 from hypergol.dataset import DatasetReader
 from hypergol.dataset import DatasetDoesNotExistException
@@ -12,79 +12,37 @@ from hypergol.dataset import DatasetDefFileDoesNotMatchException
 from hypergol.dataset import DatasetTypeDoesNotMatchDataTypeException
 
 
-class DataClass(BaseData):
+class TestDataset(HypergolTestCase):
 
-    def __init__(self, id_: int, value: int):
-        self.id_ = id_
-        self.value = value
-
-    def get_id(self):
-        return (self.id_, )
-
-    def __hash__(self):
-        return hash(self.id_)
-
-
-class OtherDataClass(BaseData):
-
-    def __init__(self, id_: int, value: int):
-        self.id_ = id_
-        self.value = value
-
-    def get_id(self):
-        return (self.id_, )
-
-
-class TestDataset(TestCase):
+    def __init__(self, methodName='runTest'):
+        super(TestDataset, self).__init__(
+            location='test_dataset_location',
+            project='test_dataset',
+            branch='branch',
+            chunks=16,
+            methodName=methodName
+        )
 
     def setUp(self):
         super().setUp()
-        self.dataset = Dataset(
-            dataType=DataClass,
-            location='test_dataset_location',
-            project='test_dataset',
-            branch='branch',
-            name='data_class',
-            chunks=16
+        self.expectedObjects = {DataClass1(id_=k, value1=k) for k in range(100)}
+        self.dataset = self.create_test_dataset(
+            dataset=self.datasetFactory.get(dataType=DataClass1, name='data_class'),
+            content=self.expectedObjects
         )
-        self.expectedObjects = {DataClass(id_=k, value=k) for k in range(100)}
-        if not self.dataset.exists():
-            with self.dataset.open('w') as ds:
-                for v in self.expectedObjects:
-                    ds.append(v)
-        self.datasetNew = Dataset(
-            dataType=DataClass,
-            location='test_dataset_location',
-            project='test_dataset',
-            branch='branch',
-            name='data_class_new',
-            chunks=16
-        )
+        self.datasetNew = self.datasetFactory.get(dataType=DataClass1, name='data_class_new')
 
     def tearDown(self):
         super().tearDown()
-        if self.dataset.exists():
-            self.dataset.delete()
-        if self.datasetNew.exists():
-            self.datasetNew.delete()
-        try:
-            os.rmdir(f'{self.dataset.location}/{self.dataset.project}/{self.dataset.branch}')
-        except FileNotFoundError:
-            pass
-        try:
-            os.rmdir(f'{self.dataset.location}/{self.dataset.project}')
-        except FileNotFoundError:
-            pass
-        try:
-            os.rmdir(f'{self.dataset.location}')
-        except FileNotFoundError:
-            pass
+        self.delete_if_exists(dataset=self.dataset)
+        self.delete_if_exists(dataset=self.datasetNew)
+        self.clean_directories()
 
     def test_dataset_directory_returns_correctly(self):
-        self.assertEqual(self.dataset.directory, PosixPath('test_dataset_location/test_dataset/branch/data_class'))
+        self.assertEqual(self.dataset.directory, PosixPath(f'{self.location}/{self.project}/{self.branch}/data_class'))
 
     def test_dataset_correctly_locates_def_file(self):
-        self.assertEqual(self.dataset.defFilename, 'test_dataset_location/test_dataset/branch/data_class/data_class.def')
+        self.assertEqual(self.dataset.defFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.def')
 
     def test_dataset_exists_returns_true_if_exists(self):
         self.assertEqual(self.dataset.exists(), True)
@@ -114,14 +72,7 @@ class TestDataset(TestCase):
             self.datasetNew.init(mode='r')
 
     def test_init_in_read_mode_fails_if_existing_dataset_def_does_not_match(self):
-        differentDataset = Dataset(
-            dataType=DataClass,
-            location='test_dataset_location',
-            project='test_dataset',
-            branch='branch',
-            name='data_class',
-            chunks=256
-        )
+        differentDataset = self.datasetFactory.get(dataType=DataClass1, name='data_class', chunks=256)
         with self.assertRaises(DatasetDefFileDoesNotMatchException):
             differentDataset.init(mode='r')
 
@@ -165,4 +116,4 @@ class TestDataset(TestCase):
     def test_data_chunk_append_raises_error_if_type_does_not_match(self):
         with self.assertRaises(DatasetTypeDoesNotMatchDataTypeException):
             with self.datasetNew.open('w') as datasetWriter:
-                datasetWriter.append(OtherDataClass(id_=0, value=0))
+                datasetWriter.append(DataClass2(id_=0, value2=0))
