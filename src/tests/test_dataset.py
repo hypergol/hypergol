@@ -41,7 +41,7 @@ class TestDataset(TestCase):
         super().setUp()
         self.dataset = Dataset(
             dataType=DataClass,
-            location='test_location',
+            location='test_dataset_location',
             project='test_dataset',
             branch='branch',
             name='data_class',
@@ -81,10 +81,10 @@ class TestDataset(TestCase):
             pass
 
     def test_dataset_directory_returns_correctly(self):
-        self.assertEqual(self.dataset.directory, PosixPath('test_location/test_dataset/branch/data_class'))
+        self.assertEqual(self.dataset.directory, PosixPath('test_dataset_location/test_dataset/branch/data_class'))
 
     def test_dataset_correctly_locates_def_file(self):
-        self.assertEqual(self.dataset.defFilename, 'test_location/test_dataset/branch/data_class/data_class.def')
+        self.assertEqual(self.dataset.defFilename, 'test_dataset_location/test_dataset/branch/data_class/data_class.def')
 
     def test_dataset_exists_returns_true_if_exists(self):
         self.assertEqual(self.dataset.exists(), True)
@@ -116,7 +116,7 @@ class TestDataset(TestCase):
     def test_init_in_read_mode_fails_if_existing_dataset_def_does_not_match(self):
         differentDataset = Dataset(
             dataType=DataClass,
-            location='test_location',
+            location='test_dataset_location',
             project='test_dataset',
             branch='branch',
             name='data_class',
