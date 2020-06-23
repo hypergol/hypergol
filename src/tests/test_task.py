@@ -80,6 +80,7 @@ class TaskExample(Task):
 class TestDataset(TestCase):
 
     def setUp(self):
+        super().setUp()
         self.sampleLength = 100
         self.increment = 1
         self.datasetFactory = DatasetFactory(location='test_task_location', project='test_task', branch='branch', chunks=16)
@@ -109,6 +110,7 @@ class TestDataset(TestCase):
             ) for k in range(100)}
 
     def tearDown(self):
+        super().tearDown()
         if self.dataset1.exists():
             self.dataset1.delete()
         if self.dataset2.exists():

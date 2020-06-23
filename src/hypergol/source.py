@@ -1,5 +1,6 @@
-from hypergol.utils import Repr
 from collections.abc import Iterable
+
+from hypergol.utils import Repr
 
 
 class SourceIteratorNotIterableException(Exception):
