@@ -90,7 +90,7 @@ class TestSource(TestCase):
         data = set(self.dataset.open('r'))
         self.assertSetEqual(data, self.expectedData)
 
-    def test_source_execute_creates_dataset(self):
+    def test_execute_raises_error_if_bad_iterator(self):
         badIteratorSourceExample = BadIteratorSourceExample(
             outputDataset=self.dataset,
             sampleLength=self.sampleLength

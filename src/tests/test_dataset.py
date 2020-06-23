@@ -9,6 +9,7 @@ from hypergol.dataset import DatasetReader
 from hypergol.dataset import DatasetDoesNotExistException
 from hypergol.dataset import DatasetAlreadyExistsException
 from hypergol.dataset import DatasetDefFileDoesNotMatchException
+from hypergol.dataset import DatasetTypeDoesNotMatchDataTypeException
 
 
 class DataClass(BaseData):
@@ -22,6 +23,16 @@ class DataClass(BaseData):
 
     def __hash__(self):
         return self.id_
+
+
+class OtherDataClass(BaseData):
+
+    def __init__(self, id_: int, value: int):
+        self.id_ = id_
+        self.value = value
+
+    def get_id(self):
+        return (self.id_, )
 
 
 class TestDataset(TestCase):
@@ -150,3 +161,8 @@ class TestDataset(TestCase):
     def test_delete_deletes_files_and_directory(self):
         self.dataset.delete()
         self.assertEqual(os.path.exists(self.dataset.directory), False)
+
+    def test_data_chunk_append_raises_error_if_type_does_not_match(self):
+        with self.assertRaises(DatasetTypeDoesNotMatchDataTypeException):
+            with self.datasetNew.open('w') as datasetWriter:
+                datasetWriter.append(OtherDataClass(id_=0, value=0))

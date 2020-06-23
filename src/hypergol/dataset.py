@@ -11,6 +11,10 @@ from hypergol.utils import Repr
 VALID_CHUNKS = {16: 1, 256: 2, 4096: 3}
 
 
+class DatasetTypeDoesNotMatchDataTypeException(Exception):
+    pass
+
+
 class DatasetDoesNotExistException(Exception):
     pass
 
@@ -48,6 +52,8 @@ class DataChunk(Repr):
         self.file = None
 
     def append(self, value):
+        if not isinstance(value, self.dataset.dataType):
+            raise DatasetTypeDoesNotMatchDataTypeException(f"Trying to append an object of type {type(value)} into a dataset of type {self.dataset.dataType}")
         self.file.write(f'{json.dumps(value.to_data())}\n')
 
     def __iter__(self):
