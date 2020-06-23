@@ -31,6 +31,8 @@ class Task(Repr):
         ]
 
     def execute(self, job):
+        if not isinstance(job, Job):
+            raise ValueError(f'{self.__class__.__name__}.execute() argument must be of type Job')
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
         logging.info(f'{self.__class__.__name__} - execute - START')
         for k, v in self.__dict__.items():

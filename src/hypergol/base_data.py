@@ -1,20 +1,14 @@
 import json
 
-MAX_MEMBER_REPR_LENGTH = 100
+
+from hypergol.utils import Repr
 
 
 class NoIdException(Exception):
     pass
 
 
-class BaseData:
-
-    def __repr__(self):
-        members = ', '.join(f'{k}={str(v)[:MAX_MEMBER_REPR_LENGTH]}' for k, v in self.__dict__.items())
-        return f"{self.__class__.__name__}({members})"
-
-    def __str__(self):
-        return self.__repr__()
+class BaseData(Repr):
 
     def __eq__(self, other):
         if not isinstance(self, type(other)):
