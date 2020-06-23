@@ -1,36 +1,11 @@
 import os
 import pickle
-from unittest import TestCase
 
+from tests.hypergol_test_case import HypergolTestCase
+from tests.hypergol_test_case import DataClass1
+from tests.hypergol_test_case import DataClass2
 from hypergol.base_data import BaseData
-from hypergol.dataset import DatasetFactory
 from hypergol.task import Task
-
-
-class DataClass1(BaseData):
-
-    def __init__(self, id_: int, value1: int):
-        self.id_ = id_
-        self.value1 = value1
-
-    def get_id(self):
-        return (self.id_, )
-
-    def __hash__(self):
-        return hash((self.id_, self.value1))
-
-
-class DataClass2(BaseData):
-
-    def __init__(self, id_: int, value2: int):
-        self.id_ = id_
-        self.value2 = value2
-
-    def get_id(self):
-        return (self.id_, )
-
-    def __hash__(self):
-        return hash((self.id_, self.value2))
 
 
 class OutputDataClass(BaseData):
@@ -77,30 +52,34 @@ class TaskExample(Task):
         )
 
 
-class TestDataset(TestCase):
+class TestDataset(HypergolTestCase):
+
+    def __init__(self, methodName='runTest'):
+        super(TestDataset, self).__init__(
+            location='test_task_location',
+            project='test_task',
+            branch='branch',
+            chunks=16,
+            methodName=methodName
+        )
 
     def setUp(self):
         super().setUp()
         self.sampleLength = 100
         self.increment = 1
-        self.datasetFactory = DatasetFactory(location='test_task_location', project='test_task', branch='branch', chunks=16)
-        self.dataset1 = self.datasetFactory.get(dataType=DataClass1, name='data1')
-        self.dataset2 = self.datasetFactory.get(dataType=DataClass2, name='data2')
-        self.reversedDataset = self.datasetFactory.get(dataType=DataClass2, name='rev_data2')
+        self.dataset1 = self.create_test_dataset(
+            dataset=self.datasetFactory.get(dataType=DataClass1, name='data1'),
+            content=[DataClass1(id_=k, value1=k) for k in range(self.sampleLength)]
+        )
+        self.dataset2 = self.create_test_dataset(
+            dataset=self.datasetFactory.get(dataType=DataClass2, name='data2'),
+            content=[DataClass2(id_=k, value2=k) for k in range(self.sampleLength)]
+        )
+        self.reversedDataset = self.create_test_dataset(
+            dataset=self.datasetFactory.get(dataType=DataClass2, name='rev_data2'),
+            content=[DataClass2(id_=k, value2=k) for k in reversed(range(self.sampleLength))]
+        )
         self.outputDataset = self.datasetFactory.get(dataType=OutputDataClass, name='output_data')
-
-        if not self.dataset1.exists():
-            with self.dataset1.open('w') as ds1:
-                for k in range(self.sampleLength):
-                    ds1.append(DataClass1(id_=k, value1=k))
-        if not self.dataset2.exists():
-            with self.dataset2.open('w') as ds2:
-                for k in range(self.sampleLength):
-                    ds2.append(DataClass2(id_=k, value2=k))
-        if not self.reversedDataset.exists():
-            with self.reversedDataset.open('w') as dsrev:
-                for k in reversed(range(self.sampleLength)):
-                    dsrev.append(DataClass2(id_=k, value2=k))
         self.expectedOutputDataset = {
             OutputDataClass(
                 id_=k,
@@ -111,26 +90,11 @@ class TestDataset(TestCase):
 
     def tearDown(self):
         super().tearDown()
-        if self.dataset1.exists():
-            self.dataset1.delete()
-        if self.dataset2.exists():
-            self.dataset2.delete()
-        if self.reversedDataset.exists():
-            self.reversedDataset.delete()
-        if self.outputDataset.exists():
-            self.outputDataset.delete()
-        try:
-            os.rmdir(f'{self.datasetFactory.location}/{self.datasetFactory.project}/{self.datasetFactory.branch}')
-        except FileNotFoundError:
-            pass
-        try:
-            os.rmdir(f'{self.datasetFactory.location}/{self.datasetFactory.project}')
-        except FileNotFoundError:
-            pass
-        try:
-            os.rmdir(f'{self.datasetFactory.location}')
-        except FileNotFoundError:
-            pass
+        self.delete_if_exists(self.dataset1)
+        self.delete_if_exists(self.dataset2)
+        self.delete_if_exists(self.reversedDataset)
+        self.delete_if_exists(self.outputDataset)
+        self.clean_directories()
 
     def test_task(self):
         task = TaskExample(
