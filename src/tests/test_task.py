@@ -90,10 +90,10 @@ class TestTask(HypergolTestCase):
 
     def tearDown(self):
         super().tearDown()
-        self.delete_if_exists(self.dataset1)
-        self.delete_if_exists(self.dataset2)
-        self.delete_if_exists(self.reversedDataset)
-        self.delete_if_exists(self.outputDataset)
+        self.delete_if_exists(dataset=self.dataset1)
+        self.delete_if_exists(dataset=self.dataset2)
+        self.delete_if_exists(dataset=self.reversedDataset)
+        self.delete_if_exists(dataset=self.outputDataset)
         self.clean_directories()
 
     def test_task(self):

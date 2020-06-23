@@ -34,8 +34,8 @@ class TestDataset(HypergolTestCase):
 
     def tearDown(self):
         super().tearDown()
-        self.delete_if_exists(self.dataset)
-        self.delete_if_exists(self.datasetNew)
+        self.delete_if_exists(dataset=self.dataset)
+        self.delete_if_exists(dataset=self.datasetNew)
         self.clean_directories()
 
     def test_dataset_directory_returns_correctly(self):

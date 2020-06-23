@@ -34,7 +34,7 @@ class DataClass2(BaseData):
 class HypergolTestCase(TestCase):
 
     def __init__(self, location, project, branch, chunks, methodName):
-        super(HypergolTestCase, self).__init__(methodName)
+        super(HypergolTestCase, self).__init__(methodName=methodName)
         self.location = location
         self.project = project
         self.branch = branch
