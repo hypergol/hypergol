@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 from hypergol.utils import Repr
+from hypergol.base_data import BaseData
 
 VALID_CHUNKS = {16: 1, 256: 2, 4096: 3}
 CHECKSUM_BUFFER_SIZE = 128*1024
@@ -44,7 +45,17 @@ def _get_hash(data):
     return hasher.hexdigest()
 
 
-class DataChunkChecksum:
+class RepoData(BaseData):
+
+    def __init__(self, branchName, commitHash, commitMessage, comitterName, comitterEmail):
+        self.branchName = branchName
+        self.commitHash = commitHash
+        self.commitMessage = commitMessage
+        self.comitterName = comitterName
+        self.comitterEmail = comitterEmail
+
+
+class DataChunkChecksum(Repr):
 
     def __init__(self, chunk, value):
         self.chunk = chunk
@@ -92,7 +103,7 @@ class DataChunk(Repr):
 
 class Dataset(Repr):
 
-    def __init__(self, dataType, location, project, branch, name, chunks=16):
+    def __init__(self, dataType, location, project, branch, name, repoData, chunks=16):
         self.dataType = dataType
         self.location = location
         self.project = project
@@ -100,6 +111,7 @@ class Dataset(Repr):
         self.name = name
         self.chunks = chunks
         self.dependencies = []
+        self.repoData = repoData
 
     def add_dependency(self, dataset):
         self.dependencies.append(dataset)
@@ -162,7 +174,8 @@ class Dataset(Repr):
             'name': self.name,
             'chunks': self.chunks,
             'creationTime': datetime.now().isoformat(),
-            'dependencies': dependencyData
+            'dependencies': dependencyData,
+            'repo': self.repoData.to_data()
         }
         self.directory.mkdir(parents=True, exist_ok=True)
         with open(self.defFilename, 'wt') as defFile:
@@ -269,11 +282,12 @@ class DatasetWriter(Repr):
 
 class DatasetFactory(Repr):
 
-    def __init__(self, location, project, branch, chunks):
+    def __init__(self, location, project, branch, chunks, repoData):
         self.location = location
         self.project = project
         self.branch = branch
         self.chunks = chunks
+        self.repoData = repoData
 
     def get(self, dataType, name, chunks=None):
         return Dataset(
@@ -282,5 +296,6 @@ class DatasetFactory(Repr):
             project=self.project,
             branch=self.branch,
             name=name,
-            chunks=chunks or self.chunks
+            chunks=chunks or self.chunks,
+            repoData=self.repoData
         )

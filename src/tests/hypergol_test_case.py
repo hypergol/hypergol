@@ -2,6 +2,7 @@ import os
 from unittest import TestCase
 
 from hypergol.base_data import BaseData
+from hypergol.dataset import RepoData
 from hypergol.dataset import DatasetFactory
 
 
@@ -39,6 +40,13 @@ class HypergolTestCase(TestCase):
         self.project = project
         self.branch = branch
         self.chunks = chunks
+        self.repoData = RepoData(
+            branchName='testBranch',
+            commitHash='f000bc7ad532063d9f9a36fe00e3ee2f83a3c565',
+            commitMessage='test commit message',
+            comitterName='Test Comitter',
+            comitterEmail='test.comitter@gmail.com'
+        )
 
     def setUp(self):
         super().setUp()
@@ -46,7 +54,8 @@ class HypergolTestCase(TestCase):
             location=self.location,
             project=self.project,
             branch=self.branch,
-            chunks=self.chunks
+            chunks=self.chunks,
+            repoData=self.repoData
         )
 
     @staticmethod
