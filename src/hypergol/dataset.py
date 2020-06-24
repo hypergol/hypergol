@@ -94,7 +94,6 @@ class Dataset(Repr):
         self.branch = branch
         self.name = name
         self.chunks = chunks
-        self.chunkIdLength = VALID_CHUNKS[self.chunks]
         self.dependencies = []
 
     def add_dependency(self, dataset):
@@ -135,7 +134,7 @@ class Dataset(Repr):
             else:
                 hasher = hashlib.sha1(''.encode('utf-8'))
                 with gzip.open(f'{self.directory}/{fileName}', 'rb') as f:
-                    for n in iter(lambda: f.readinto(mv), 0):
+                    for n in iter(lambda: f.readinto(mv), 0):   # pylint: disable=cell-var-from-loop
                         hasher.update(mv[:n])
                 actualChecksum = hasher.hexdigest()
             if chkFileChecksum != actualChecksum:
@@ -192,13 +191,13 @@ class Dataset(Repr):
 
     def get_chunks(self, mode):
         def _get_chunk_ids():
-            return [f'{k:0{self.chunkIdLength}x}' for k in range(self.chunks)]
+            return [f'{k:0{VALID_CHUNKS[self.chunks]}x}' for k in range(self.chunks)]
 
         self.init(mode=mode)
         return [DataChunk(dataset=self, chunkId=chunkId, mode=mode) for chunkId in _get_chunk_ids()]
 
     def get_object_chunk_id(self, objectId):
-        return _get_hash(objectId)[:self.chunkIdLength]
+        return _get_hash(objectId)[:VALID_CHUNKS[self.chunks]]
 
     def delete(self):
         if not self.exists():
