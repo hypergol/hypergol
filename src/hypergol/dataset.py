@@ -28,6 +28,10 @@ class DatasetDefFileDoesNotMatchException(Exception):
     pass
 
 
+class DatasetChecksumMismatchException(Exception):
+    pass
+
+
 def _get_hash(data):
     if isinstance(data, (str, int)):
         data = [data]
@@ -138,7 +142,7 @@ class Dataset(Repr):
                         hasher.update(mv[:n])
                 actualChecksum = hasher.hexdigest()
             if chkFileChecksum != actualChecksum:
-                raise ValueError(f'Checksum error {self.name} for {fileName}: chkFile: {chkFileChecksum}, actual: {actualChecksum}')
+                raise DatasetChecksumMismatchException(f'Checksum error {self.name} for {fileName}: chkFile: {chkFileChecksum}, actual: {actualChecksum}')
         return True
 
     def get_def_file_data(self):
@@ -169,6 +173,7 @@ class Dataset(Repr):
         )
         if not isDefFilesMatch:
             raise DatasetDefFileDoesNotMatchException('The defintion of the dataset class does not match the def file')
+        return True
 
     def init(self, mode):
         if mode == 'w':
