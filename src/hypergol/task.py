@@ -15,8 +15,8 @@ class Job(Repr):
 
 class JobReport(Repr):
 
-    def __init__(self, dataChunkChecksum):
-        self.dataChunkChecksum = dataChunkChecksum
+    def __init__(self, outputChecksum):
+        self.outputChecksum = outputChecksum
 
 
 class Task(Repr):
@@ -26,6 +26,8 @@ class Task(Repr):
             raise ValueError('If there are no inputs to this task use Source')
         self.inputDatasets = inputDatasets
         self.outputDataset = outputDataset
+        for inputDataset in self.inputDatasets:
+            self.outputDataset.add_dependency(dataset=inputDataset)
         self.threads = threads
 
     def get_jobs(self):
@@ -51,9 +53,9 @@ class Task(Repr):
             outputChunk.append(self.run(*inputData))
         for inputChunk in inputChunks:
             inputChunk.close()
-        dataChunkChecksum = outputChunk.close()
+        outputChecksum = outputChunk.close()
         logging.info(f'{self.__class__.__name__} - execute - END')
-        return JobReport(dataChunkChecksum=dataChunkChecksum)
+        return JobReport(outputChecksum=outputChecksum)
 
     def init(self):
         pass

@@ -3,6 +3,7 @@ import glob
 import gzip
 import json
 import hashlib
+
 from datetime import datetime
 from pathlib import Path
 
@@ -27,11 +28,15 @@ class DatasetDefFileDoesNotMatchException(Exception):
     pass
 
 
-def _get_hash(lst):
-    m = hashlib.sha1()
-    for v in lst:
-        m.update(str(v).encode('utf-8'))
-    return m.hexdigest()
+def _get_hash(data):
+    if isinstance(data, (str, int)):
+        data = [data]
+    hasher = hashlib.sha1(''.encode('utf-8'))
+    for value in data:
+        if not isinstance(value, (str, int)):
+            raise ValueError(f'_get_hash was called with type {value.__class__.__name__}')
+        hasher.update(str(value).encode('utf-8'))
+    return hasher.hexdigest()
 
 
 class DataChunkChecksum:
@@ -48,7 +53,8 @@ class DataChunk(Repr):
         self.chunkId = chunkId
         self.mode = mode
         self.file = None
-        self.hasher = hashlib.sha1()
+        self.hasher = None
+        self.checksum = None
 
     @property
     def fileName(self):
@@ -57,12 +63,15 @@ class DataChunk(Repr):
     def open(self):
         fileName = f'{self.dataset.directory}/{self.fileName}'
         self.file = gzip.open(fileName, f'{self.mode}t')
+        self.hasher = hashlib.sha1((self.checksum or '').encode('utf-8'))
         return self
 
     def close(self):
         self.file.close()
         self.file = None
-        return DataChunkChecksum(chunk=self, value=self.hasher.hexdigest())
+        self.checksum = self.hasher.hexdigest()
+        self.hasher = None
+        return DataChunkChecksum(chunk=self, value=self.checksum)
 
     def append(self, value):
         if not isinstance(value, self.dataset.dataType):
@@ -86,6 +95,10 @@ class Dataset(Repr):
         self.name = name
         self.chunks = chunks
         self.chunkIdLength = VALID_CHUNKS[self.chunks]
+        self.dependencies = []
+
+    def add_dependency(self, dataset):
+        self.dependencies.append(dataset)
 
     @property
     def directory(self):
@@ -99,47 +112,74 @@ class Dataset(Repr):
     def chkFilename(self):
         return f'{self.directory}/{self.name}.chk'
 
+    def get_chk_file_data(self):
+        return json.loads(open(self.chkFilename, 'rt').read())
+
+    def get_checksum(self):
+        return _get_hash(self.get_chk_file_data())
+
     def make_chk_file(self, checksums):
         chkData = {checksum.chunk.fileName: checksum.value for checksum in checksums}
-        chkData[f'{self.name}.def'] = _get_hash([open(self.defFilename, 'rt').read()])
+        chkData[f'{self.name}.def'] = _get_hash(open(self.defFilename, 'rt').read())
+        chkDataString = json.dumps(chkData, sort_keys=True, indent=4)
         with open(self.chkFilename, 'wt') as chkFile:
-            chkFile.write(json.dumps(chkData, sort_keys=True, indent=4))
+            chkFile.write(chkDataString)
 
-    def _make_def_file(self):
+    def check_chk_file(self):
+        oldChkData = self.get_chk_file_data()
+        mv = memoryview(bytearray(128*1024))
+        for fileName, chkFileChecksum in oldChkData.items():
+            if fileName.endswith('.def'):
+                data = open(self.defFilename, 'rt').read()
+                actualChecksum = hashlib.sha1(data.encode('utf-8')).hexdigest()
+            else:
+                hasher = hashlib.sha1(''.encode('utf-8'))
+                with gzip.open(f'{self.directory}/{fileName}', 'rb') as f:
+                    for n in iter(lambda: f.readinto(mv), 0):
+                        hasher.update(mv[:n])
+                actualChecksum = hasher.hexdigest()
+            if chkFileChecksum != actualChecksum:
+                raise ValueError(f'Checksum error {self.name} for {fileName}: chkFile: {chkFileChecksum}, actual: {actualChecksum}')
+        return True
+
+    def get_def_file_data(self):
+        return json.loads(open(self.defFilename, 'rt').read())
+
+    def make_def_file(self):
         defData = {
             'dataType': self.dataType.__name__,
             'project': self.project,
             'branch': self.branch,
             'name': self.name,
             'chunks': self.chunks,
-            'creationTime': datetime.now().isoformat()
+            'creationTime': datetime.now().isoformat(),
+            'dependencies': [dataset.get_def_file_data() for dataset in self.dependencies]
         }
         self.directory.mkdir(parents=True, exist_ok=True)
         with open(self.defFilename, 'wt') as defFile:
             defFile.write(json.dumps(defData, sort_keys=True, indent=4))
 
-    def _check_def_file(self):
-        with open(self.defFilename, 'rt') as defFile:
-            oldDefData = json.loads(defFile.read())
-            isDefFilesMatch = (
-                oldDefData['dataType'] == self.dataType.__name__ and
-                oldDefData['project'] == self.project and
-                oldDefData['branch'] == self.branch and
-                oldDefData['name'] == self.name and
-                oldDefData['chunks'] == self.chunks
-            )
-            if not isDefFilesMatch:
-                raise DatasetDefFileDoesNotMatchException(f'The defintion of the dataset class does not match the def file')
+    def check_def_file(self):
+        oldDefData = self.get_def_file_data()
+        isDefFilesMatch = (
+            oldDefData['dataType'] == self.dataType.__name__ and
+            oldDefData['project'] == self.project and
+            oldDefData['branch'] == self.branch and
+            oldDefData['name'] == self.name and
+            oldDefData['chunks'] == self.chunks
+        )
+        if not isDefFilesMatch:
+            raise DatasetDefFileDoesNotMatchException('The defintion of the dataset class does not match the def file')
 
     def init(self, mode):
         if mode == 'w':
             if self.exists():
                 raise DatasetAlreadyExistsException(f"Dataset {self.defFilename} already exist, delete the dataset first with Dataset.delete()")
-            self._make_def_file()
+            self.make_def_file()
         elif mode == 'r':
             if not self.exists():
                 raise DatasetDoesNotExistException(f'Dataset {self.name} does not exist')
-            self._check_def_file()
+            self.check_def_file()
         else:
             raise ValueError(f'Invalid mode: {mode} in {self.name}')
 
