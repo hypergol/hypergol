@@ -24,6 +24,9 @@ class BaseData(Repr):
     def get_id(self):
         raise NoIdException(f"{self.__class__.__name__} doesn't have an id")
 
+    def get_hash_id(self):
+        return self.get_id()
+
     def to_data(self):
         return self.__dict__.copy()
 
@@ -31,9 +34,9 @@ class BaseData(Repr):
     def from_data(cls, data):
         return cls(**data)
 
-    def test_get_id(self):
+    def test_get_hash_id(self):
         try:
-            classId = self.get_id()  # pylint: disable=assignment-from-no-return
+            classId = self.get_hash_id()  # pylint: disable=assignment-from-no-return
         except NoIdException:
             return True
         if not isinstance(classId, tuple):
