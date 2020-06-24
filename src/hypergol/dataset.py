@@ -166,7 +166,7 @@ class DatasetWriter(Repr):
         self.chunks = {chunk.chunkId: chunk.open() for chunk in self.dataset.get_chunks(mode='w')}
 
     def append(self, elem):
-        chunkHash = self.dataset.get_object_chunk_id(elem.get_id())
+        chunkHash = self.dataset.get_object_chunk_id(elem.get_hash_id())
         self.chunks[chunkHash].append(elem)
 
     def close(self):
