@@ -10,6 +10,7 @@ from pathlib import Path
 from hypergol.utils import Repr
 
 VALID_CHUNKS = {16: 1, 256: 2, 4096: 3}
+CHECKSUM_BUFFER_SIZE = 128*1024
 
 
 class DatasetTypeDoesNotMatchDataTypeException(Exception):
@@ -119,7 +120,7 @@ class Dataset(Repr):
         return json.loads(open(self.chkFilename, 'rt').read())
 
     def get_checksum(self):
-        return _get_hash(self.get_chk_file_data())
+        return _get_hash(data=self.get_chk_file_data())
 
     def make_chk_file(self, checksums):
         chkData = {checksum.chunk.fileName: checksum.value for checksum in checksums}
@@ -129,12 +130,12 @@ class Dataset(Repr):
             chkFile.write(chkDataString)
 
     def check_chk_file(self):
-        oldChkData = self.get_chk_file_data()
-        mv = memoryview(bytearray(128*1024))
-        for fileName, chkFileChecksum in oldChkData.items():
+        chkFileData = self.get_chk_file_data()
+        mv = memoryview(bytearray(CHECKSUM_BUFFER_SIZE))
+        for fileName, chkFileChecksum in chkFileData.items():
             if fileName.endswith('.def'):
                 data = open(self.defFilename, 'rt').read()
-                actualChecksum = hashlib.sha1(data.encode('utf-8')).hexdigest()
+                actualChecksum = _get_hash(data)
             else:
                 hasher = hashlib.sha1(''.encode('utf-8'))
                 with gzip.open(f'{self.directory}/{fileName}', 'rb') as f:
@@ -168,15 +169,15 @@ class Dataset(Repr):
             defFile.write(json.dumps(defData, sort_keys=True, indent=4))
 
     def check_def_file(self):
-        oldDefData = self.get_def_file_data()
-        isDefFilesMatch = (
-            oldDefData['dataType'] == self.dataType.__name__ and
-            oldDefData['project'] == self.project and
-            oldDefData['branch'] == self.branch and
-            oldDefData['name'] == self.name and
-            oldDefData['chunks'] == self.chunks
+        defFileData = self.get_def_file_data()
+        isDefValuesMatch = (
+            defFileData['dataType'] == self.dataType.__name__ and
+            defFileData['project'] == self.project and
+            defFileData['branch'] == self.branch and
+            defFileData['name'] == self.name and
+            defFileData['chunks'] == self.chunks
         )
-        if not isDefFilesMatch:
+        if not isDefValuesMatch:
             raise DatasetDefFileDoesNotMatchException('The defintion of the dataset class does not match the def file')
         return True
 
