@@ -14,8 +14,8 @@ from datamodel.article import Article
 
 
 LOCATION = f'{os.environ["BASE_DIR"]}/tempdata'
-PROJECT = 'test1'
-BRANCH = 'test'
+PROJECT = 'test'
+BRANCH = 'test1'
 SOURCE_PATTERN = f'{os.environ["BASE_DIR"]}/data/blogposts/pages_*.pkl'
 GIT_REPO_DIRECTORY = f'{os.environ["BASE_DIR"]}/org/hypergol/.git'
 
