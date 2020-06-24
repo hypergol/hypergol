@@ -149,6 +149,11 @@ class Dataset(Repr):
         return json.loads(open(self.defFilename, 'rt').read())
 
     def make_def_file(self):
+        dependencyData = []
+        for dataset in self.dependencies:
+            data = dataset.get_def_file_data()
+            data['chkFileChecksum'] = dataset.get_checksum()
+            dependencyData.append(data)
         defData = {
             'dataType': self.dataType.__name__,
             'project': self.project,
@@ -156,7 +161,7 @@ class Dataset(Repr):
             'name': self.name,
             'chunks': self.chunks,
             'creationTime': datetime.now().isoformat(),
-            'dependencies': [dataset.get_def_file_data() for dataset in self.dependencies]
+            'dependencies': dependencyData
         }
         self.directory.mkdir(parents=True, exist_ok=True)
         with open(self.defFilename, 'wt') as defFile:
