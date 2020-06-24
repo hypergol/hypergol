@@ -34,6 +34,13 @@ def _get_hash(lst):
     return m.hexdigest()
 
 
+class DataChunkChecksum:
+
+    def __init__(self, chunk, value):
+        self.chunk = chunk
+        self.value = value
+
+
 class DataChunk(Repr):
 
     def __init__(self, dataset, chunkId, mode):
@@ -41,20 +48,28 @@ class DataChunk(Repr):
         self.chunkId = chunkId
         self.mode = mode
         self.file = None
+        self.hasher = hashlib.sha1()
+
+    @property
+    def fileName(self):
+        return f'{self.dataset.name}_{self.chunkId}.json.gz'
 
     def open(self):
-        fileName = f'{self.dataset.directory}/{self.dataset.name}_{self.chunkId}.json.gz'
+        fileName = f'{self.dataset.directory}/{self.fileName}'
         self.file = gzip.open(fileName, f'{self.mode}t')
         return self
 
     def close(self):
         self.file.close()
         self.file = None
+        return DataChunkChecksum(chunk=self, value=self.hasher.hexdigest())
 
     def append(self, value):
         if not isinstance(value, self.dataset.dataType):
             raise DatasetTypeDoesNotMatchDataTypeException(f"Trying to append an object of type {value.__class__.__name__} into a dataset of type {self.dataset.dataType.__name__}")
-        self.file.write(f'{json.dumps(value.to_data())}\n')
+        data = f'{json.dumps(value.to_data(), sort_keys=True)}\n'
+        self.hasher.update(data.encode('utf-8'))
+        self.file.write(data)
 
     def __iter__(self):
         for line in self.file:
@@ -80,22 +95,41 @@ class Dataset(Repr):
     def defFilename(self):
         return f'{self.directory}/{self.name}.def'
 
+    @property
+    def chkFilename(self):
+        return f'{self.directory}/{self.name}.chk'
+
+    def make_chk_file(self, checksums):
+        chkData = {checksum.chunk.fileName: checksum.value for checksum in checksums}
+        chkData[f'{self.name}.def'] = _get_hash([open(self.defFilename, 'rt').read()])
+        with open(self.chkFilename, 'wt') as chkFile:
+            chkFile.write(json.dumps(chkData, sort_keys=True, indent=4))
+
     def _make_def_file(self):
+        defData = {
+            'dataType': self.dataType.__name__,
+            'project': self.project,
+            'branch': self.branch,
+            'name': self.name,
+            'chunks': self.chunks,
+            'creationTime': datetime.now().isoformat()
+        }
         self.directory.mkdir(parents=True, exist_ok=True)
         with open(self.defFilename, 'wt') as defFile:
-            defData = self.__dict__.copy()
-            defData['dataType'] = defData['dataType'].__name__
-            defData['creationTime'] = datetime.now().isoformat()
-            defFile.write(json.dumps(defData, indent=4))
+            defFile.write(json.dumps(defData, sort_keys=True, indent=4))
 
     def _check_def_file(self):
         with open(self.defFilename, 'rt') as defFile:
             oldDefData = json.loads(defFile.read())
-            oldDefData.pop('creationTime', None)
-            newDefData = self.__dict__.copy()
-            newDefData['dataType'] = newDefData['dataType'].__name__
-            if oldDefData != newDefData:
-                raise DatasetDefFileDoesNotMatchException(f'The defintion of the dataset class does not match the def file {set(newDefData.items()) ^ set(oldDefData.items())}')
+            isDefFilesMatch = (
+                oldDefData['dataType'] == self.dataType.__name__ and
+                oldDefData['project'] == self.project and
+                oldDefData['branch'] == self.branch and
+                oldDefData['name'] == self.name and
+                oldDefData['chunks'] == self.chunks
+            )
+            if not isDefFilesMatch:
+                raise DatasetDefFileDoesNotMatchException(f'The defintion of the dataset class does not match the def file')
 
     def init(self, mode):
         if mode == 'w':
@@ -170,8 +204,11 @@ class DatasetWriter(Repr):
         self.chunks[chunkHash].append(elem)
 
     def close(self):
+        checksums = []
         for chunk in self.chunks.values():
-            chunk.close()
+            checksum = chunk.close()
+            checksums.append(checksum)
+        self.dataset.make_chk_file(checksums=checksums)
 
     def __enter__(self):
         return self

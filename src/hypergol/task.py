@@ -13,6 +13,12 @@ class Job(Repr):
         self.outputChunk = outputChunk
 
 
+class JobReport(Repr):
+
+    def __init__(self, dataChunkChecksum):
+        self.dataChunkChecksum = dataChunkChecksum
+
+
 class Task(Repr):
 
     def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, threads=None):
@@ -45,8 +51,9 @@ class Task(Repr):
             outputChunk.append(self.run(*inputData))
         for inputChunk in inputChunks:
             inputChunk.close()
-        outputChunk.close()
+        dataChunkChecksum = outputChunk.close()
         logging.info(f'{self.__class__.__name__} - execute - END')
+        return JobReport(dataChunkChecksum=dataChunkChecksum)
 
     def init(self):
         pass
