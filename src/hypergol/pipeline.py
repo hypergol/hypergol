@@ -14,7 +14,8 @@ class Pipeline:
                 task.execute()
             elif isinstance(task, Task):
                 pool = Pool(task.threads or threads)
-                pool.map(task.execute, task.get_jobs())
+                jobReports = pool.map(task.execute, task.get_jobs())
+                task.outputDataset.make_chk_file(checksums=[jobReport.outputChecksum for jobReport in jobReports])
                 pool.close()
                 pool.join()
                 pool.terminate()

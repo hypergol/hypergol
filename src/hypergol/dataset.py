@@ -3,12 +3,14 @@ import glob
 import gzip
 import json
 import hashlib
+
 from datetime import datetime
 from pathlib import Path
 
 from hypergol.utils import Repr
 
 VALID_CHUNKS = {16: 1, 256: 2, 4096: 3}
+CHECKSUM_BUFFER_SIZE = 128*1024
 
 
 class DatasetTypeDoesNotMatchDataTypeException(Exception):
@@ -27,11 +29,26 @@ class DatasetDefFileDoesNotMatchException(Exception):
     pass
 
 
-def _get_hash(lst):
-    m = hashlib.sha1()
-    for v in lst:
-        m.update(str(v).encode('utf-8'))
-    return m.hexdigest()
+class DatasetChecksumMismatchException(Exception):
+    pass
+
+
+def _get_hash(data):
+    if isinstance(data, (str, int)):
+        data = [data]
+    hasher = hashlib.sha1(''.encode('utf-8'))
+    for value in data:
+        if not isinstance(value, (str, int)):
+            raise ValueError(f'_get_hash was called with type {value.__class__.__name__}')
+        hasher.update(str(value).encode('utf-8'))
+    return hasher.hexdigest()
+
+
+class DataChunkChecksum:
+
+    def __init__(self, chunk, value):
+        self.chunk = chunk
+        self.value = value
 
 
 class DataChunk(Repr):
@@ -41,20 +58,32 @@ class DataChunk(Repr):
         self.chunkId = chunkId
         self.mode = mode
         self.file = None
+        self.hasher = None
+        self.checksum = None
+
+    @property
+    def fileName(self):
+        return f'{self.dataset.name}_{self.chunkId}.json.gz'
 
     def open(self):
-        fileName = f'{self.dataset.directory}/{self.dataset.name}_{self.chunkId}.json.gz'
+        fileName = f'{self.dataset.directory}/{self.fileName}'
         self.file = gzip.open(fileName, f'{self.mode}t')
+        self.hasher = hashlib.sha1((self.checksum or '').encode('utf-8'))
         return self
 
     def close(self):
         self.file.close()
         self.file = None
+        self.checksum = self.hasher.hexdigest()
+        self.hasher = None
+        return DataChunkChecksum(chunk=self, value=self.checksum)
 
     def append(self, value):
         if not isinstance(value, self.dataset.dataType):
             raise DatasetTypeDoesNotMatchDataTypeException(f"Trying to append an object of type {value.__class__.__name__} into a dataset of type {self.dataset.dataType.__name__}")
-        self.file.write(f'{json.dumps(value.to_data())}\n')
+        data = f'{json.dumps(value.to_data(), sort_keys=True)}\n'
+        self.hasher.update(data.encode('utf-8'))
+        self.file.write(data)
 
     def __iter__(self):
         for line in self.file:
@@ -70,7 +99,10 @@ class Dataset(Repr):
         self.branch = branch
         self.name = name
         self.chunks = chunks
-        self.chunkIdLength = VALID_CHUNKS[self.chunks]
+        self.dependencies = []
+
+    def add_dependency(self, dataset):
+        self.dependencies.append(dataset)
 
     @property
     def directory(self):
@@ -80,32 +112,84 @@ class Dataset(Repr):
     def defFilename(self):
         return f'{self.directory}/{self.name}.def'
 
-    def _make_def_file(self):
+    @property
+    def chkFilename(self):
+        return f'{self.directory}/{self.name}.chk'
+
+    def get_chk_file_data(self):
+        return json.loads(open(self.chkFilename, 'rt').read())
+
+    def get_checksum(self):
+        return _get_hash(data=self.get_chk_file_data())
+
+    def make_chk_file(self, checksums):
+        chkData = {checksum.chunk.fileName: checksum.value for checksum in checksums}
+        chkData[f'{self.name}.def'] = _get_hash(open(self.defFilename, 'rt').read())
+        chkDataString = json.dumps(chkData, sort_keys=True, indent=4)
+        with open(self.chkFilename, 'wt') as chkFile:
+            chkFile.write(chkDataString)
+
+    def check_chk_file(self):
+        chkFileData = self.get_chk_file_data()
+        mv = memoryview(bytearray(CHECKSUM_BUFFER_SIZE))
+        for fileName, chkFileChecksum in chkFileData.items():
+            if fileName.endswith('.def'):
+                data = open(self.defFilename, 'rt').read()
+                actualChecksum = _get_hash(data)
+            else:
+                hasher = hashlib.sha1(''.encode('utf-8'))
+                with gzip.open(f'{self.directory}/{fileName}', 'rb') as f:
+                    for n in iter(lambda: f.readinto(mv), 0):   # pylint: disable=cell-var-from-loop
+                        hasher.update(mv[:n])
+                actualChecksum = hasher.hexdigest()
+            if chkFileChecksum != actualChecksum:
+                raise DatasetChecksumMismatchException(f'Checksum error {self.name} for {fileName}: chkFile: {chkFileChecksum}, actual: {actualChecksum}')
+        return True
+
+    def get_def_file_data(self):
+        return json.loads(open(self.defFilename, 'rt').read())
+
+    def make_def_file(self):
+        dependencyData = []
+        for dataset in self.dependencies:
+            data = dataset.get_def_file_data()
+            data['chkFileChecksum'] = dataset.get_checksum()
+            dependencyData.append(data)
+        defData = {
+            'dataType': self.dataType.__name__,
+            'project': self.project,
+            'branch': self.branch,
+            'name': self.name,
+            'chunks': self.chunks,
+            'creationTime': datetime.now().isoformat(),
+            'dependencies': dependencyData
+        }
         self.directory.mkdir(parents=True, exist_ok=True)
         with open(self.defFilename, 'wt') as defFile:
-            defData = self.__dict__.copy()
-            defData['dataType'] = defData['dataType'].__name__
-            defData['creationTime'] = datetime.now().isoformat()
-            defFile.write(json.dumps(defData, indent=4))
+            defFile.write(json.dumps(defData, sort_keys=True, indent=4))
 
-    def _check_def_file(self):
-        with open(self.defFilename, 'rt') as defFile:
-            oldDefData = json.loads(defFile.read())
-            oldDefData.pop('creationTime', None)
-            newDefData = self.__dict__.copy()
-            newDefData['dataType'] = newDefData['dataType'].__name__
-            if oldDefData != newDefData:
-                raise DatasetDefFileDoesNotMatchException(f'The defintion of the dataset class does not match the def file {set(newDefData.items()) ^ set(oldDefData.items())}')
+    def check_def_file(self):
+        defFileData = self.get_def_file_data()
+        isDefValuesMatch = (
+            defFileData['dataType'] == self.dataType.__name__ and
+            defFileData['project'] == self.project and
+            defFileData['branch'] == self.branch and
+            defFileData['name'] == self.name and
+            defFileData['chunks'] == self.chunks
+        )
+        if not isDefValuesMatch:
+            raise DatasetDefFileDoesNotMatchException('The defintion of the dataset class does not match the def file')
+        return True
 
     def init(self, mode):
         if mode == 'w':
             if self.exists():
                 raise DatasetAlreadyExistsException(f"Dataset {self.defFilename} already exist, delete the dataset first with Dataset.delete()")
-            self._make_def_file()
+            self.make_def_file()
         elif mode == 'r':
             if not self.exists():
                 raise DatasetDoesNotExistException(f'Dataset {self.name} does not exist')
-            self._check_def_file()
+            self.check_def_file()
         else:
             raise ValueError(f'Invalid mode: {mode} in {self.name}')
 
@@ -118,13 +202,13 @@ class Dataset(Repr):
 
     def get_chunks(self, mode):
         def _get_chunk_ids():
-            return [f'{k:0{self.chunkIdLength}x}' for k in range(self.chunks)]
+            return [f'{k:0{VALID_CHUNKS[self.chunks]}x}' for k in range(self.chunks)]
 
         self.init(mode=mode)
         return [DataChunk(dataset=self, chunkId=chunkId, mode=mode) for chunkId in _get_chunk_ids()]
 
     def get_object_chunk_id(self, objectId):
-        return _get_hash(objectId)[:self.chunkIdLength]
+        return _get_hash(objectId)[:VALID_CHUNKS[self.chunks]]
 
     def delete(self):
         if not self.exists():
@@ -170,8 +254,11 @@ class DatasetWriter(Repr):
         self.chunks[chunkHash].append(elem)
 
     def close(self):
+        checksums = []
         for chunk in self.chunks.values():
-            chunk.close()
+            checksum = chunk.close()
+            checksums.append(checksum)
+        self.dataset.make_chk_file(checksums=checksums)
 
     def __enter__(self):
         return self
