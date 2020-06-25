@@ -7,3 +7,4 @@ from .dataset import RepoData
 from .task import Task
 from .source import Source
 from .utils import Repr
+from .cli.data_model_renderer import DataModelRenderer

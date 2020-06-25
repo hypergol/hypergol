@@ -1,33 +1,11 @@
-import re
+import os
 import fire
-from utils import Repr
-
-
-class Renderer:
-
-    def __init__(self):
-        self.lines = []
-
-    def add(self, template, value=None, **kwargs):
-        if isinstance(value, bool) and value:
-            self.lines.append(template.format(**kwargs))
-        elif isinstance(value, (list, set)):
-            for elem in value:
-                if isinstance(elem, dict):
-                    self.lines.append(template.format(**elem))
-                else:
-                    self.lines.append(template.format(elem))
-        elif value is None:
-            self.lines.append(template.format(**kwargs))
-        return self
-
-    def get(self):
-        return '\n'.join([v.rstrip() for v in self.lines])
-
-
-def to_snake(name):
-    name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+from pathlib import Path
+from hypergol.utils import Mode
+from hypergol.utils import Repr
+from hypergol.utils import to_snake
+from hypergol.utils import create_text_file
+from hypergol.cli.data_model_renderer import DataModelRenderer
 
 
 class Category:
@@ -53,6 +31,10 @@ class Member(Repr):
         self.type_ = type_
         self.category = category
 
+    @property
+    def fullType(self):
+        return f'List[{self.type_}]' if self.category in Category.LIST_TYPES else self.type_
+
     @classmethod
     def from_string(cls, memberString, temporalTypes, dataModelTypes):
         if ':' not in memberString:
@@ -62,24 +44,13 @@ class Member(Repr):
         category = None
         if parts[-1] == 'id':
             category = Category.ID_
-        elif parts[1].startswith('List['):
-            if type_ in temporalTypes:
-                category = Category.LIST_TEMPORAL
-            elif type_ in dataModelTypes:
-                category = Category.LIST_DATA_MODEL
-            else:
-                category = Category.LIST_BASIC
+        elif type_ in temporalTypes:
+            category = Category.LIST_TEMPORAL if parts[1].startswith('List[') else Category.TEMPORAL
+        elif type_ in dataModelTypes:
+            category = Category.LIST_DATA_MODEL if parts[1].startswith('List[') else Category.DATA_MODEL
         else:
-            if type_ in temporalTypes:
-                category = Category.TEMPORAL
-            elif type_ in dataModelTypes:
-                category = Category.DATA_MODEL
-            else:
-                category = Category.BASIC
+            category = Category.LIST_BASIC if parts[1].startswith('List[') else Category.BASIC
         return cls(name=parts[0], type_=type_, category=category)
-
-    def get_full_type(self):
-        return f'List[{self.type_}]' if self.category in Category.LIST_TYPES else self.type_
 
 
 class DataModel(Repr):
@@ -104,43 +75,37 @@ class DataModel(Repr):
             temporalTypes=self.temporalTypes,
             dataModelTypes=self.dataModelTypes
         )
-        if member.get_full_type() not in self.validTypes:
-            raise ValueError(f'Member {member} has invalid type {member.get_full_type()}')
+        if member.fullType not in self.validTypes:
+            raise ValueError(f'Member {member} has invalid type {member.fullType}')
         self.members.append(member)
-
-    def need_conversion(self):
-        return self.any(Category.TEMPORAL_TYPES + Category.DATA_MODEL_TYPES)
-
-    def any(self, categories):
-        if not isinstance(categories, list):
-            categories = [categories]
-        return any(member.category in categories for member in self.members)
-
-    def get_types(self, categories):
-        if not isinstance(categories, list):
-            categories = [categories]
-        return list(set(member.type_ for member in self.members if member.category in categories))
-
-    def get_names(self, categories):
-        if not isinstance(categories, list):
-            categories = [categories]
-        return [member.name for member in self.members if member.category in categories]
 
     def get_members(self, categories):
         if not isinstance(categories, list):
             categories = [categories]
         return [member for member in self.members if member.category in categories]
 
+    def any(self, categories):
+        return len(self.get_members(categories)) > 0
+
+    def need_conversion(self):
+        return self.any(Category.TEMPORAL_TYPES + Category.DATA_MODEL_TYPES)
+
+    def get_types(self, categories):
+        return list(set(member.type_ for member in self.get_members(categories)))
+
+    def get_names(self, categories):
+        return [member.name for member in self.get_members(categories)]
+
     def get_id_string(self):
-        return ' '.join([f'self.{member.name},' for member in self.get_members(Category.ID_)])
+        return ' '.join(f'self.{member.name},' for member in self.get_members(Category.ID_TYPES))
 
 
-def create_datamodel(className, *args, projectDirectory='.'):
+def create_datamodel(className, *args, projectDirectory='.', mode=Mode.NORMAL):
     dataModel = DataModel(className=className, members=[], dataModelTypes=['Token'])
     for memberString in args:
         dataModel.add_member_from_string(memberString)
     renderer = (
-        Renderer()
+        DataModelRenderer()
         .add('from typing import List               ', dataModel.any(Category.LIST_TYPES))
         .add('from datetime import {0}              ', dataModel.get_types(Category.TEMPORAL_TYPES))
         .add('from hypergol import BaseData         ')
@@ -148,7 +113,7 @@ def create_datamodel(className, *args, projectDirectory='.'):
         .add('                                      ')
         .add('class {className}(BaseData):          ', className=dataModel.className)
         .add('                                      ')
-        .add('    def __init__(self, {arguments}):  ', arguments=', '.join([f'{member.name}: {member.get_full_type()}' for member in dataModel.members]))
+        .add('    def __init__(self, {arguments}):  ', arguments=', '.join([f'{member.name}: {member.fullType}' for member in dataModel.members]))
         .add('        self.{0} = {0}                ', dataModel.get_names(Category.ALL))
         .add('                                      ', dataModel.any(Category.ID_TYPES))
         .add('    def get_id(self):                 ', dataModel.any(Category.ID_TYPES))
@@ -170,8 +135,8 @@ def create_datamodel(className, *args, projectDirectory='.'):
         .add("        data['{name}'] = [{type_}.from_data(v) for v in data['{name}']]       ", [{'name': member.name, 'type_': member.type_} for member in dataModel.get_members(Category.LIST_DATA_MODEL)])
         .add('        return cls(**data)                                    ', dataModel.need_conversion())
     )
-    with open(f'{projectDirectory}/datamodels/{dataModel.fileName}', 'wt') as dataModelFile:
-        dataModelFile.write(renderer.get())
+    filePath = Path(projectDirectory, 'data_models', dataModel.fileName)
+    create_text_file(filePath=filePath, content=renderer.get(), mode=mode)
 
 
 if __name__ == "__main__":
