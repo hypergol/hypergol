@@ -30,7 +30,7 @@ def create_project(projectName, mode=Mode.NORMAL, dryrun=None, force=None):
     create_directory(Path(projectPath, 'tasks'), mode)
     create_directory(Path(projectPath, 'pipelines'), mode)
     print('')
-    print(f'Project {projectName} created in directory {projectPath}.{mode_message(mode)}')
+    print(f'Project {projectName} was created in directory {projectPath}.{mode_message(mode)}')
     print('')
 
 

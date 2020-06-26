@@ -1,9 +1,26 @@
 import re
 import os
+import glob
 import stat
 import shutil
+from pathlib import Path
+
 
 MAX_MEMBER_REPR_LENGTH = 1000
+
+
+def get_data_model_types(projectDirectory):
+    return [
+        to_camel(os.path.split(filePath)[1][:-3])
+        for filePath in glob.glob(str(Path(projectDirectory, 'data_models', '*.py')))
+    ]
+
+
+def get_task_types(projectDirectory):
+    return [
+        to_camel(os.path.split(filePath)[1][:-3])
+        for filePath in glob.glob(str(Path(projectDirectory, 'tasks', '*.py')))
+    ]
 
 
 class HypergolFileAlreadyExistsException(Exception):
@@ -53,8 +70,10 @@ def _mode_handler(path, verb, objectName, mode, handledFunction):
     elif mode == Mode.FORCE:
         if os.path.exists(path):
             print(f"{objectName} {path} already exist.{mode_message(mode)}")
-        else:
+        try:
             handledFunction()
+        except ValueError:
+            pass
     else:
         raise ValueError(f'Unknown mode: {mode}')
 

@@ -1,15 +1,13 @@
 from pathlib import Path
-import glob
-import os
 import fire
 
 from hypergol.utils import Mode
 from hypergol.utils import Repr
 from hypergol.utils import to_snake
-from hypergol.utils import to_camel
 from hypergol.utils import create_text_file
 from hypergol.utils import get_mode
 from hypergol.utils import mode_message
+from hypergol.utils import get_data_model_types
 from hypergol.cli.data_model_renderer import DataModelRenderer
 
 
@@ -105,13 +103,6 @@ class DataModel(Repr):
         return ' '.join(f'self.{member.name},' for member in self.select_members(Category.ID_TYPES))
 
 
-def get_data_model_types(projectDirectory):
-    return [
-        to_camel(os.path.split(filePath)[1][:-3])
-        for filePath in glob.glob(str(Path(projectDirectory, 'data_models', '*.py')))
-    ]
-
-
 def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
     mode = get_mode(mode=mode, dryrun=dryrun, force=force)
     dataModelTypes = get_data_model_types(projectDirectory)
@@ -152,7 +143,7 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
     filePath = Path(projectDirectory, 'data_models', dataModel.fileName)
     create_text_file(filePath=filePath, content=renderer.get(), mode=mode)
     print('')
-    print(f'Class {className} created in directory {filePath}.{mode_message(mode)}')
+    print(f'Class {className} was created in directory {filePath}.{mode_message(mode)}')
     print('')
     if mode == Mode.DRY_RUN:
         return renderer.get()

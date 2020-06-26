@@ -1,0 +1,68 @@
+import os
+import fire
+from git import Repo
+
+from hypergol import DatasetFactory
+from hypergol import RepoData
+from hypergol import Pipeline
+{%- for taskDependency in data.taskDependencies %}
+from tasks.{{ taskDependency.importName }} import {{ taskDependency.name }}
+{%- endfor %}
+{%- for dataModelDependency in data.dataModelDependencies %}
+from data_models.{{ dataModelDependency.importName }} import {{ dataModelDependency.name }}
+{%- endfor %}
+
+
+LOCATION = '.'
+PROJECT = 'example_project'
+BRANCH = 'example_branch'
+
+
+def {{ snakeName }}(threads=1, force=False):
+    repo = Repo(path='.')
+    if repo.is_dirty():
+        if force:
+            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
+        else:
+            raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
+
+    commit = repo.commit()
+    repoData = RepoData(
+        branchName=repo.active_branch.name,
+        commitHash=commit.hexsha,
+        commitMessage=commit.message,
+        comitterName=commit.committer.name,
+        comitterEmail=commit.committer.email
+    )
+
+    dsf = DatasetFactory(
+        location=LOCATION,
+        project=PROJECT,
+        branch=BRANCH,
+        chunks=16,
+        repoData=repoData
+    )
+
+{%- for dataModelDependency in data.dataModelDependencies %}
+    {{ dataModelDependency.pluralName }} = dsf.get(dataType={{ dataModelDependency.name }}, name='{{ dataModelDependency.pluralSnakeName }}')
+{%- endfor %}
+
+{%- for taskDependency in data.taskDependencies %}
+    {{ taskDependency.lowerName = {{ taskDependency.name }}(
+        inputDatasets=[exampleInputDataset1,  exampleInputDataset2],
+        outputDataset=exampleOutputDataset,
+    )
+{%- endfor %}
+
+    pipeline = Pipeline(
+        tasks=[
+{%- for taskDependency in data.taskDependencies %}
+            {{ taskDependency.lowerName }},
+{%- endfor %}
+        ]
+    )
+    pipeline.run(threads=threads)
+
+
+if __name__ == '__main__':
+    fire.Fire({{ snakeName }})
