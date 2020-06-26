@@ -1,6 +1,5 @@
-import os
-import fire
 from pathlib import Path
+import fire
 from hypergol.utils import Mode
 from hypergol.utils import Repr
 from hypergol.utils import to_snake
