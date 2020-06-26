@@ -62,7 +62,7 @@ class DataModel(Repr):
 
     def __init__(self, className, members, dataModelTypes):
         self.className = className
-        self.members = members
+        self._members = members
         self.dataModelTypes = dataModelTypes
         self.basicTypes = ['int', 'str', 'float']
         self.temporalTypes = ['datetime', 'date', 'time']
@@ -82,27 +82,27 @@ class DataModel(Repr):
         )
         if member.fullType not in self.validTypes:
             raise ValueError(f'{member} has invalid type {member.fullType}')
-        self.members.append(member)
+        self._members.append(member)
 
-    def get_members(self, categories):
+    def select_members(self, categories):
         if not isinstance(categories, list):
             categories = [categories]
-        return [member for member in self.members if member.category in categories]
+        return [member for member in self._members if member.category in categories]
 
-    def any(self, categories):
-        return len(self.get_members(categories)) > 0
+    def is_any(self, categories):
+        return len(self.select_members(categories)) > 0
 
-    def need_conversion(self):
-        return self.any(Category.TEMPORAL_TYPES + Category.DATA_MODEL_TYPES)
+    def needs_conversion(self):
+        return self.is_any(Category.TEMPORAL_TYPES + Category.DATA_MODEL_TYPES)
 
     def get_types(self, categories):
-        return list(set(member.type_ for member in self.get_members(categories)))
+        return list(set(member.type_ for member in self.select_members(categories)))
 
     def get_names(self, categories):
-        return [member.name for member in self.get_members(categories)]
+        return [member.name for member in self.select_members(categories)]
 
     def get_id_string(self):
-        return ' '.join(f'self.{member.name},' for member in self.get_members(Category.ID_TYPES))
+        return ' '.join(f'self.{member.name},' for member in self.select_members(Category.ID_TYPES))
 
 
 def get_data_model_types(projectDirectory):
@@ -120,34 +120,34 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
         dataModel.add_member_from_string(memberString)
     renderer = (
         DataModelRenderer()
-        .add('from typing import List               ', dataModel.any(Category.LIST_TYPES))
+        .add('from typing import List               ', dataModel.is_any(Category.LIST_TYPES))
         .add('from datetime import {0}              ', dataModel.get_types(Category.TEMPORAL_TYPES))
         .add('from hypergol import BaseData         ')
         .add('from data_models.{snake} import {name}', [{'snake': to_snake(name), 'name': name} for name in dataModel.get_types(Category.DATA_MODEL_TYPES)])
         .add('                                      ')
         .add('class {className}(BaseData):          ', className=dataModel.className)
         .add('                                      ')
-        .add('    def __init__(self, {arguments}):  ', arguments=', '.join([f'{member.name}: {member.fullType}' for member in dataModel.members]))
+        .add('    def __init__(self, {arguments}):  ', arguments=', '.join([f'{member.name}: {member.fullType}' for member in dataModel.select_members(Category.ALL)]))
         .add('        self.{0} = {0}                ', dataModel.get_names(Category.ALL))
-        .add('                                      ', dataModel.any(Category.ID_TYPES))
-        .add('    def get_id(self):                 ', dataModel.any(Category.ID_TYPES))
-        .add('        return ({idString} )          ', dataModel.any(Category.ID_TYPES), idString=dataModel.get_id_string())
-        .add('                                      ', dataModel.need_conversion())
-        .add('    def to_data(self):                ', dataModel.need_conversion())
-        .add('        data = self.__dict__.copy()   ', dataModel.need_conversion())
+        .add('                                      ', dataModel.is_any(Category.ID_TYPES))
+        .add('    def get_id(self):                 ', dataModel.is_any(Category.ID_TYPES))
+        .add('        return ({idString} )          ', dataModel.is_any(Category.ID_TYPES), idString=dataModel.get_id_string())
+        .add('                                      ', dataModel.needs_conversion())
+        .add('    def to_data(self):                ', dataModel.needs_conversion())
+        .add('        data = self.__dict__.copy()   ', dataModel.needs_conversion())
         .add("        data['{0}'] = data['{0}'].isoformat()                 ", dataModel.get_names(Category.TEMPORAL))
         .add("        data['{0}'] = data['{0}'].to_data()                   ", dataModel.get_names(Category.DATA_MODEL))
         .add("        data['{0}'] = [v.isoformat() for v in data['{0}']]    ", dataModel.get_names(Category.LIST_TEMPORAL))
         .add("        data['{0}'] = [v.to_data() for v in data['{0}']]      ", dataModel.get_names(Category.LIST_DATA_MODEL))
-        .add('        return data                                           ', dataModel.need_conversion())
-        .add('                                                              ', dataModel.need_conversion())
-        .add('    @classmethod                                              ', dataModel.need_conversion())
-        .add('    def from_data(self, data):                                ', dataModel.need_conversion())
-        .add("        data['{name}'] = {type_}.fromisoformat(data['{name}'])                ", [{'name': member.name, 'type_': member.type_} for member in dataModel.get_members(Category.TEMPORAL)])
-        .add("        data['{name}'] = {type_}.from_data(data['{name}'])                    ", [{'name': member.name, 'type_': member.type_} for member in dataModel.get_members(Category.DATA_MODEL)])
-        .add("        data['{name}'] = [{type_}.fromisoformat(v) for v in data['{name}']]   ", [{'name': member.name, 'type_': member.type_} for member in dataModel.get_members(Category.LIST_TEMPORAL)])
-        .add("        data['{name}'] = [{type_}.from_data(v) for v in data['{name}']]       ", [{'name': member.name, 'type_': member.type_} for member in dataModel.get_members(Category.LIST_DATA_MODEL)])
-        .add('        return cls(**data)                                    ', dataModel.need_conversion())
+        .add('        return data                                           ', dataModel.needs_conversion())
+        .add('                                                              ', dataModel.needs_conversion())
+        .add('    @classmethod                                              ', dataModel.needs_conversion())
+        .add('    def from_data(self, data):                                ', dataModel.needs_conversion())
+        .add("        data['{name}'] = {type_}.fromisoformat(data['{name}'])                ", [{'name': member.name, 'type_': member.type_} for member in dataModel.select_members(Category.TEMPORAL)])
+        .add("        data['{name}'] = {type_}.from_data(data['{name}'])                    ", [{'name': member.name, 'type_': member.type_} for member in dataModel.select_members(Category.DATA_MODEL)])
+        .add("        data['{name}'] = [{type_}.fromisoformat(v) for v in data['{name}']]   ", [{'name': member.name, 'type_': member.type_} for member in dataModel.select_members(Category.LIST_TEMPORAL)])
+        .add("        data['{name}'] = [{type_}.from_data(v) for v in data['{name}']]       ", [{'name': member.name, 'type_': member.type_} for member in dataModel.select_members(Category.LIST_DATA_MODEL)])
+        .add('        return cls(**data)                                    ', dataModel.needs_conversion())
     )
     filePath = Path(projectDirectory, 'data_models', dataModel.fileName)
     create_text_file(filePath=filePath, content=renderer.get(), mode=mode)
