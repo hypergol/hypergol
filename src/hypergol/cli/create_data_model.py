@@ -70,7 +70,7 @@ class DataModel(Repr):
         self.validTypes += [f'List[{t}]' for t in self.validTypes]
         self.validTypes += ['int:id', 'str:id']
 
-    @ property
+    @property
     def fileName(self):
         return f'{to_snake(self.className)}.py'
 
