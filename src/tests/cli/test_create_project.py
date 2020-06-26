@@ -26,12 +26,14 @@ class TestCreateProject(TestCase):
         self.pipelinesDirectory = Path(self.projectDirectory, 'pipelines')
         self.makeVenvFilePath = Path(self.projectDirectory, 'make_venv.sh')
         self.requirementsFilePath = Path(self.projectDirectory, 'requirements.txt')
+        self.gitignorePath = Path(self.projectDirectory, '.gitignore')
         self.allPaths = [
             self.dataModelsDirectory,
             self.tasksDirectory,
             self.pipelinesDirectory,
             self.makeVenvFilePath,
             self.requirementsFilePath,
+            self.gitignorePath,
             self.projectDirectory
         ]
 

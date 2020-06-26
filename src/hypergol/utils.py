@@ -72,7 +72,7 @@ def _mode_handler(path, verb, objectName, mode, handledFunction):
             print(f"{objectName} {path} already exist.{mode_message(mode)}")
         try:
             handledFunction()
-        except ValueError:
+        except FileExistsError:
             pass
     else:
         raise ValueError(f'Unknown mode: {mode}')

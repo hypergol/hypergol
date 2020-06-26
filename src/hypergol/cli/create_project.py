@@ -8,24 +8,32 @@ from hypergol.utils import create_directory
 from hypergol.utils import copy_file
 from hypergol.utils import get_mode
 from hypergol.utils import mode_message
+from hypergol.cli.jinja_renderer import JinjaRenderer
 
 
 def locate(fname):
     return Path(hypergol.__path__[0], 'cli', 'templates', fname)
 
 
-def setup_project_directory(projectPath, mode):
+def setup_project_directory(projectName, projectPath, mode):
     create_directory(projectPath, mode)
     copy_file(locate('make_venv.sh'), Path(projectPath, 'make_venv.sh'), mode)
     make_file_executable(Path(projectPath, 'make_venv.sh'), mode)
     copy_file(locate('requirements.txt'), Path(projectPath, 'requirements.txt'), mode)
-    copy_file(locate('requirements.txt'), Path(projectPath, 'requirements2.txt'), mode)
+    copy_file(locate('.gitignore'), Path(projectPath, '.gitignore'), mode)
+
+    JinjaRenderer().render(
+        templateName='README.md.j2',
+        templateData={'name': projectName},
+        filePath=Path(projectPath, 'README.md'),
+        mode=mode
+    )
 
 
 def create_project(projectName, mode=Mode.NORMAL, dryrun=None, force=None):
     mode = get_mode(mode=mode, dryrun=dryrun, force=force)
     projectPath = Path(to_snake(projectName))
-    setup_project_directory(projectPath, mode)
+    setup_project_directory(projectName, projectPath, mode)
     create_directory(Path(projectPath, 'data_models'), mode)
     create_directory(Path(projectPath, 'tasks'), mode)
     create_directory(Path(projectPath, 'pipelines'), mode)
