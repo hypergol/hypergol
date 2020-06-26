@@ -17,6 +17,12 @@ class Mode:
     ALL = [DRY_RUN, FORCE, NORMAL]
 
 
+def mode_message(mode):
+    if mode == Mode.NORMAL:
+        return ''
+    return f' - Mode: {mode}'
+
+
 def get_mode(mode, dryrun, force):
     if force:
         mode = Mode.FORCE
@@ -30,32 +36,31 @@ def get_mode(mode, dryrun, force):
 def _test_existence(path, objectName, mode):
     if not os.path.exists(path):
         if mode == Mode.DRY_RUN:
-            print(f'{objectName} {path} does not exist - {mode}')
+            print(f'{objectName} {path} does not exist.{mode_message(mode)}')
         else:
-            raise ValueError(f'{objectName} {path} does not exist - {mode}')
+            raise ValueError(f'{objectName} {path} does not exist.{mode_message(mode)}')
 
 
 def _mode_handler(path, verb, objectName, mode, handledFunction):
-    print(f'{verb} {objectName.lower()} {path} - {mode}')
+    print(f'{verb} {objectName.lower()} {path}.{mode_message(mode)}')
     if mode == Mode.NORMAL:
         if os.path.exists(path):
-            raise HypergolFileAlreadyExistsException(f'{objectName} {path} already exist')
+            raise HypergolFileAlreadyExistsException(f'{objectName} {path} already exist.{mode_message(mode)}')
         handledFunction()
     elif mode == Mode.DRY_RUN:
         if os.path.exists(path):
-            print(f"{objectName} {path} already exist - {mode}")
+            print(f"{objectName} {path} already exist.{mode_message(mode)}")
     elif mode == Mode.FORCE:
         if os.path.exists(path):
-            print(f"{objectName} {path} already exist - {mode}")
+            print(f"{objectName} {path} already exist.{mode_message(mode)}")
         else:
             handledFunction()
     else:
         raise ValueError(f'Unknown mode: {mode}')
-    print(f'{verb} {objectName.lower()} {path} - DONE - {mode}')
 
 
 def make_file_executable(filePath, mode):
-    print(f'Making file {filePath} executable - {mode}')
+    print(f'Making file {filePath} executable.{mode_message(mode)}')
     _test_existence(filePath, 'File', mode)
     if mode != Mode.DRY_RUN:
         fileStat = os.stat(filePath)
@@ -114,6 +119,7 @@ class Repr:
 def to_snake(name):
     name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+
 
 def to_camel(name):
     return ''.join([v.title() for v in name.split('_')])

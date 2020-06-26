@@ -7,6 +7,7 @@ from hypergol.utils import to_snake
 from hypergol.utils import create_directory
 from hypergol.utils import copy_file
 from hypergol.utils import get_mode
+from hypergol.utils import mode_message
 
 
 def locate(fname):
@@ -29,7 +30,7 @@ def create_project(projectName, mode=Mode.NORMAL, dryrun=None, force=None):
     create_directory(Path(projectPath, 'tasks'), mode)
     create_directory(Path(projectPath, 'pipelines'), mode)
     print('')
-    print(f'Project {projectName} created in directory {projectPath}.')
+    print(f'Project {projectName} created in directory {projectPath}.{mode_message(mode)}')
     print('')
 
 

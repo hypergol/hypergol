@@ -9,6 +9,7 @@ from hypergol.utils import to_snake
 from hypergol.utils import to_camel
 from hypergol.utils import create_text_file
 from hypergol.utils import get_mode
+from hypergol.utils import mode_message
 from hypergol.cli.data_model_renderer import DataModelRenderer
 
 
@@ -150,8 +151,12 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
     )
     filePath = Path(projectDirectory, 'data_models', dataModel.fileName)
     create_text_file(filePath=filePath, content=renderer.get(), mode=mode)
+    print('')
+    print(f'Class {className} created in directory {filePath}.{mode_message(mode)}')
+    print('')
     if mode == Mode.DRY_RUN:
         return renderer.get()
+    return None
 
 
 if __name__ == "__main__":
