@@ -1,20 +1,25 @@
 from pathlib import Path
+import glob
+import os
 import fire
+
 from hypergol.utils import Mode
 from hypergol.utils import Repr
 from hypergol.utils import to_snake
+from hypergol.utils import to_camel
 from hypergol.utils import create_text_file
+from hypergol.utils import get_mode
 from hypergol.cli.data_model_renderer import DataModelRenderer
 
 
 class Category:
-    ID_ = 0
-    BASIC = 1
-    TEMPORAL = 2
-    DATA_MODEL = 3
-    LIST_BASIC = 4
-    LIST_TEMPORAL = 5
-    LIST_DATA_MODEL = 6
+    ID_ = 'ID'
+    BASIC = 'BASIC'
+    TEMPORAL = 'TEMPORAL'
+    DATA_MODEL = 'DATA_MODEL'
+    LIST_BASIC = 'LIST_BASIC'
+    LIST_TEMPORAL = 'LIST_TEMPORAL'
+    LIST_DATA_MODEL = 'LIST_DATA_MODEL'
     ID_TYPES = [ID_]
     LIST_TYPES = [LIST_BASIC, LIST_TEMPORAL, LIST_DATA_MODEL]
     BASIC_TYPES = [ID_, BASIC, LIST_BASIC]
@@ -75,7 +80,7 @@ class DataModel(Repr):
             dataModelTypes=self.dataModelTypes
         )
         if member.fullType not in self.validTypes:
-            raise ValueError(f'Member {member} has invalid type {member.fullType}')
+            raise ValueError(f'{member} has invalid type {member.fullType}')
         self.members.append(member)
 
     def get_members(self, categories):
@@ -99,8 +104,17 @@ class DataModel(Repr):
         return ' '.join(f'self.{member.name},' for member in self.get_members(Category.ID_TYPES))
 
 
-def create_datamodel(className, *args, projectDirectory='.', mode=Mode.NORMAL):
-    dataModel = DataModel(className=className, members=[], dataModelTypes=['Token'])
+def get_data_model_types(projectDirectory):
+    return [
+        to_camel(os.path.split(filePath)[1][:-3])
+        for filePath in glob.glob(str(Path(projectDirectory, 'data_models', '*.py')))
+    ]
+
+
+def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
+    mode = get_mode(mode=mode, dryrun=dryrun, force=force)
+    dataModelTypes = get_data_model_types(projectDirectory)
+    dataModel = DataModel(className=className, members=[], dataModelTypes=dataModelTypes)
     for memberString in args:
         dataModel.add_member_from_string(memberString)
     renderer = (
@@ -136,7 +150,9 @@ def create_datamodel(className, *args, projectDirectory='.', mode=Mode.NORMAL):
     )
     filePath = Path(projectDirectory, 'data_models', dataModel.fileName)
     create_text_file(filePath=filePath, content=renderer.get(), mode=mode)
+    if mode == Mode.DRY_RUN:
+        return renderer.get()
 
 
 if __name__ == "__main__":
-    fire.Fire(create_datamodel)
+    fire.Fire(create_data_model)

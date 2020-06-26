@@ -49,7 +49,6 @@ class TestCreateProject(TestCase):
         super().setUp()
         self.clean_up()
 
-
     def tearDown(self):
         super().tearDown()
         self.clean_up()

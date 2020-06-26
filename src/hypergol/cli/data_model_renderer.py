@@ -17,4 +17,4 @@ class DataModelRenderer:
         return self
 
     def get(self):
-        return '\n'.join([v.rstrip() for v in self.lines])
+        return '\n'.join([v.rstrip() for v in self.lines]) + '\n'
