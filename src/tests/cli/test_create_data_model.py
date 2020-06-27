@@ -44,7 +44,7 @@ class Test(BaseData):
         return data
 
     @classmethod
-    def from_data(self, data):
+    def from_data(cls, data):
         data['dt'] = datetime.fromisoformat(data['dt'])
         return cls(**data)
 """.lstrip()
@@ -79,7 +79,7 @@ class Test(BaseData):
         return data
 
     @classmethod
-    def from_data(self, data):
+    def from_data(cls, data):
         data['values'] = [OtherTest.from_data(v) for v in data['values']]
         return cls(**data)
 """.lstrip()
