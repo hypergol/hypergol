@@ -11,15 +11,12 @@ class ArticleText(BaseData):
         self.text = text
         self.url = url
 
-    def get_id(self):
-        return (self.articleTextId,)
-
     def to_data(self):
         data = self.__dict__.copy()
         data['publishDate'] = data['publishDate'].isoformat()
         return data
 
     @classmethod
-    def from_data(cls, data):
+    def from_data(self, data):
         data['publishDate'] = datetime.fromisoformat(data['publishDate'])
         return cls(**data)

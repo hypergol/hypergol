@@ -1,8 +1,7 @@
-
 export PYTHONPATH="${PWD}/..:${PWD}/../..:"
 
 THREADS=4
 
-python \
+python3 \
     ./pipelines/process_blogposts.py \
     --threads=${THREADS}

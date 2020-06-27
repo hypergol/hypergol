@@ -5,28 +5,26 @@ from git import Repo
 from hypergol import DatasetFactory
 from hypergol import RepoData
 from hypergol import Pipeline
-from tasks.load_html_pages_task import LoadHtmlPagesTask
 from tasks.create_article_texts_task import CreateArticleTextsTask
 from tasks.create_articles_task import CreateArticlesTask
-from datamodel.article_page import ArticlePage
-from datamodel.article_text import ArticleText
-from datamodel.article import Article
+from tasks.load_html_pages_task import LoadHtmlPagesTask
+from data_models.article import Article
+from data_models.article_page import ArticlePage
+from data_models.labelled_article import LabelledArticle
 
 
-LOCATION = f'{os.environ["BASE_DIR"]}/tempdata'
-PROJECT = 'test'
-BRANCH = 'test1'
-SOURCE_PATTERN = f'{os.environ["BASE_DIR"]}/data/blogposts/pages_*.pkl'
-GIT_REPO_DIRECTORY = f'{os.environ["BASE_DIR"]}/org/hypergol/.git'
+LOCATION = '.'
+PROJECT = 'example_project'
+BRANCH = 'example_branch'
 
 
 def process_blogposts(threads=1, force=False):
-    repo = Repo(path=GIT_REPO_DIRECTORY)
+    repo = Repo(path='.')
     if repo.is_dirty():
         if force:
-            print('Warning! Current git repo is dirty, will result in incorrect commit hash in datasets')
+            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
         else:
-            raise ValueError("git repo is dirty, please commit your work befour you run your pipeline")
+            raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
 
     commit = repo.commit()
     repoData = RepoData(
@@ -44,36 +42,30 @@ def process_blogposts(threads=1, force=False):
         chunks=16,
         repoData=repoData
     )
-
-    articlePages = dsf.get(dataType=ArticlePage, name='article_pages')
-    articleTexts = dsf.get(dataType=ArticleText, name='article_texts')
     articles = dsf.get(dataType=Article, name='articles')
-
-    loadHtmlPagesTask = LoadHtmlPagesTask(
-        outputDataset=articlePages,
-        sourcePattern=SOURCE_PATTERN
-    )
-
+    articlePages = dsf.get(dataType=ArticlePage, name='article_pages')
+    labelledArticles = dsf.get(dataType=LabelledArticle, name='labelled_articles')
     createArticleTextsTask = CreateArticleTextsTask(
-        inputDatasets=[articlePages],
-        outputDataset=articleTexts,
+        inputDatasets=[exampleInputDataset1,  exampleInputDataset2],
+        outputDataset=exampleOutputDataset,
     )
-
     createArticlesTask = CreateArticlesTask(
-        inputDatasets=[articleTexts],
-        outputDataset=articles,
-        spacyModelName='en_core_web_sm',
-        threads=2
+        inputDatasets=[exampleInputDataset1,  exampleInputDataset2],
+        outputDataset=exampleOutputDataset,
+    )
+    loadHtmlPagesTask = LoadHtmlPagesTask(
+        inputDatasets=[exampleInputDataset1,  exampleInputDataset2],
+        outputDataset=exampleOutputDataset,
     )
 
-    pipeline1 = Pipeline(
+    pipeline = Pipeline(
         tasks=[
-            loadHtmlPagesTask,
             createArticleTextsTask,
-            createArticlesTask
+            createArticlesTask,
+            loadHtmlPagesTask,
         ]
     )
-    pipeline1.run(threads=threads)
+    pipeline.run(threads=threads)
 
 
 if __name__ == '__main__':
