@@ -19,11 +19,11 @@ def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun
     mode = utils.get_mode(mode, dryrun, force)
     taskType = get_task_type(taskType, source)
 
-    dependencies = list(args)
+    dependencies = list(set(args))
     dataModelTypes = utils.get_data_model_types(projectDirectory)
-    unknownTypes = set(dependencies)-set(dataModelTypes)
-    if len(unknownTypes) > 0:
-        raise ValueError(f'Unknown dependencies: {unknownTypes}')
+    for dependency in dependencies:
+        if dependency not in dataModelTypes:
+            raise ValueError(f'Unknown dependency: {dependency}')
 
     templateData = {
         'className': className,

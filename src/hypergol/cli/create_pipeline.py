@@ -13,12 +13,19 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
         if '_' in pipeLineName:
             raise ValueError('Error: {pipeLineName}, pipeline name must be either snake case or camel case')
         pipeLineName = to_snake(pipeLineName)
-    dependencies = list(args)
+
+    dependencies = list(set(args))
+    taskDependencies = []
+    dataModelDependencies = []
     dataModelTypes = utils.get_data_model_types(projectDirectory)
     taskTypes = utils.get_task_types(projectDirectory)
-    unknownTypes = set(dependencies)-set(dataModelTypes)-set(taskTypes)
-    if len(unknownTypes) > 0:
-        raise ValueError(f'Unknown dependencies: {unknownTypes}')
+    for dependency in dependencies:
+        if dependency in taskTypes:
+            taskDependencies.append(dependency)
+        elif dependency in dataModelTypes:
+            dataModelDependencies.append(dependency)
+        else:
+            raise ValueError(f'Unknown dependency: {dependency}')
 
     templateData = {
         'snakeName': pipeLineName,
@@ -26,13 +33,13 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
             'importName': to_snake(name),
             'name': name,
             'lowerName': name[0].lower() + name[1:]
-        } for name in sorted(list(set(dependencies) & set(taskTypes)))],
+        } for name in sorted(taskDependencies)],
         'dataModelDependencies': [{
             'importName': to_snake(name),
             'name': name,
             'pluralName': f'{name[0].lower() + name[1:]}s',
             'pluralSnakeName': f'{to_snake(name)}s'
-        } for name in sorted(list(set(dependencies) & set(dataModelTypes)))]
+        } for name in sorted(dataModelDependencies)]
     }
     filePath = Path(projectDirectory, 'pipelines', f'{to_snake(pipeLineName)}.py')
     content = JinjaRenderer().render(

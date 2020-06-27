@@ -17,5 +17,5 @@ class {{ className }}(Task):
         pass
 
     def run(self, exampleInputObject1, exampleInputObject2):
-        raise NotImplementedError(f'{{ '{' }}self.__class__.__name__{{ '}' }} must implement run()')
+        raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
         return exampleOutputObject

@@ -12,10 +12,10 @@ class {{ className }}(Source):
         self.exampleParameter = exampleParameter
 
     def source_iterator(self):
-        raise NotImplementedError(f'{{ '{' }}self.__class__.__name__{{ '}' }} must implement source_iterator()')
+        raise NotImplementedError(f'{self.__class__.__name__} must implement source_iterator()')
         # TODO: use yield in this function instead of return while your are consuming your source data
         yield exampleData
 
     def run(self, data):
-        raise NotImplementedError(f'{{ '{' }}self.__class__.__name__{{ '}' }} must implement run()')
+        raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
         return exampleOutputObject
