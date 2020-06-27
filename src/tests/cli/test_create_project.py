@@ -4,6 +4,7 @@ from hypergol.utils import Mode
 from hypergol.utils import HypergolFileAlreadyExistsException
 from hypergol.cli.create_project import create_project
 from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
+from tests.cli.hypergol_create_test_case import delete_if_exists
 
 
 class TestCreateProject(HypergolCreateTestCase):
@@ -11,19 +12,27 @@ class TestCreateProject(HypergolCreateTestCase):
     def __init__(self, methodName):
         super(TestCreateProject, self).__init__(projectName='TestProject', methodName=methodName)
         self.allPaths = [
+            Path(self.projectDirectory, 'tests', '__init__.py'),
+            Path(self.projectDirectory, 'tests'),
+            Path(self.projectDirectory, 'data_models', '__init__.py'),
             Path(self.projectDirectory, 'data_models'),
+            Path(self.projectDirectory, 'tasks', '__init__.py'),
             Path(self.projectDirectory, 'tasks'),
+            Path(self.projectDirectory, 'pipelines', '__init__.py'),
             Path(self.projectDirectory, 'pipelines'),
+            Path(self.projectDirectory, 'README.md'),
             Path(self.projectDirectory, 'make_venv.sh'),
             Path(self.projectDirectory, 'requirements.txt'),
             Path(self.projectDirectory, '.gitignore'),
             Path(self.projectDirectory)
         ]
 
-    def test_create_project_creates(self):
+    def test_create_project_only_creates_files_expected(self):
         create_project(self.projectName, mode=Mode.NORMAL)
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
+        for filePath in self.allPaths:
+            delete_if_exists(filePath)
 
     def test_create_project_throws_error_if_already_exists(self):
         create_project(self.projectName, mode=Mode.NORMAL)

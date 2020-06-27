@@ -34,9 +34,9 @@ def create_project(projectName, mode=Mode.NORMAL, dryrun=None, force=None):
     mode = get_mode(mode=mode, dryrun=dryrun, force=force)
     projectPath = Path(to_snake(projectName))
     setup_project_directory(projectName, projectPath, mode)
-    create_directory(Path(projectPath, 'data_models'), mode)
-    create_directory(Path(projectPath, 'tasks'), mode)
-    create_directory(Path(projectPath, 'pipelines'), mode)
+    for directoryName in ['data_models', 'tasks', 'pipelines', 'tests']:
+        create_directory(Path(projectPath, directoryName), mode)
+        copy_file(locate('__init__.py'), Path(projectPath, directoryName, '__init__.py'), mode)
     print('')
     print(f'Project {projectName} was created in directory {projectPath}.{mode_message(mode)}')
     print('')
