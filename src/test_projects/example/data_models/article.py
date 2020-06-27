@@ -24,7 +24,7 @@ class Article(BaseData):
         return data
 
     @classmethod
-    def from_data(self, data):
+    def from_data(cls, data):
         data['publishDate'] = datetime.fromisoformat(data['publishDate'])
         data['sentences'] = [Sentence.from_data(v) for v in data['sentences']]
         return cls(**data)

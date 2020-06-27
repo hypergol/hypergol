@@ -134,7 +134,7 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
         .add('        return data                                           ', dataModel.needs_conversion())
         .add('                                                              ', dataModel.needs_conversion())
         .add('    @classmethod                                              ', dataModel.needs_conversion())
-        .add('    def from_data(self, data):                                ', dataModel.needs_conversion())
+        .add('    def from_data(cls, data):                                 ', dataModel.needs_conversion())
         .add("        data['{name}'] = {type_}.fromisoformat(data['{name}'])                ", [{'name': member.name, 'type_': member.type_} for member in dataModel.select_members(Category.TEMPORAL)])
         .add("        data['{name}'] = {type_}.from_data(data['{name}'])                    ", [{'name': member.name, 'type_': member.type_} for member in dataModel.select_members(Category.DATA_MODEL)])
         .add("        data['{name}'] = [{type_}.fromisoformat(v) for v in data['{name}']]   ", [{'name': member.name, 'type_': member.type_} for member in dataModel.select_members(Category.LIST_TEMPORAL)])

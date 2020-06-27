@@ -18,6 +18,6 @@ class Sentence(BaseData):
         return data
 
     @classmethod
-    def from_data(self, data):
+    def from_data(cls, data):
         data['tokens'] = [Token.from_data(v) for v in data['tokens']]
         return cls(**data)

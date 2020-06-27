@@ -14,7 +14,7 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
             raise ValueError('Error: {pipeLineName}, pipeline name must be either snake case or camel case')
         pipeLineName = to_snake(pipeLineName)
 
-    dependencies = list(set(args))
+    dependencies = sorted(list(set(args)))
     taskDependencies = []
     dataModelDependencies = []
     dataModelTypes = utils.get_data_model_types(projectDirectory)

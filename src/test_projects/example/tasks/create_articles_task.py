@@ -1,7 +1,7 @@
 from hypergol import Task
 from data_models.article import Article
-from data_models.token import Token
 from data_models.sentence import Sentence
+from data_models.token import Token
 
 
 class CreateArticlesTask(Task):

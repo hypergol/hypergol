@@ -17,6 +17,6 @@ class ArticleText(BaseData):
         return data
 
     @classmethod
-    def from_data(self, data):
+    def from_data(cls, data):
         data['publishDate'] = datetime.fromisoformat(data['publishDate'])
         return cls(**data)

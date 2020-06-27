@@ -19,7 +19,7 @@ def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun
     mode = utils.get_mode(mode, dryrun, force)
     taskType = get_task_type(taskType, source)
 
-    dependencies = list(set(args))
+    dependencies = sorted(list(set(args)))
     dataModelTypes = utils.get_data_model_types(projectDirectory)
     for dependency in dependencies:
         if dependency not in dataModelTypes:
