@@ -9,6 +9,14 @@ from pathlib import Path
 MAX_MEMBER_REPR_LENGTH = 1000
 
 
+def delete_if_exists(filePath):
+    if os.path.exists(filePath):
+        if os.path.isdir(filePath):
+            os.rmdir(filePath)
+        else:
+            os.remove(filePath)
+
+
 def get_data_model_types(projectDirectory):
     return [
         to_camel(os.path.split(filePath)[1][:-3])

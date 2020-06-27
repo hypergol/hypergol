@@ -26,26 +26,26 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
             'importName': to_snake(name),
             'name': name,
             'lowerName': name[0].lower() + name[1:]
-        } for name in dependencies & taskTypes],
+        } for name in sorted(list(set(dependencies) & set(taskTypes)))],
         'dataModelDependencies': [{
             'importName': to_snake(name),
             'name': name,
             'pluralName': f'{name[0].lower() + name[1:]}s',
             'pluralSnakeName': f'{to_snake(name)}s'
-        } for name in dependencies & dataModelTypes]
+        } for name in sorted(list(set(dependencies) & set(dataModelTypes)))]
     }
-    filePath = Path(projectDirectory, 'pipelines', f'{pipeLineName}.py')
+    filePath = Path(projectDirectory, 'pipelines', f'{to_snake(pipeLineName)}.py')
     content = JinjaRenderer().render(
         templateName='pipeline.py.j2',
         templateData=templateData,
-        filePath=Path(projectDirectory, 'pipelines', f'{pipeLineName}.py'),
+        filePath=Path(projectDirectory, 'pipelines', f'{to_snake(pipeLineName)}.py'),
         mode=mode
     )
 
     scriptContent = JinjaRenderer().render(
         templateName='pipeline.sh.j2',
-        templateData={'snakeName': pipeLineName},
-        filePath=Path(projectDirectory, f'{pipeLineName}.sh'),
+        templateData={'snakeName': to_snake(pipeLineName)},
+        filePath=Path(projectDirectory, f'{to_snake(pipeLineName)}.sh'),
         mode=mode
     )
 

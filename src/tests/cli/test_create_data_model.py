@@ -1,6 +1,7 @@
 from unittest import TestCase
-from hypergol.cli.create_data_model import create_data_model
 import mock
+from hypergol.cli.create_data_model import create_data_model
+
 
 TEST_CLASS = """
 from hypergol import BaseData

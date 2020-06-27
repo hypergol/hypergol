@@ -15,5 +15,7 @@ class JinjaRenderer:
 
     def render(self, templateName, templateData, filePath, mode):
         content = self.templateEnvironment.get_template(templateName).render(templateData)
+        # TODO(Laszlo): jinja seems to be stripping ending newlines
+        content = content + '\n'
         create_text_file(filePath=filePath, content=content, mode=mode)
         return content

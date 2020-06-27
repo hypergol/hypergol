@@ -1,59 +1,24 @@
 import os
-import glob
 from pathlib import Path
-from unittest import TestCase
 from hypergol.utils import Mode
 from hypergol.utils import HypergolFileAlreadyExistsException
 from hypergol.cli.create_project import create_project
+from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 
 
-def delete_if_exists(filePath):
-    if os.path.exists(filePath):
-        if os.path.isdir(filePath):
-            os.rmdir(filePath)
-        else:
-            os.remove(filePath)
-
-
-class TestCreateProject(TestCase):
+class TestCreateProject(HypergolCreateTestCase):
 
     def __init__(self, methodName):
-        super(TestCreateProject, self).__init__(methodName=methodName)
-        self.projectName = 'TestProject'
-        self.projectDirectory = 'test_project'
-        self.dataModelsDirectory = Path(self.projectDirectory, 'data_models')
-        self.tasksDirectory = Path(self.projectDirectory, 'tasks')
-        self.pipelinesDirectory = Path(self.projectDirectory, 'pipelines')
-        self.makeVenvFilePath = Path(self.projectDirectory, 'make_venv.sh')
-        self.requirementsFilePath = Path(self.projectDirectory, 'requirements.txt')
-        self.gitignorePath = Path(self.projectDirectory, '.gitignore')
+        super(TestCreateProject, self).__init__(projectName='TestProject', methodName=methodName)
         self.allPaths = [
-            self.dataModelsDirectory,
-            self.tasksDirectory,
-            self.pipelinesDirectory,
-            self.makeVenvFilePath,
-            self.requirementsFilePath,
-            self.gitignorePath,
-            self.projectDirectory
+            Path(self.projectDirectory, 'data_models'),
+            Path(self.projectDirectory, 'tasks'),
+            Path(self.projectDirectory, 'pipelines'),
+            Path(self.projectDirectory, 'make_venv.sh'),
+            Path(self.projectDirectory, 'requirements.txt'),
+            Path(self.projectDirectory, '.gitignore'),
+            Path(self.projectDirectory)
         ]
-
-    def clean_up(self):
-        for filePath in self.allPaths:
-            try:
-                delete_if_exists(filePath)
-            except OSError:
-                for unexpectedFilePath in glob.glob(str(Path(filePath, '*'))):
-                    print(f'deleting unexpected filed {unexpectedFilePath}')
-                    delete_if_exists(unexpectedFilePath)
-                delete_if_exists(filePath)
-
-    def setUp(self):
-        super().setUp()
-        self.clean_up()
-
-    def tearDown(self):
-        super().tearDown()
-        self.clean_up()
 
     def test_create_project_creates(self):
         create_project(self.projectName, mode=Mode.NORMAL)
