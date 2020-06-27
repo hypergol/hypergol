@@ -1,0 +1,7 @@
+export PYTHONPATH="${PWD}/..:${PWD}/../..:"
+
+THREADS=4
+
+python3 \
+    ./pipelines/{{ snakeName }}.py \
+    --threads=${THREADS}
