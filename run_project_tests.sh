@@ -1,5 +1,8 @@
 #!/bin/sh
-python src/hypergol.py create_project alpha && \
-python src/hypergol.py create_datamodel alpha article articleId:int url:str title:str text:str && \
-python src/hypergol.py create_datamodel alpha sentence startChar:int endChar:int articleId:int sentenceId:int && \
+cd src
+pip3 install -e .
+cd ..
+python src/hypergol/cli/create_project.py alpha && \
+python src/hypergol/cli/create_data_model.py Article articleId:int url:str title:str text:str --projectDirectory=alpha && \
+python src/hypergol/cli/create_data_model.py Sentence startChar:int endChar:int articleId:int sentenceId:int --projectDirectory=alpha && \
 diff --suppress-common-lines --no-ignore-file-name-case --recursive alpha/ src/test_projects/alpha/

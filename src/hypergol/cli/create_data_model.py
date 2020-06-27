@@ -116,6 +116,7 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
         .add('from hypergol import BaseData         ')
         .add('from data_models.{snake} import {name}', [{'snake': to_snake(name), 'name': name} for name in dataModel.get_types(Category.DATA_MODEL_TYPES)])
         .add('                                      ')
+        .add('                                      ')
         .add('class {className}(BaseData):          ', className=dataModel.className)
         .add('                                      ')
         .add('    def __init__(self, {arguments}):  ', arguments=', '.join([f'{member.name}: {member.fullType}' for member in dataModel.select_members(Category.ALL)]))

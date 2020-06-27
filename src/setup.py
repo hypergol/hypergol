@@ -1,6 +1,4 @@
 import os
-from pip._internal.network.session import PipSession
-from pip._internal.req import parse_requirements
 from setuptools import find_packages
 from setuptools import setup
 
