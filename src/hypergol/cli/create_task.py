@@ -10,11 +10,9 @@ VALID_TASK_TYPES = {'Task', 'Source'}
 
 
 def get_task_type(taskType, source):
-    if taskType in VALID_TASK_TYPES:
-        return taskType
-    elif taskType is not None:
-        raise ValueError(f'Unkown task type: {taskType}')
-    return 'Source' if source else 'Task'
+    if taskType is None or taskType in VALID_TASK_TYPES:
+        return 'Source' if source else (taskType or 'Task')
+    raise ValueError(f'Unkown task type: {taskType}')
 
 
 def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None, source=False, taskType=None):

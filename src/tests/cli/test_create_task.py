@@ -79,4 +79,4 @@ class TestCreateTask(HypergolCreateTestCase):
 
     def test_create_pipeline_throws_error_if_bad_task_type(self):
         with self.assertRaises(ValueError):
-            content = create_task(className='TestSource', taskType='BadTask', mode=Mode.DRY_RUN, projectDirectory=self.projectDirectory)
+            _ = create_task(className='TestSource', taskType='BadTask', mode=Mode.DRY_RUN, projectDirectory=self.projectDirectory)
