@@ -79,7 +79,8 @@ THREADS=4
 
 python3 \\
     ./pipelines/test_pipeline.py \\
-    --threads=${THREADS}
+    --threads=${THREADS} \\
+    $1
 """.lstrip()
 
 
@@ -107,6 +108,6 @@ class TestCreatePipeline(HypergolCreateTestCase):
     @mock.patch('hypergol.cli.create_pipeline.utils.get_data_model_types', return_value=['DataModelTestClass'])
     @mock.patch('hypergol.cli.create_pipeline.utils.get_task_types', return_value=['OtherTask', 'ExampleSource'])
     def test_create_pipeline_creates_content(self, mock_get_task_types, mock_get_data_model_types):
-        content, scriptContent = create_pipeline('TestPipeline', 'DataModelTestClass', 'OtherTask', 'ExampleSource', mode=Mode.DRY_RUN)
+        content, scriptContent = create_pipeline('TestPipeline', 'DataModelTestClass', 'ExampleSource', 'OtherTask', mode=Mode.DRY_RUN)
         self.assertEqual(content, TEST_CONTENT)
         self.assertEqual(scriptContent, TEST_SHELL)

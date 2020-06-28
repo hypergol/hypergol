@@ -24,5 +24,6 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    install_requires=['fire', 'jinja2', 'GitPython']
+    install_requires=['fire', 'jinja2', 'GitPython'],
+    include_package_data=True
 )

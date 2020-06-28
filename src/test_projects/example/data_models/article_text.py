@@ -12,7 +12,7 @@ class ArticleText(BaseData):
         self.url = url
 
     def get_id(self):
-        return (self.articleTextId,)
+        return (self.articleTextId, )
 
     def to_data(self):
         data = self.__dict__.copy()

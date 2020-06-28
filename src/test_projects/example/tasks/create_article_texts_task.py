@@ -1,33 +1,19 @@
-from datetime import datetime
 from hypergol import Task
-from bs4 import BeautifulSoup
-from datamodel.article_text import ArticleText
+from data_models.article_text import ArticleText
 
 
 class CreateArticleTextsTask(Task):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, exampleParameter, *args, **kwargs):
         super(CreateArticleTextsTask, self).__init__(*args, **kwargs)
+        # TODO: all member variables must be pickle-able, otherwise use the "Delayed" methodology
+        # TODO: (e.g. for a DB connection), see the documentation <add link here>
+        self.exampleParameter = exampleParameter
 
-    def run(self, articlePage):
-        try:
-            soup = BeautifulSoup(articlePage.body, features='html.parser')
-            body = soup.find('div', class_='has-content-area')
-            content = '\n'.join([v.text for v in body.children])
-            meta = soup.find('meta', property="article:published_time")
-            return ArticleText(
-                articleTextId=articlePage.articlePageId,
-                publishDate=datetime.fromisoformat(meta.attrs['content']),
-                title=body['data-title'],
-                text=content,
-                url=articlePage.url
-            )
-        except AttributeError as ex:
-            print(f'Error in {articlePage.articlePageId}: {ex}')
-            return ArticleText(
-                articleTextId=articlePage.articlePageId,
-                publishDate=datetime.now(),
-                title="Error while processing article",
-                text=str(ex),
-                url=articlePage.url
-            )
+    def init(self):
+        # TODO: initialise members that are NOT "Delayed" here (e.g. load spacy model)
+        pass
+
+    def run(self, exampleInputObject1, exampleInputObject2):
+        raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
+        return exampleOutputObject

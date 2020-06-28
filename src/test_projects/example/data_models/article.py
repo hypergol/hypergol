@@ -1,12 +1,12 @@
 from typing import List
 from datetime import datetime
 from hypergol import BaseData
-from datamodel.sentence import Sentence
+from data_models.sentence import Sentence
 
 
 class Article(BaseData):
 
-    def __init__(self, articleId: int, url: str, title: str, text: str, publishDate: datetime, sentences: List[Sentence] = None):
+    def __init__(self, articleId: int, url: str, title: str, text: str, publishDate: datetime, sentences: List[Sentence]):
         self.articleId = articleId
         self.url = url
         self.title = title
@@ -15,12 +15,12 @@ class Article(BaseData):
         self.sentences = sentences
 
     def get_id(self):
-        return (self.articleId,)
+        return (self.articleId, )
 
     def to_data(self):
         data = self.__dict__.copy()
         data['publishDate'] = data['publishDate'].isoformat()
-        data['sentences'] = [sentence.to_data() for sentence in data['sentences']]
+        data['sentences'] = [v.to_data() for v in data['sentences']]
         return data
 
     @classmethod
