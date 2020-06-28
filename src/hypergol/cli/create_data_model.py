@@ -1,6 +1,7 @@
 from pathlib import Path
 import fire
 
+from hypergol.name_string import NameString
 from hypergol.utils import Mode
 from hypergol.utils import Repr
 from hypergol.utils import to_snake
@@ -58,7 +59,7 @@ class Member(Repr):
 
 class DataModel(Repr):
 
-    def __init__(self, className, members, dataModelTypes):
+    def __init__(self, className: NameString, members, dataModelTypes):
         self.className = className
         self._members = members
         self.dataModelTypes = dataModelTypes
@@ -70,7 +71,7 @@ class DataModel(Repr):
 
     @property
     def fileName(self):
-        return f'{to_snake(self.className)}.py'
+        return f'{self.className.asSnake}.py'
 
     def add_member_from_string(self, memberString):
         member = Member.from_string(
@@ -104,6 +105,7 @@ class DataModel(Repr):
 
 
 def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
+    className = NameString(className)
     mode = get_mode(mode=mode, dryrun=dryrun, force=force)
     dataModelTypes = get_data_model_types(projectDirectory)
     dataModel = DataModel(className=className, members=[], dataModelTypes=dataModelTypes)
@@ -117,7 +119,7 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
         .add('from data_models.{snake} import {name}', [{'snake': to_snake(name), 'name': name} for name in dataModel.get_types(Category.DATA_MODEL_TYPES)])
         .add('                                      ')
         .add('                                      ')
-        .add('class {className}(BaseData):          ', className=dataModel.className)
+        .add('class {className}(BaseData):          ', className=dataModel.className.asClass)
         .add('                                      ')
         .add('    def __init__(self, {arguments}):  ', arguments=', '.join([f'{member.name}: {member.fullType}' for member in dataModel.select_members(Category.ALL)]))
         .add('        self.{0} = {0}                ', dataModel.get_names(Category.ALL))
@@ -144,7 +146,7 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
     filePath = Path(projectDirectory, 'data_models', dataModel.fileName)
     create_text_file(filePath=filePath, content=renderer.get(), mode=mode)
     print('')
-    print(f'Class {className} was created in directory {filePath}.{mode_message(mode)}')
+    print(f'Class {className.asClass} was created in directory {filePath}.{mode_message(mode)}')
     print('')
     if mode == Mode.DRY_RUN:
         return renderer.get()
