@@ -3,45 +3,28 @@ import fire
 
 from hypergol import utils
 from hypergol.utils import Mode
-from hypergol.utils import to_snake
 from hypergol.cli.jinja_renderer import JinjaRenderer
 from hypergol.name_string import NameString
+from hypergol.hypergol_project import HypergolProject
 
 
 def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
+    project = HypergolProject(projectDirectory)
     pipeLineName = NameString(pipeLineName)
     mode = utils.get_mode(mode=mode, dryrun=dryrun, force=force)
-    dependencies = args
-    taskDependencies = []
-    dataModelDependencies = []
-    dataModelTypes = utils.get_data_model_types(projectDirectory)
-    taskTypes = utils.get_task_types(projectDirectory)
-    for dependency in dependencies:
-        if dependency in taskTypes:
-            taskDependencies.append(dependency)
-        elif dependency in dataModelTypes:
-            dataModelDependencies.append(dependency)
-        else:
-            raise ValueError(f'Unknown dependency: {dependency}')
+    dependencies = [NameString(value) for value in args]
+    if not all(project.is_project_class(dependency) for dependency in dependencies):
+        print(project)
+        raise ValueError(f'Unknown dependency {[d.asClass for d in dependencies if not project.is_project_class(d)]}')
 
-    templateData = {
-        'snakeName': pipeLineName.asSnake,
-        'taskDependencies': [{
-            'importName': to_snake(name),
-            'name': name,
-            'lowerName': name[0].lower() + name[1:]
-        } for name in taskDependencies],
-        'dataModelDependencies': [{
-            'importName': to_snake(name),
-            'name': name,
-            'pluralName': f'{name[0].lower() + name[1:]}s',
-            'pluralSnakeName': f'{to_snake(name)}s'
-        } for name in dataModelDependencies]
-    }
     filePath = Path(projectDirectory, 'pipelines', pipeLineName.asFileName)
     content = JinjaRenderer().render(
         templateName='pipeline.py.j2',
-        templateData=templateData,
+        templateData={
+            'snakeName': pipeLineName.asSnake,
+            'taskDependencies': [name for name in dependencies if project.is_task_class(name)],
+            'dataModelDependencies': [name for name in dependencies if project.is_data_model_class(name)]
+        },
         filePath=Path(projectDirectory, 'pipelines', pipeLineName.asFileName),
         mode=mode
     )

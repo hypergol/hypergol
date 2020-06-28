@@ -12,8 +12,8 @@ class NameString:
         self._pluralComponents = _to_components(plural) if plural else []
 
     def __repr__(self):
-        raise ValueError(f'NameString({self._components}, {self._pluralComponents})')
-        # return f'NameString({self._components}, {self._pluralComponents})'
+        # raise ValueError(f'NameString({self._components}, {self._pluralComponents})')
+        return f'NameString({self.asClass}, {self._components}, {self._pluralComponents})'
 
     def __str__(self):
         self.__repr__()

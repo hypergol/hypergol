@@ -49,7 +49,7 @@ def test_pipeline(threads=1, force=False):
         chunks=16,
         repoData=repoData
     )
-    dataModelTestClasss = dsf.get(dataType=DataModelTestClass, name='data_model_test_classs')
+    dataModelTestClasses = dsf.get(dataType=DataModelTestClass, name='data_model_test_classes')
     exampleSource = ExampleSource(
         inputDatasets=[exampleInputDataset1,  exampleInputDataset2],
         outputDataset=exampleOutputDataset,
@@ -105,9 +105,11 @@ class TestCreatePipeline(HypergolCreateTestCase):
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
 
-    @mock.patch('hypergol.cli.create_pipeline.utils.get_data_model_types', return_value=['DataModelTestClass'])
-    @mock.patch('hypergol.cli.create_pipeline.utils.get_task_types', return_value=['OtherTask', 'ExampleSource'])
-    def test_create_pipeline_creates_content(self, mock_get_task_types, mock_get_data_model_types):
+    @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_project_class', side_effect=lambda x: x.asClass in ['DataModelTestClass', 'OtherTask', 'ExampleSource'])
+    @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_data_model_class', side_effect=lambda x: x.asClass in ['DataModelTestClass'])
+    @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_task_class', side_effect=lambda x: x.asClass in ['OtherTask', 'ExampleSource'])
+    def test_create_pipeline_creates_content(self, mock_is_task_class, mock_is_data_model_class, mock_is_project_class):
+        self.maxDiff = None
         content, scriptContent = create_pipeline('TestPipeline', 'DataModelTestClass', 'ExampleSource', 'OtherTask', mode=Mode.DRY_RUN)
         self.assertEqual(content, TEST_CONTENT)
         self.assertEqual(scriptContent, TEST_SHELL)

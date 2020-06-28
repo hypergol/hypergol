@@ -8,7 +8,7 @@ from hypergol.utils import to_snake
 from hypergol.utils import create_text_file
 from hypergol.utils import get_mode
 from hypergol.utils import mode_message
-from hypergol.utils import get_data_model_types
+from hypergol.utils import get_data_model_types_old
 from hypergol.cli.data_model_renderer import DataModelRenderer
 
 
@@ -107,7 +107,7 @@ class DataModel(Repr):
 def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
     className = NameString(className)
     mode = get_mode(mode=mode, dryrun=dryrun, force=force)
-    dataModelTypes = get_data_model_types(projectDirectory)
+    dataModelTypes = get_data_model_types_old(projectDirectory)
     dataModel = DataModel(className=className, members=[], dataModelTypes=dataModelTypes)
     for memberString in args:
         dataModel.add_member_from_string(memberString)

@@ -5,11 +5,11 @@ from git import Repo
 from hypergol import DatasetFactory
 from hypergol import RepoData
 from hypergol import Pipeline
-{%- for taskDependency in taskDependencies %}
-from tasks.{{ taskDependency.importName }} import {{ taskDependency.name }}
+{%- for name in taskDependencies %}
+from tasks.{{ name.asSnake }} import {{ name.asClass }}
 {%- endfor %}
-{%- for dataModelDependency in dataModelDependencies %}
-from data_models.{{ dataModelDependency.importName }} import {{ dataModelDependency.name }}
+{%- for name in dataModelDependencies %}
+from data_models.{{ name.asSnake }} import {{ name.asClass }}
 {%- endfor %}
 
 
@@ -43,12 +43,12 @@ def {{ snakeName }}(threads=1, force=False):
         repoData=repoData
     )
 
-{%- for dataModelDependency in dataModelDependencies %}
-    {{ dataModelDependency.pluralName }} = dsf.get(dataType={{ dataModelDependency.name }}, name='{{ dataModelDependency.pluralSnakeName }}')
+{%- for name in dataModelDependencies %}
+    {{ name.asPluralVariable }} = dsf.get(dataType={{ name.asClass }}, name='{{ name.asPluralSnake }}')
 {%- endfor %}
 
-{%- for taskDependency in taskDependencies %}
-    {{ taskDependency.lowerName }} = {{ taskDependency.name }}(
+{%- for name in taskDependencies %}
+    {{ name.asVariable }} = {{ name.asClass }}(
         inputDatasets=[exampleInputDataset1,  exampleInputDataset2],
         outputDataset=exampleOutputDataset,
     )
@@ -56,8 +56,8 @@ def {{ snakeName }}(threads=1, force=False):
 
     pipeline = Pipeline(
         tasks=[
-{%- for taskDependency in taskDependencies %}
-            {{ taskDependency.lowerName }},
+{%- for name in taskDependencies %}
+            {{ name.asVariable }},
 {%- endfor %}
         ]
     )
