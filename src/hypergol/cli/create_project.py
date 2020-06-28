@@ -24,7 +24,7 @@ def setup_project_directory(projectName: NameString, mode):
 
     JinjaRenderer().render(
         templateName='README.md.j2',
-        templateData={'name': projectName.asClass},
+        templateData={'name': projectName},
         filePath=Path(projectName.asSnake, 'README.md'),
         mode=mode
     )
@@ -38,7 +38,7 @@ def create_project(projectName, mode=Mode.NORMAL, dryrun=None, force=None):
         create_directory(Path(projectName.asSnake, directoryName), mode)
         copy_file(locate('__init__.py'), Path(projectName.asSnake, directoryName, '__init__.py'), mode)
     print('')
-    print(f'Project {projectName.asClass} was created in directory {projectName.asSnake}.{mode_message(mode)}')
+    print(f'Project {projectName} was created in directory {projectName.asSnake}.{mode_message(mode)}')
     print('')
 
 

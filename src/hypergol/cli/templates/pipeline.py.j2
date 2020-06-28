@@ -6,10 +6,10 @@ from hypergol import DatasetFactory
 from hypergol import RepoData
 from hypergol import Pipeline
 {%- for name in taskDependencies %}
-from tasks.{{ name.asSnake }} import {{ name.asClass }}
+from tasks.{{ name.asSnake }} import {{ name }}
 {%- endfor %}
 {%- for name in dataModelDependencies %}
-from data_models.{{ name.asSnake }} import {{ name.asClass }}
+from data_models.{{ name.asSnake }} import {{ name }}
 {%- endfor %}
 
 
@@ -44,11 +44,11 @@ def {{ snakeName }}(threads=1, force=False):
     )
 
 {%- for name in dataModelDependencies %}
-    {{ name.asPluralVariable }} = dsf.get(dataType={{ name.asClass }}, name='{{ name.asPluralSnake }}')
+    {{ name.asPluralVariable }} = dsf.get(dataType={{ name }}, name='{{ name.asPluralSnake }}')
 {%- endfor %}
 
 {%- for name in taskDependencies %}
-    {{ name.asVariable }} = {{ name.asClass }}(
+    {{ name.asVariable }} = {{ name }}(
         inputDatasets=[exampleInputDataset1,  exampleInputDataset2],
         outputDataset=exampleOutputDataset,
     )

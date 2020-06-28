@@ -29,7 +29,7 @@ def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun
     content = JinjaRenderer().render(
         templateName=f'{taskType.asFileName}.j2',
         templateData={
-            'className': className.asClass,
+            'className': className,
             'dependencies': dependencies
         },
         filePath=Path(projectDirectory, 'tasks', className.asFileName),
@@ -37,7 +37,7 @@ def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun
     )
 
     print('')
-    print(f'{taskType.asClass} {className.asClass} was created.{utils.mode_message(mode)}')
+    print(f'{taskType} {className} was created.{utils.mode_message(mode)}')
     print('')
     if mode == Mode.DRY_RUN:
         return content

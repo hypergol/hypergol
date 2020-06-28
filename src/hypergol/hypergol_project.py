@@ -27,4 +27,4 @@ class HypergolProject(Repr):
     def check_dependencies(self, dependencies):
         for dependency in dependencies:
             if dependency not in self._allClasses:
-                raise ValueError(f'Unknown dependency {dependency.asClass}')
+                raise ValueError(f'Unknown dependency {dependency}')

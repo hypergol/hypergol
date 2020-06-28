@@ -73,10 +73,10 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
         .add('from typing import List               ', dataModel.isListDependent)
         .add('from datetime import {0}              ', sorted(list({m.type_ for m in dataModel.conversions if str(m.type_) in TEMPORAL})))
         .add('from hypergol import BaseData         ')
-        .add('from data_models.{snake} import {name}', [{'snake': m.type_.asSnake, 'name': m.type_.asClass} for m in dataModel.conversions if str(m.type_) not in TEMPORAL])
+        .add('from data_models.{snake} import {name}', [{'snake': m.type_.asSnake, 'name': m.type_} for m in dataModel.conversions if str(m.type_) not in TEMPORAL])
         .add('                                      ')
         .add('                                      ')
-        .add('class {className}(BaseData):          ', className=dataModel.className.asClass)
+        .add('class {className}(BaseData):          ', className=dataModel.className)
         .add('                                      ')
         .add('    def __init__(self, {arguments}):  ', arguments=', '.join(dataModel.arguments))
         .add('        self.{0} = {0}                ', dataModel.names)
@@ -102,7 +102,7 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
         mode=mode
     )
     print('')
-    print(f'Class {dataModel.className.asClass} was created.{mode_message(mode)}')
+    print(f'Class {dataModel.className} was created.{mode_message(mode)}')
     print('')
     if mode == Mode.DRY_RUN:
         return renderer.get()
