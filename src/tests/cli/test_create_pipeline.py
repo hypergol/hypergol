@@ -79,7 +79,8 @@ THREADS=4
 
 python3 \\
     ./pipelines/test_pipeline.py \\
-    --threads=${THREADS}
+    --threads=${THREADS} \\
+    $1
 """.lstrip()
 
 
