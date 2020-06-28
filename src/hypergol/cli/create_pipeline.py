@@ -14,7 +14,7 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
             raise ValueError('Error: {pipeLineName}, pipeline name must be either snake case or camel case')
         pipeLineName = to_snake(pipeLineName)
 
-    dependencies = sorted(list(set(args)))
+    dependencies = args
     taskDependencies = []
     dataModelDependencies = []
     dataModelTypes = utils.get_data_model_types(projectDirectory)
@@ -33,13 +33,13 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
             'importName': to_snake(name),
             'name': name,
             'lowerName': name[0].lower() + name[1:]
-        } for name in sorted(taskDependencies)],
+        } for name in taskDependencies],
         'dataModelDependencies': [{
             'importName': to_snake(name),
             'name': name,
             'pluralName': f'{name[0].lower() + name[1:]}s',
             'pluralSnakeName': f'{to_snake(name)}s'
-        } for name in sorted(dataModelDependencies)]
+        } for name in dataModelDependencies]
     }
     filePath = Path(projectDirectory, 'pipelines', f'{to_snake(pipeLineName)}.py')
     content = JinjaRenderer().render(
@@ -49,12 +49,14 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
         mode=mode
     )
 
+    scriptFilePath = Path(projectDirectory, f'{to_snake(pipeLineName)}.sh')
     scriptContent = JinjaRenderer().render(
         templateName='pipeline.sh.j2',
         templateData={'snakeName': to_snake(pipeLineName)},
         filePath=Path(projectDirectory, f'{to_snake(pipeLineName)}.sh'),
         mode=mode
     )
+    utils.make_file_executable(filePath=scriptFilePath, mode=mode)
 
     print('')
     print(f'PipeLine {pipeLineName} was created in directory {filePath}.{utils.mode_message(mode)}')

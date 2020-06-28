@@ -12,6 +12,9 @@ class Sentence(BaseData):
         self.sentenceId = sentenceId
         self.tokens = tokens
 
+    def get_id(self):
+        return (self.articleId, self.sentenceId, )
+
     def to_data(self):
         data = self.__dict__.copy()
         data['tokens'] = [v.to_data() for v in data['tokens']]
