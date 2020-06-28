@@ -1,6 +1,7 @@
 from pathlib import Path
 import fire
 
+from hypergol.name_string import NameString
 from hypergol import utils
 from hypergol.utils import Mode
 from hypergol.cli.jinja_renderer import JinjaRenderer
@@ -16,6 +17,7 @@ def get_task_type(taskType, source):
 
 
 def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None, source=False, taskType=None):
+    className = NameString(className)
     mode = utils.get_mode(mode, dryrun, force)
     taskType = get_task_type(taskType, source)
 
@@ -26,14 +28,10 @@ def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun
             raise ValueError(f'Unknown dependency: {dependency}')
 
     templateData = {
-        'className': className,
-        'dependencies': [
-            {'importName': utils.to_snake(value), 'name': value}
-            for value in dependencies
-        ]
-    }
+        'className': className.asClass,
+        'dependencies': [{'importName': utils.to_snake(value), 'name': value} for value in dependencies]}
 
-    filePath = Path(projectDirectory, 'tasks', f'{utils.to_snake(className)}.py')
+    filePath = Path(projectDirectory, 'tasks', className.asFileName)
     content = JinjaRenderer().render(
         templateName=f'{utils.to_snake(taskType.lower())}.py.j2',
         templateData=templateData,
@@ -42,7 +40,7 @@ def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun
     )
 
     print('')
-    print(f'{taskType} {className} was created in directory {filePath}.{utils.mode_message(mode)}')
+    print(f'{taskType} {className.asClass} was created in directory {filePath}.{utils.mode_message(mode)}')
     print('')
     if mode == Mode.DRY_RUN:
         return content

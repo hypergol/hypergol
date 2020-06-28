@@ -1,11 +1,11 @@
 from pathlib import Path
 import fire
 
-from hypergol.name_string import NameString
 from hypergol import utils
 from hypergol.utils import Mode
 from hypergol.utils import to_snake
 from hypergol.cli.jinja_renderer import JinjaRenderer
+from hypergol.name_string import NameString
 
 
 def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):

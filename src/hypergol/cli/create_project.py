@@ -4,7 +4,6 @@ import hypergol
 from hypergol.name_string import NameString
 from hypergol.utils import Mode
 from hypergol.utils import make_file_executable
-from hypergol.utils import to_snake
 from hypergol.utils import create_directory
 from hypergol.utils import copy_file
 from hypergol.utils import get_mode
