@@ -1,10 +1,6 @@
-import re
 import os
-import glob
 import stat
 import shutil
-from pathlib import Path
-from hypergol.name_string import NameString
 
 MAX_MEMBER_REPR_LENGTH = 1000
 
@@ -15,11 +11,6 @@ def delete_if_exists(filePath):
             os.rmdir(filePath)
         else:
             os.remove(filePath)
-
-
-def get_data_model_types(projectDirectory):
-    dataModelFiles = glob.glob(str(Path(projectDirectory, 'data_models', '*.py')))
-    return [NameString(os.path.split(filePath)[1][:-3]) for filePath in dataModelFiles]
 
 
 class HypergolFileAlreadyExistsException(Exception):

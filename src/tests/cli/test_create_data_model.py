@@ -103,7 +103,8 @@ class TestCreateDataModel(TestCase):
         result = create_data_model('Test', 'testId:int', 'values:List[int]', dryrun=True)
         self.assertEqual(result, TEST_CLASS_WITH_LIST)
 
-    @mock.patch('hypergol.cli.create_data_model.get_data_model_types', return_value=['OtherTest'])
-    def test_create_data_model_with_data_model_type(self, mock_get_data_model_types):
+    @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_data_model_class', side_effect=lambda x: x.asClass == 'OtherTest')
+    def test_create_data_model_with_data_model_type(self, is_data_model_class):
+        self.maxDiff = None
         result = create_data_model('Test', 'testId:int', 'values:List[OtherTest]', dryrun=True)
         self.assertEqual(result, TEST_CLASS_WITH_DATA_MODEL_DEPENDENCY)

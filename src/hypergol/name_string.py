@@ -12,15 +12,14 @@ class NameString:
         self._pluralComponents = _to_components(plural) if plural else []
 
     def __repr__(self):
-        # raise ValueError(f'NameString({self._components}, {self._pluralComponents})')
-        return f'NameString({self.asClass}, {self._components}, {self._pluralComponents})'
+        return self.asClass
 
     def __str__(self):
-        self.__repr__()
+        return self.__repr__()
 
     def __eq__(self, other):
-        # if not isinstance(other, NameString):
-        #     return False
+        if not isinstance(other, NameString):
+            return False
         return self.asClass == other.asClass
 
     def __hash__(self):
