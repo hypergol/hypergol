@@ -4,12 +4,12 @@ import fire
 from hypergol.name_string import NameString
 from hypergol.utils import Mode
 from hypergol.utils import Repr
-from hypergol.utils import to_snake
 from hypergol.utils import create_text_file
 from hypergol.utils import get_mode
 from hypergol.utils import mode_message
-from hypergol.utils import get_data_model_types_old
+from hypergol.utils import get_data_model_types
 from hypergol.cli.data_model_renderer import DataModelRenderer
+from hypergol.hypergol_project import HypergolProject
 
 
 class Category:
@@ -39,6 +39,10 @@ class Member(Repr):
     def fullType(self):
         return f'List[{self.type_}]' if self.category in Category.LIST_TYPES else self.type_
 
+    @property
+    def importLocation(self):
+        return self.type_.asSnake
+
     @classmethod
     def from_string(cls, memberString, temporalTypes, dataModelTypes):
         if ':' not in memberString:
@@ -59,10 +63,11 @@ class Member(Repr):
 
 class DataModel(Repr):
 
-    def __init__(self, className: NameString, members, dataModelTypes):
+    def __init__(self, className: NameString, members, dataModelTypes, project):
         self.className = className
         self._members = members
         self.dataModelTypes = dataModelTypes
+        self.project = project
         self.basicTypes = ['int', 'str', 'float']
         self.temporalTypes = ['datetime', 'date', 'time']
         self.validTypes = self.dataModelTypes + self.basicTypes + self.temporalTypes
@@ -77,7 +82,8 @@ class DataModel(Repr):
         member = Member.from_string(
             memberString=memberString,
             temporalTypes=self.temporalTypes,
-            dataModelTypes=self.dataModelTypes
+            dataModelTypes=self.dataModelTypes,
+
         )
         if member.fullType not in self.validTypes:
             raise ValueError(f'{member} has invalid type {member.fullType}')
@@ -105,10 +111,11 @@ class DataModel(Repr):
 
 
 def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
+    project = HypergolProject(projectDirectory)
     className = NameString(className)
     mode = get_mode(mode=mode, dryrun=dryrun, force=force)
-    dataModelTypes = get_data_model_types_old(projectDirectory)
-    dataModel = DataModel(className=className, members=[], dataModelTypes=dataModelTypes)
+    dataModelTypes = get_data_model_types(projectDirectory)
+    dataModel = DataModel(className=className, members=[], dataModelTypes=dataModelTypes, project=project)
     for memberString in args:
         dataModel.add_member_from_string(memberString)
     renderer = (
@@ -116,7 +123,7 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
         .add('from typing import List               ', dataModel.is_any(Category.LIST_TYPES))
         .add('from datetime import {0}              ', dataModel.get_types(Category.TEMPORAL_TYPES))
         .add('from hypergol import BaseData         ')
-        .add('from data_models.{snake} import {name}', [{'snake': to_snake(name), 'name': name} for name in dataModel.get_types(Category.DATA_MODEL_TYPES)])
+        .add('from data_models.{snake} import {name}', [{'snake': NameString(type_).asSnake, 'name': type_} for type_ in dataModel.get_types(Category.DATA_MODEL_TYPES)])
         .add('                                      ')
         .add('                                      ')
         .add('class {className}(BaseData):          ', className=dataModel.className.asClass)
