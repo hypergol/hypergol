@@ -27,6 +27,10 @@ class NameString:
         return hash(self.asClass)
 
     @property
+    def asFileName(self):
+        return self.asSnake + '.py'
+
+    @property
     def asSnake(self):
         return '_'.join(v.lower() for v in self._components)
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 import fire
 
+from hypergol.name_string import NameString
 from hypergol import utils
 from hypergol.utils import Mode
 from hypergol.utils import to_snake
@@ -8,12 +9,8 @@ from hypergol.cli.jinja_renderer import JinjaRenderer
 
 
 def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
+    pipeLineName = NameString(pipeLineName)
     mode = utils.get_mode(mode=mode, dryrun=dryrun, force=force)
-    if pipeLineName != pipeLineName.lower():
-        if '_' in pipeLineName:
-            raise ValueError('Error: {pipeLineName}, pipeline name must be either snake case or camel case')
-        pipeLineName = to_snake(pipeLineName)
-
     dependencies = args
     taskDependencies = []
     dataModelDependencies = []
@@ -28,7 +25,7 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
             raise ValueError(f'Unknown dependency: {dependency}')
 
     templateData = {
-        'snakeName': pipeLineName,
+        'snakeName': pipeLineName.asSnake,
         'taskDependencies': [{
             'importName': to_snake(name),
             'name': name,
@@ -41,25 +38,25 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
             'pluralSnakeName': f'{to_snake(name)}s'
         } for name in dataModelDependencies]
     }
-    filePath = Path(projectDirectory, 'pipelines', f'{to_snake(pipeLineName)}.py')
+    filePath = Path(projectDirectory, 'pipelines', pipeLineName.asFileName)
     content = JinjaRenderer().render(
         templateName='pipeline.py.j2',
         templateData=templateData,
-        filePath=Path(projectDirectory, 'pipelines', f'{to_snake(pipeLineName)}.py'),
+        filePath=Path(projectDirectory, 'pipelines', pipeLineName.asFileName),
         mode=mode
     )
 
-    scriptFilePath = Path(projectDirectory, f'{to_snake(pipeLineName)}.sh')
+    scriptFilePath = Path(projectDirectory, f'{pipeLineName.asSnake}.sh')
     scriptContent = JinjaRenderer().render(
         templateName='pipeline.sh.j2',
-        templateData={'snakeName': to_snake(pipeLineName)},
-        filePath=Path(projectDirectory, f'{to_snake(pipeLineName)}.sh'),
+        templateData={'snakeName': pipeLineName.asSnake},
+        filePath=Path(projectDirectory, f'{pipeLineName.asSnake}.sh'),
         mode=mode
     )
     utils.make_file_executable(filePath=scriptFilePath, mode=mode)
 
     print('')
-    print(f'PipeLine {pipeLineName} was created in directory {filePath}.{utils.mode_message(mode)}')
+    print(f'PipeLine {pipeLineName.asSnake} was created in directory {filePath}.{utils.mode_message(mode)}')
     print('')
     if mode == Mode.DRY_RUN:
         return content, scriptContent

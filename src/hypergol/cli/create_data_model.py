@@ -71,7 +71,7 @@ class DataModel(Repr):
 
     @property
     def fileName(self):
-        return f'{self.className.asSnake}.py'
+        return self.className.asFileName
 
     def add_member_from_string(self, memberString):
         member = Member.from_string(
