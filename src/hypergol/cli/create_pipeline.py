@@ -13,9 +13,7 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL,
     pipeLineName = NameString(pipeLineName)
     mode = utils.get_mode(mode=mode, dryrun=dryrun, force=force)
     dependencies = [NameString(value) for value in args]
-    if not all(project.is_project_class(dependency) for dependency in dependencies):
-        print(project)
-        raise ValueError(f'Unknown dependency {[d.asClass for d in dependencies if not project.is_project_class(d)]}')
+    project.check_dependencies(dependencies)
 
     filePath = Path(projectDirectory, 'pipelines', pipeLineName.asFileName)
     content = JinjaRenderer().render(

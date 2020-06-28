@@ -64,19 +64,19 @@ class TestCreateTask(HypergolCreateTestCase):
         create_directory(self.projectDirectory, mode=Mode.NORMAL)
         create_directory(Path(self.projectDirectory, 'tasks'), mode=Mode.NORMAL)
 
-    def test_create_tasks_creates_files(self):
+    def test_create_task_creates_files(self):
         create_task(className='TestTask', mode=Mode.NORMAL, projectDirectory=self.projectDirectory)
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
 
-    def test_create_pipeline_creates_content(self):
+    def test_create_task_creates_content(self):
         content = create_task(className='TestTask', mode=Mode.DRY_RUN, projectDirectory=self.projectDirectory)
         self.assertEqual(content, TEST_TASK)
 
-    def test_create_pipeline_creates_content_source(self):
+    def test_create_task_creates_content_source(self):
         content = create_task(className='TestSource', taskType='Source', mode=Mode.DRY_RUN, projectDirectory=self.projectDirectory)
         self.assertEqual(content, TEST_SOURCE)
 
-    def test_create_pipeline_throws_error_if_bad_task_type(self):
+    def test_create_task_throws_error_if_bad_task_type(self):
         with self.assertRaises(ValueError):
             _ = create_task(className='TestSource', taskType='BadTask', mode=Mode.DRY_RUN, projectDirectory=self.projectDirectory)
