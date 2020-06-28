@@ -1,0 +1,4 @@
+recursive-include hypergol/cli/templates include *.py *.j2
+include hypergol/cli/templates/requirements.txt
+include hypergol/cli/templates/.gitignore
+include hypergol/cli/templates/make_venv.sh
