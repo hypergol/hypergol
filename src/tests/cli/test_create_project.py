@@ -31,7 +31,6 @@ class TestCreateProject(HypergolCreateTestCase):
     def test_create_project_only_creates_files_expected(self):
         create_project(self.projectName)
         for filePath in self.allPaths:
-            print(filePath, os.path.exists(filePath))
             self.assertEqual(os.path.exists(filePath), True)
         for filePath in self.allPaths:
             delete_if_exists(filePath)
