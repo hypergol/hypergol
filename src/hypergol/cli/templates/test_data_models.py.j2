@@ -1,0 +1,27 @@
+from datetime import time
+from datetime import date
+from datetime import datetime
+from unittest import TestCase
+from data_models.{{ name.asSnake }} import {{ name }}
+
+
+class Test{{ name }}(TestCase):
+
+    def __init__(self, methodName):
+        super(Test{{ name }}, self).__init__(methodName=methodName)
+        self.{{ name.asVariable }} = {{ name }}({{ initialisations }})
+
+    def setUp(self):
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_{{ name.asSnake }}_test_get_hash_id(self):
+        self.assertEqual(self.{{ name.asVariable }}.test_get_hash_id(), True)
+
+    def test_{{ name.asSnake }}_test_to_data(self):
+        self.assertEqual(self.{{ name.asVariable }}.test_to_data(), True)
+
+    def test_{{ name.asSnake }}_test_from_data(self):
+        self.assertEqual(self.{{ name.asVariable }}.test_from_data(), True)

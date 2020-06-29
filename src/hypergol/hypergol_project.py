@@ -67,7 +67,7 @@ class HypergolProject:
 
     def create_tests_directory(self):
         create_directory(self.testsPath, self.mode)
-        self.render_simple(templateName='__init__.py.j2', filePath=Path(self.testsPath, '__init__.py'))
+        # Test directory should not have __init__.py
 
     def is_data_model_class(self, value: NameString):
         return value in self._dataModelClasses

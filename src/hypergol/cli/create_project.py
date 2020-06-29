@@ -13,9 +13,12 @@ def create_project(projectName, dryrun=None, force=None):
     project.create_pipelines_directory()
     project.create_tests_directory()
     project.render_executable(templateName='make_venv.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'make_venv.sh'))
+    project.render_executable(templateName='run_tests.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'run_tests.sh'))
+    project.render_executable(templateName='run_pylint.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'run_pylint.sh'))
     project.render_simple(templateName='requirements.txt.j2', filePath=Path(project.projectDirectory, 'requirements.txt'))
     project.render_simple(templateName='.gitignore.j2', filePath=Path(project.projectDirectory, '.gitignore'))
     project.render_simple(templateName='README.md.j2', filePath=Path(project.projectDirectory, 'README.md'))
+    project.render_simple(templateName='pylintrc.j2', filePath=Path(project.projectDirectory, 'pylintrc'))
 
     print('')
     print(f'Project {projectName} was created in directory {projectName.asSnake}.{project.modeMessage}')
