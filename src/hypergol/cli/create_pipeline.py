@@ -9,7 +9,7 @@ from hypergol.hypergol_project import HypergolProject
 
 
 def create_pipeline(pipeLineName, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
-    project = HypergolProject(projectDirectory)
+    project = HypergolProject(projectDirectory=projectDirectory)
     pipeLineName = NameString(pipeLineName)
     mode = utils.get_mode(mode=mode, dryrun=dryrun, force=force)
     dependencies = [NameString(value) for value in args]

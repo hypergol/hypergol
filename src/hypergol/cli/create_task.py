@@ -18,7 +18,7 @@ def get_task_type(taskType, source):
 
 
 def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None, source=False, taskType=None):
-    project = HypergolProject(projectDirectory)
+    project = HypergolProject(projectDirectory=projectDirectory)
     className = NameString(className)
     mode = utils.get_mode(mode, dryrun, force)
     taskType = get_task_type(taskType, source)

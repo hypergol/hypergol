@@ -4,12 +4,10 @@ import re
 class NameString:
 
     def __init__(self, name, plural=None):
-        def _to_components(value):
-            value = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', value)
-            value = re.sub('([a-z0-9])([A-Z])', r'\1_\2', value)
-            return [v.title() for v in value.split('_')]
-        self._components = _to_components(name)
-        self._pluralComponents = _to_components(plural) if plural else []
+        r1 = re.compile(r'(.)([A-Z][a-z]+)')
+        r2 = re.compile(r'([a-z0-9])([A-Z])')
+        self._components = [v.title() for v in r2.sub(r'\1_\2', r1.sub(r'\1_\2', name)).split('_')]
+        self._pluralComponents = [v.title() for v in r2.sub(r'\1_\2', r1.sub(r'\1_\2', plural)).split('_')] if plural is not None else []
 
     def __repr__(self):
         return self.asClass

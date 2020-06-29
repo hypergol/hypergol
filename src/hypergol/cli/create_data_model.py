@@ -24,7 +24,7 @@ class Member:
 
 class DataModel:
 
-    def __init__(self, className: NameString, project):
+    def __init__(self, className: NameString, project: HypergolProject):
         self.className = className
         self.project = project
         self.arguments = []
@@ -47,24 +47,22 @@ class DataModel:
             m.type_ = m.type_[5:-1]
             m.isList = True
 
-        if m.type_ in ['int', 'str', 'float']:
-            return
-
         if m.type_ in TEMPORAL:
             m.to_ = 'isoformat'
             m.from_ = 'fromisoformat'
+            self.conversions.append(m)
         elif self.project.is_data_model_class(NameString(m.type_)):
             m.to_ = 'to_data'
             m.from_ = 'from_data'
             m.type_ = NameString(m.type_)
-        else:
+            self.conversions.append(m)
+        elif m.type_ not in ['int', 'str', 'float']:
             raise ValueError(f'Unknown type: {value}')
-        self.conversions.append(m)
 
 
 def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
     mode = get_mode(mode=mode, dryrun=dryrun, force=force)
-    dataModel = DataModel(className=NameString(className), project=HypergolProject(projectDirectory))
+    dataModel = DataModel(className=NameString(className), project=HypergolProject(projectDirectory=projectDirectory))
     for value in args:
         dataModel.process_inputs(value)
 

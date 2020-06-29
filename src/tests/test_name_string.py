@@ -15,3 +15,8 @@ class TestNameString(TestCase):
         ns = NameString(name='BigCity', plural='BigCities')
         self.assertEqual(ns.asPluralVariable, 'bigCities')
         self.assertEqual(ns.asPluralSnake, 'big_cities')
+
+    def test_name_string_equality(self):
+        ns1 = NameString('GitHub')
+        ns2 = NameString('git_hub')
+        self.assertEqual(ns1, ns2)
