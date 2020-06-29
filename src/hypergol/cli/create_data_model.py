@@ -2,10 +2,6 @@ from pathlib import Path
 import fire
 
 from hypergol.name_string import NameString
-from hypergol.utils import Mode
-from hypergol.utils import create_text_file
-from hypergol.utils import get_mode
-from hypergol.utils import mode_message
 from hypergol.cli.data_model_renderer import DataModelRenderer
 from hypergol.hypergol_project import HypergolProject
 
@@ -60,9 +56,9 @@ class DataModel:
             raise ValueError(f'Unknown type: {value}')
 
 
-def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None):
-    mode = get_mode(mode=mode, dryrun=dryrun, force=force)
-    dataModel = DataModel(className=NameString(className), project=HypergolProject(projectDirectory=projectDirectory))
+def create_data_model(className, *args, projectDirectory='.', dryrun=None, force=None):
+    project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
+    dataModel = DataModel(className=NameString(className), project=project)
     for value in args:
         dataModel.process_inputs(value)
 
@@ -94,15 +90,14 @@ def create_data_model(className, *args, projectDirectory='.', mode=Mode.NORMAL, 
         .add("        data['{name}'] = [{type_}.{conv}(v) for v in data['{name}']]   ", [{'name': m.name, 'type_': str(m.type_), 'conv': m.from_} for m in dataModel.conversions if m.isList])
         .add('        return cls(**data)                                    ', len(dataModel.conversions) > 0)
     )
-    create_text_file(
-        filePath=Path(projectDirectory, 'data_models', dataModel.className.asFileName),
+    project.create_text_file(
+        filePath=Path(project.dataModelsPath, dataModel.className.asFileName),
         content=renderer.get(),
-        mode=mode
     )
     print('')
-    print(f'Class {dataModel.className} was created.{mode_message(mode)}')
+    print(f'Class {dataModel.className} was created.{project.modeMessage}')
     print('')
-    if mode == Mode.DRY_RUN:
+    if project.isDryRun:
         return renderer.get()
     return None
 

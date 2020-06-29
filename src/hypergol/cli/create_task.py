@@ -2,9 +2,6 @@ from pathlib import Path
 import fire
 
 from hypergol.name_string import NameString
-from hypergol import utils
-from hypergol.utils import Mode
-from hypergol.cli.jinja_renderer import JinjaRenderer
 from hypergol.hypergol_project import HypergolProject
 
 
@@ -17,29 +14,24 @@ def get_task_type(taskType, source):
     raise ValueError(f'Unkown task type: {taskType}')
 
 
-def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None, source=False, taskType=None):
-    project = HypergolProject(projectDirectory=projectDirectory)
+def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False, taskType=None):
+    project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     className = NameString(className)
-    mode = utils.get_mode(mode, dryrun, force)
     taskType = get_task_type(taskType, source)
 
     dependencies = [NameString(value) for value in args]
     project.check_dependencies(dependencies)
 
-    content = JinjaRenderer().render(
+    content = project.render(
         templateName=f'{taskType.asFileName}.j2',
-        templateData={
-            'className': className,
-            'dependencies': dependencies
-        },
-        filePath=Path(projectDirectory, 'tasks', className.asFileName),
-        mode=mode
+        templateData={'className': className, 'dependencies': dependencies},
+        filePath=Path(projectDirectory, 'tasks', className.asFileName)
     )
 
     print('')
-    print(f'{taskType} {className} was created.{utils.mode_message(mode)}')
+    print(f'{taskType} {className} was created.{project.modeMessage}')
     print('')
-    if mode == Mode.DRY_RUN:
+    if project.isDryRun:
         return content
     return None
 

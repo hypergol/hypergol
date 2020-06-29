@@ -3,8 +3,7 @@ from pathlib import Path
 import mock
 
 from hypergol.cli.create_pipeline import create_pipeline
-from hypergol.utils import Mode
-from hypergol.utils import create_directory
+from hypergol.hypergol_project import HypergolProject
 from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 
 TEST_CONTENT = """
@@ -94,14 +93,16 @@ class TestCreatePipeline(HypergolCreateTestCase):
             Path(self.projectDirectory, 'pipelines'),
             Path(self.projectDirectory)
         ]
+        self.project = None
 
     def setUp(self):
         super().setUp()
-        create_directory(self.projectDirectory, mode=Mode.NORMAL)
-        create_directory(Path(self.projectDirectory, 'pipelines'), mode=Mode.NORMAL)
+        self.project = HypergolProject(projectDirectory=self.projectDirectory)
+        self.project.create_project_directory()
+        self.project.create_pipelines_directory()
 
     def test_create_pipeline_creates_files(self):
-        create_pipeline(pipeLineName='TestPipeline', mode=Mode.NORMAL, projectDirectory=self.projectDirectory)
+        create_pipeline(pipeLineName='TestPipeline', projectDirectory=self.projectDirectory)
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
 
@@ -110,6 +111,6 @@ class TestCreatePipeline(HypergolCreateTestCase):
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_task_class', side_effect=lambda x: x.asClass in ['OtherTask', 'ExampleSource'])
     def test_create_pipeline_creates_content(self, mock_is_task_class, mock_is_data_model_class, check_dependencies):
         self.maxDiff = None
-        content, scriptContent = create_pipeline('TestPipeline', 'DataModelTestClass', 'ExampleSource', 'OtherTask', mode=Mode.DRY_RUN)
+        content, scriptContent = create_pipeline('TestPipeline', 'DataModelTestClass', 'ExampleSource', 'OtherTask', dryrun=True)
         self.assertEqual(content, TEST_CONTENT)
         self.assertEqual(scriptContent, TEST_SHELL)
