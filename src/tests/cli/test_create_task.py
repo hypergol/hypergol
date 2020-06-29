@@ -2,8 +2,7 @@ import os
 from pathlib import Path
 
 from hypergol.cli.create_task import create_task
-from hypergol.utils import Mode
-from hypergol.utils import create_directory
+from hypergol.hypergol_project import HypergolProject
 from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 
 TEST_SOURCE = """
@@ -58,25 +57,27 @@ class TestCreateTask(HypergolCreateTestCase):
             Path(self.projectDirectory, 'tasks'),
             Path(self.projectDirectory)
         ]
+        self.project = None
 
     def setUp(self):
         super().setUp()
-        create_directory(self.projectDirectory, mode=Mode.NORMAL)
-        create_directory(Path(self.projectDirectory, 'tasks'), mode=Mode.NORMAL)
+        self.project = HypergolProject(projectDirectory=self.projectDirectory)
+        self.project.create_project_directory()
+        self.project.create_tasks_directory()
 
     def test_create_task_creates_files(self):
-        create_task(className='TestTask', mode=Mode.NORMAL, projectDirectory=self.projectDirectory)
+        create_task(className='TestTask', projectDirectory=self.projectDirectory)
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
 
     def test_create_task_creates_content(self):
-        content = create_task(className='TestTask', mode=Mode.DRY_RUN, projectDirectory=self.projectDirectory)
+        content = create_task(className='TestTask', projectDirectory=self.projectDirectory, dryrun=True)
         self.assertEqual(content, TEST_TASK)
 
     def test_create_task_creates_content_source(self):
-        content = create_task(className='TestSource', taskType='Source', mode=Mode.DRY_RUN, projectDirectory=self.projectDirectory)
+        content = create_task(className='TestSource', taskType='Source', projectDirectory=self.projectDirectory, dryrun=True)
         self.assertEqual(content, TEST_SOURCE)
 
     def test_create_task_throws_error_if_bad_task_type(self):
         with self.assertRaises(ValueError):
-            _ = create_task(className='TestSource', taskType='BadTask', mode=Mode.DRY_RUN, projectDirectory=self.projectDirectory)
+            _ = create_task(className='TestSource', taskType='BadTask', projectDirectory=self.projectDirectory, dryrun=True)
