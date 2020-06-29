@@ -1,4 +1,4 @@
-# alpha
+# Alpha
 
 This project was generated with the Hypergol framework
 

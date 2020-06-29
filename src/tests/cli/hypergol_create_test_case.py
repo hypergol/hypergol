@@ -3,7 +3,7 @@ import glob
 from pathlib import Path
 from unittest import TestCase
 
-from hypergol.utils import to_snake
+from hypergol.name_string import NameString
 
 
 def delete_if_exists(filePath):
@@ -19,7 +19,7 @@ class HypergolCreateTestCase(TestCase):
     def __init__(self, projectName, methodName):
         super(HypergolCreateTestCase, self).__init__(methodName=methodName)
         self.projectName = projectName
-        self.projectDirectory = to_snake(self.projectName)
+        self.projectDirectory = NameString(self.projectName).asSnake
         self.allPaths = []
 
     def clean_up(self):

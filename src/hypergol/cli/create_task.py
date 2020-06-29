@@ -1,9 +1,11 @@
 from pathlib import Path
 import fire
 
+from hypergol.name_string import NameString
 from hypergol import utils
 from hypergol.utils import Mode
 from hypergol.cli.jinja_renderer import JinjaRenderer
+from hypergol.hypergol_project import HypergolProject
 
 
 VALID_TASK_TYPES = {'Task', 'Source'}
@@ -11,38 +13,31 @@ VALID_TASK_TYPES = {'Task', 'Source'}
 
 def get_task_type(taskType, source):
     if taskType is None or taskType in VALID_TASK_TYPES:
-        return 'Source' if source else (taskType or 'Task')
+        return NameString('Source' if source else (taskType or 'Task'))
     raise ValueError(f'Unkown task type: {taskType}')
 
 
 def create_task(className, *args, projectDirectory='.', mode=Mode.NORMAL, dryrun=None, force=None, source=False, taskType=None):
+    project = HypergolProject(projectDirectory=projectDirectory)
+    className = NameString(className)
     mode = utils.get_mode(mode, dryrun, force)
     taskType = get_task_type(taskType, source)
 
-    dependencies = sorted(list(set(args)))
-    dataModelTypes = utils.get_data_model_types(projectDirectory)
-    for dependency in dependencies:
-        if dependency not in dataModelTypes:
-            raise ValueError(f'Unknown dependency: {dependency}')
+    dependencies = [NameString(value) for value in args]
+    project.check_dependencies(dependencies)
 
-    templateData = {
-        'className': className,
-        'dependencies': [
-            {'importName': utils.to_snake(value), 'name': value}
-            for value in dependencies
-        ]
-    }
-
-    filePath = Path(projectDirectory, 'tasks', f'{utils.to_snake(className)}.py')
     content = JinjaRenderer().render(
-        templateName=f'{utils.to_snake(taskType.lower())}.py.j2',
-        templateData=templateData,
-        filePath=filePath,
+        templateName=f'{taskType.asFileName}.j2',
+        templateData={
+            'className': className,
+            'dependencies': dependencies
+        },
+        filePath=Path(projectDirectory, 'tasks', className.asFileName),
         mode=mode
     )
 
     print('')
-    print(f'{taskType} {className} was created in directory {filePath}.{utils.mode_message(mode)}')
+    print(f'{taskType} {className} was created.{utils.mode_message(mode)}')
     print('')
     if mode == Mode.DRY_RUN:
         return content

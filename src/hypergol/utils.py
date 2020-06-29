@@ -1,10 +1,6 @@
-import re
 import os
-import glob
 import stat
 import shutil
-from pathlib import Path
-
 
 MAX_MEMBER_REPR_LENGTH = 1000
 
@@ -15,20 +11,6 @@ def delete_if_exists(filePath):
             os.rmdir(filePath)
         else:
             os.remove(filePath)
-
-
-def get_data_model_types(projectDirectory):
-    return [
-        to_camel(os.path.split(filePath)[1][:-3])
-        for filePath in glob.glob(str(Path(projectDirectory, 'data_models', '*.py')))
-    ]
-
-
-def get_task_types(projectDirectory):
-    return [
-        to_camel(os.path.split(filePath)[1][:-3])
-        for filePath in glob.glob(str(Path(projectDirectory, 'tasks', '*.py')))
-    ]
 
 
 class HypergolFileAlreadyExistsException(Exception):
@@ -141,12 +123,3 @@ class Repr:
 
     def __str__(self):
         return self.__repr__()
-
-
-def to_snake(name):
-    name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
-
-
-def to_camel(name):
-    return ''.join([v.title() for v in name.split('_')])

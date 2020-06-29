@@ -1,4 +1,4 @@
-# example
+# Example
 
 This project was generated with the Hypergol framework
 

@@ -1,6 +1,6 @@
 from hypergol import Source
-{%- for dependency in dependencies %}
-from data_models.{{ dependency.importName }} import {{ dependency.name }}
+{%- for name in dependencies %}
+from data_models.{{ name.asSnake }} import {{ name }}
 {%- endfor %}
 
 
