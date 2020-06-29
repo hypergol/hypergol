@@ -23,26 +23,22 @@ class HypergolProject:
         self.tasksPath = Path(projectDirectory, 'tasks')
         self.pipelinesPath = Path(projectDirectory, 'pipelines')
         self.testsPath = Path(projectDirectory, 'tests')
+        self._dataModelClasses = []
+        self._taskClasses = []
         if os.path.exists(self.dataModelsPath):
             dataModelFiles = glob.glob(str(Path(self.dataModelsPath, '*.py')))
             self._dataModelClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in dataModelFiles]
-        else:
-            self._dataModelClasses = []
         if os.path.exists(self.tasksPath):
             taskFiles = glob.glob(str(Path(projectDirectory, 'tasks', '*.py')))
             self._taskClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in taskFiles]
-        else:
-            self._taskClasses = []
         self.templateEnvironment = jinja2.Environment(
             loader=jinja2.FileSystemLoader(
                 searchpath=Path(hypergol.__path__[0], 'cli', 'templates')
             )
         )
-        self.mode = Mode.NORMAL
-        if force is not None:
-            self.mode = Mode.FORCE
-        if dryrun is not None:
-            self.mode = Mode.DRY_RUN
+        if force and dryrun:
+            raise ValueError('Both force and dryrun are set')
+        self.mode = Mode.DRY_RUN if dryrun else Mode.FORCE if force else Mode.NORMAL
 
     @property
     def isDryRun(self):
