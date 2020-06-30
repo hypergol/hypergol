@@ -6,6 +6,20 @@ from hypergol.cli.data_model_renderer import DataModelRenderer
 from hypergol.hypergol_project import HypergolProject
 
 TEMPORAL = ['datetime', 'date', 'time']
+DEFAULT_INITIALISATIONS = {
+    'datetime': 'datetime.now()',
+    'date': 'date.today()',
+    'time': 'time.min()',
+    'int': '0',
+    'str': "''",
+    'float': '0.0',
+    'List[int]': '[0, 0]',
+    'List[str]': "['', '']",
+    'List[float]': '[0.0, 0.0]',
+    'List[datetime]': '[datetime.now(), datetime.now()]',
+    'List[date]': '[date.today(), date.today()]',
+    'List[time]': '[time.min(), time.min()]'
+}
 
 
 class Member:
@@ -24,6 +38,7 @@ class DataModel:
         self.className = className
         self.project = project
         self.arguments = []
+        self.initialisations = []
         self.names = []
         self.ids = []
         self.conversions = []
@@ -37,6 +52,7 @@ class DataModel:
             self.ids.append(f'self.{m.name}')
             m.type_ = m.type_[:-3]
         self.arguments.append(f'{m.name}: {m.type_}')
+        self.initialisations.append(f'{m.name}={DEFAULT_INITIALISATIONS.get(m.type_, "None")}')
 
         if m.type_.startswith('List['):
             self.isListDependent = True
@@ -62,7 +78,7 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
     for value in args:
         dataModel.process_inputs(value)
 
-    renderer = (
+    content = (
         DataModelRenderer()
         .add('from typing import List               ', dataModel.isListDependent)
         .add('from datetime import {0}              ', sorted(list({m.type_ for m in dataModel.conversions if str(m.type_) in TEMPORAL})))
@@ -89,16 +105,24 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
         .add("        data['{name}'] = {type_}.{conv}(data['{name}'])                ", [{'name': m.name, 'type_': str(m.type_), 'conv': m.from_} for m in dataModel.conversions if not m.isList])
         .add("        data['{name}'] = [{type_}.{conv}(v) for v in data['{name}']]   ", [{'name': m.name, 'type_': str(m.type_), 'conv': m.from_} for m in dataModel.conversions if m.isList])
         .add('        return cls(**data)                                    ', len(dataModel.conversions) > 0)
+    ).get()
+    project.create_text_file(content=content, filePath=Path(project.dataModelsPath, dataModel.className.asFileName))
+
+    project.render(
+        templateName='test_data_models.py.j2',
+        templateData={
+            'name': dataModel.className,
+            'initialisations': ', '.join(dataModel.initialisations)
+        },
+        filePath=Path(project.testsPath, f'test_{dataModel.className.asFileName}')
     )
-    project.create_text_file(
-        filePath=Path(project.dataModelsPath, dataModel.className.asFileName),
-        content=renderer.get(),
-    )
+
     print('')
     print(f'Class {dataModel.className} was created.{project.modeMessage}')
     print('')
+
     if project.isDryRun:
-        return renderer.get()
+        return content
     return None
 
 

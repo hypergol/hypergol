@@ -40,7 +40,7 @@ class BaseData(Repr):
         except NoIdException:
             return True
         if not isinstance(classId, tuple):
-            raise ValueError(f'Return of get_id must be a tuple instead of f{type(classId)}')
+            raise ValueError(f'Return of get_id must be a tuple instead of {type(classId)}')
         return True
 
     def test_to_data(self):

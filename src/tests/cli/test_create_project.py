@@ -11,7 +11,6 @@ class TestCreateProject(HypergolCreateTestCase):
     def __init__(self, methodName):
         super(TestCreateProject, self).__init__(projectName='TestProject', methodName=methodName)
         self.allPaths = [
-            Path(self.projectDirectory, 'tests', '__init__.py'),
             Path(self.projectDirectory, 'tests'),
             Path(self.projectDirectory, 'data_models', '__init__.py'),
             Path(self.projectDirectory, 'data_models'),
@@ -21,8 +20,11 @@ class TestCreateProject(HypergolCreateTestCase):
             Path(self.projectDirectory, 'pipelines'),
             Path(self.projectDirectory, 'README.md'),
             Path(self.projectDirectory, 'make_venv.sh'),
+            Path(self.projectDirectory, 'run_tests.sh'),
+            Path(self.projectDirectory, 'run_pylint.sh'),
             Path(self.projectDirectory, 'requirements.txt'),
             Path(self.projectDirectory, '.gitignore'),
+            Path(self.projectDirectory, 'pylintrc'),
             Path(self.projectDirectory)
         ]
 

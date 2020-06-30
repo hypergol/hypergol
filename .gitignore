@@ -9,5 +9,5 @@ src/dist
 # TODO(Laszlo): Remove these later
 injector.py
 injections.txt
-alpha/
-example/
+/alpha/
+/example/
