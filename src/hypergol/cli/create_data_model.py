@@ -12,7 +12,13 @@ DEFAULT_INITIALISATIONS = {
     'time': 'time.min()',
     'int': '0',
     'str': "''",
-    'float': '0.0'
+    'float': '0.0',
+    'List[int]': '[0, 0]',
+    'List[str]': "['', '']",
+    'List[float]': '[0.0, 0.0]',
+    'List[datetime]': '[datetime.now(), datetime.now()]',
+    'List[date]': '[date.today(), date.today()]',
+    'List[time]': '[time.min(), time.min()]'
 }
 
 
@@ -46,8 +52,7 @@ class DataModel:
             self.ids.append(f'self.{m.name}')
             m.type_ = m.type_[:-3]
         self.arguments.append(f'{m.name}: {m.type_}')
-        tmp = '[]' if m.type_.startswith('List[') else DEFAULT_INITIALISATIONS.get(m.type_, f'{m.type_}')
-        self.initialisations.append(f'{m.name}={tmp}')
+        self.initialisations.append(f'{m.name}={DEFAULT_INITIALISATIONS.get(m.type_, "None")}')
 
         if m.type_.startswith('List['):
             self.isListDependent = True
