@@ -120,6 +120,7 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
     print('')
     print(f'Class {dataModel.className} was created.{project.modeMessage}')
     print('')
+
     if project.isDryRun:
         return content
     return None

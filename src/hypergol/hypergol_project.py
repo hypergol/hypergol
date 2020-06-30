@@ -55,19 +55,15 @@ class HypergolProject:
 
     def create_data_models_directory(self):
         create_directory(self.dataModelsPath, self.mode)
-        self.render_simple(templateName='__init__.py.j2', filePath=Path(self.dataModelsPath, '__init__.py'))
 
     def create_tasks_directory(self):
         create_directory(self.tasksPath, self.mode)
-        self.render_simple(templateName='__init__.py.j2', filePath=Path(self.tasksPath, '__init__.py'))
 
     def create_pipelines_directory(self):
         create_directory(self.pipelinesPath, self.mode)
-        self.render_simple(templateName='__init__.py.j2', filePath=Path(self.pipelinesPath, '__init__.py'))
 
     def create_tests_directory(self):
         create_directory(self.testsPath, self.mode)
-        # Test directory should not have __init__.py
 
     def is_data_model_class(self, value: NameString):
         return value in self._dataModelClasses
