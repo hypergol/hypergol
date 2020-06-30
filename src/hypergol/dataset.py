@@ -103,13 +103,13 @@ class DataChunk(Repr):
 
 class Dataset(Repr):
 
-    def __init__(self, dataType, location, project, branch, name, repoData, chunks=16):
+    def __init__(self, dataType, location, project, branch, name, repoData, chunkCount=16):
         self.dataType = dataType
         self.location = location
         self.project = project
         self.branch = branch
         self.name = name
-        self.chunks = chunks
+        self.chunkCount = chunkCount
         self.dependencies = []
         self.repoData = repoData
 
@@ -172,7 +172,7 @@ class Dataset(Repr):
             'project': self.project,
             'branch': self.branch,
             'name': self.name,
-            'chunks': self.chunks,
+            'chunkCount': self.chunkCount,
             'creationTime': datetime.now().isoformat(),
             'dependencies': dependencyData,
             'repo': self.repoData.to_data()
@@ -188,7 +188,7 @@ class Dataset(Repr):
             defFileData['project'] == self.project and
             defFileData['branch'] == self.branch and
             defFileData['name'] == self.name and
-            defFileData['chunks'] == self.chunks
+            defFileData['chunkCount'] == self.chunkCount
         )
         if not isDefValuesMatch:
             raise DatasetDefFileDoesNotMatchException('The defintion of the dataset class does not match the def file')
@@ -213,15 +213,15 @@ class Dataset(Repr):
             return DatasetReader(dataset=self)
         raise ValueError(f'Invalid mode: {mode} in {self.name}')
 
-    def get_chunks(self, mode):
+    def get_data_chunks(self, mode):
         def _get_chunk_ids():
-            return [f'{k:0{VALID_CHUNKS[self.chunks]}x}' for k in range(self.chunks)]
+            return [f'{k:0{VALID_CHUNKS[self.chunkCount]}x}' for k in range(self.chunkCount)]
 
         self.init(mode=mode)
         return [DataChunk(dataset=self, chunkId=chunkId, mode=mode) for chunkId in _get_chunk_ids()]
 
     def get_object_chunk_id(self, objectId):
-        return _get_hash(objectId)[:VALID_CHUNKS[self.chunks]]
+        return _get_hash(objectId)[:VALID_CHUNKS[self.chunkCount]]
 
     def delete(self):
         if not self.exists():
@@ -238,7 +238,7 @@ class DatasetReader(Repr):
 
     def __init__(self, dataset):
         self.dataset = dataset
-        self.chunks = self.dataset.get_chunks(mode='r')
+        self.dataChunks = self.dataset.get_data_chunks(mode='r')
 
     def __enter__(self):
         return self
@@ -247,7 +247,7 @@ class DatasetReader(Repr):
         pass
 
     def __iter__(self):
-        for chunk in self.chunks:
+        for chunk in self.dataChunks:
             try:
                 chunk.open()
                 for elem in chunk:
@@ -260,15 +260,15 @@ class DatasetWriter(Repr):
 
     def __init__(self, dataset):
         self.dataset = dataset
-        self.chunks = {chunk.chunkId: chunk.open() for chunk in self.dataset.get_chunks(mode='w')}
+        self.dataChunks = {dataChunk.chunkId: dataChunk.open() for dataChunk in self.dataset.get_data_chunks(mode='w')}
 
     def append(self, elem):
         chunkHash = self.dataset.get_object_chunk_id(elem.get_hash_id())
-        self.chunks[chunkHash].append(elem)
+        self.dataChunks[chunkHash].append(elem)
 
     def close(self):
         checksums = []
-        for chunk in self.chunks.values():
+        for chunk in self.dataChunks.values():
             checksum = chunk.close()
             checksums.append(checksum)
         self.dataset.make_chk_file(checksums=checksums)
@@ -282,20 +282,20 @@ class DatasetWriter(Repr):
 
 class DatasetFactory(Repr):
 
-    def __init__(self, location, project, branch, chunks, repoData):
+    def __init__(self, location, project, branch, chunkCount, repoData):
         self.location = location
         self.project = project
         self.branch = branch
-        self.chunks = chunks
+        self.chunkCount = chunkCount
         self.repoData = repoData
 
-    def get(self, dataType, name, chunks=None):
+    def get(self, dataType, name, chunkCount=None):
         return Dataset(
             dataType=dataType,
             location=self.location,
             project=self.project,
             branch=self.branch,
             name=name,
-            chunks=chunks or self.chunks,
+            chunkCount=chunkCount or self.chunkCount,
             repoData=self.repoData
         )

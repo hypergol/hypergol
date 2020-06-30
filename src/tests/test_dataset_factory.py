@@ -24,7 +24,7 @@ class TestDatasetFactory(TestCase):
             project='test_x',
             branch='branch',
             name='data_class',
-            chunks=256,
+            chunkCount=256,
             repoData=self.repoData
         )
 
@@ -33,7 +33,7 @@ class TestDatasetFactory(TestCase):
             location=self.expectedDataset.location,
             project=self.expectedDataset.project,
             branch=self.expectedDataset.branch,
-            chunks=self.expectedDataset.chunks,
+            chunkCount=self.expectedDataset.chunkCount,
             repoData=self.repoData)
         dataset = datasetFactory.get(dataType=DataClass1, name='data_class')
         self.assertEqual(type(dataset), Dataset)

@@ -34,12 +34,12 @@ class DataClass2(BaseData):
 
 class HypergolTestCase(TestCase):
 
-    def __init__(self, location, project, branch, chunks, methodName):
+    def __init__(self, location, project, branch, chunkCount, methodName):
         super(HypergolTestCase, self).__init__(methodName=methodName)
         self.location = location
         self.project = project
         self.branch = branch
-        self.chunks = chunks
+        self.chunkCount = chunkCount
         self.repoData = RepoData(
             branchName='testBranch',
             commitHash='f000bc7ad532063d9f9a36fe00e3ee2f83a3c565',
@@ -54,7 +54,7 @@ class HypergolTestCase(TestCase):
             location=self.location,
             project=self.project,
             branch=self.branch,
-            chunks=self.chunks,
+            chunkCount=self.chunkCount,
             repoData=self.repoData
         )
 

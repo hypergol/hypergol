@@ -21,7 +21,7 @@ class TestDataset(HypergolTestCase):
             location='test_dataset_location',
             project='test_dataset',
             branch='branch',
-            chunks=16,
+            chunkCount=16,
             methodName=methodName
         )
 
@@ -71,26 +71,26 @@ class TestDataset(HypergolTestCase):
     def test_open_returns_datawriter_and_opened_chunks_if_w_mode(self):
         datasetWriter = self.datasetNew.open('w')
         expectedFilenames = {f'{k:0x}': f'{self.datasetNew.directory}/data_class_new_{k:0x}.json.gz' for k in range(16)}
-        filenames = {chunkId: chunk.file.name for chunkId, chunk in datasetWriter.chunks.items()}
+        filenames = {dataChunkId: dataChunk.file.name for dataChunkId, dataChunk in datasetWriter.dataChunks.items()}
         self.assertEqual(type(datasetWriter), DatasetWriter)
         self.assertEqual(datasetWriter.dataset, self.datasetNew)
         self.assertEqual(expectedFilenames, filenames)
 
     def test_open_returns_datareader_and_unopened_chunks_if_r_mode(self):
         datasetReader = self.dataset.open('r')
-        expectedChunkIds = {f'{k:0x}' for k in range(16)}
+        expectedDataChunkIds = {f'{k:0x}' for k in range(16)}
         self.assertEqual(type(datasetReader), DatasetReader)
         self.assertEqual(datasetReader.dataset, self.dataset)
-        for chunk in datasetReader.chunks:
-            self.assertIsNone(chunk.file)
-        self.assertSetEqual({chunk.chunkId for chunk in datasetReader.chunks}, expectedChunkIds)
+        for dataChunk in datasetReader.dataChunks:
+            self.assertIsNone(dataChunk.file)
+        self.assertSetEqual({dataChunk.chunkId for dataChunk in datasetReader.dataChunks}, expectedDataChunkIds)
 
     def test_init_in_read_mode_fails_if_dataset_does_not_exist(self):
         with self.assertRaises(DatasetDoesNotExistException):
             self.datasetNew.init(mode='r')
 
     def test_init_in_read_mode_fails_if_existing_dataset_def_does_not_match(self):
-        differentDataset = self.datasetFactory.get(dataType=DataClass1, name='data_class', chunks=256)
+        differentDataset = self.datasetFactory.get(dataType=DataClass1, name='data_class', chunkCount=256)
         with self.assertRaises(DatasetDefFileDoesNotMatchException):
             differentDataset.init(mode='r')
 
@@ -99,11 +99,11 @@ class TestDataset(HypergolTestCase):
             self.dataset.init(mode='w')
 
     def test_get_chunks_returns_the_right_chunks(self):
-        chunks = self.dataset.get_chunks(mode='r')
-        for chunk in chunks:
-            self.assertEqual(chunk.dataset, self.dataset)
-            self.assertIsNone(chunk.file)
-        self.assertSetEqual({chunk.chunkId for chunk in chunks}, {f'{k:0x}' for k in range(16)})
+        dataChunks = self.dataset.get_data_chunks(mode='r')
+        for dataChunk in dataChunks:
+            self.assertEqual(dataChunk.dataset, self.dataset)
+            self.assertIsNone(dataChunk.file)
+        self.assertSetEqual({dataChunk.chunkId for dataChunk in dataChunks}, {f'{k:0x}' for k in range(16)})
 
     def test_dataset_reader_reads_correctly(self):
         objects = set(self.dataset.open('r'))
