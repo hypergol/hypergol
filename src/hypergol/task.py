@@ -54,7 +54,7 @@ class Task(Repr):
         if not isinstance(job, Job):
             raise ValueError(f'{self.__class__.__name__}.execute() argument must be of type Job')
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-        logging.info(f'{self.__class__.__name__} - execute - START')
+        logging.info(f'{self.__class__.__name__} - {job.jobIndex:3}/{job.jobCount:3} - execute - START')
         for k, v in self.__dict__.items():
             if isinstance(v, Delayed):
                 setattr(self, k, v.make())
@@ -66,7 +66,7 @@ class Task(Repr):
         for inputChunk in inputChunks:
             inputChunk.close()
         outputChecksum = outputChunk.close()
-        logging.info(f'{self.__class__.__name__} - execute - END')
+        logging.info(f'{self.__class__.__name__} - {job.jobIndex:3}/{job.jobCount:3} - execute - END')
         return JobReport(outputChecksum=outputChecksum)
 
     def init(self):
