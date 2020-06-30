@@ -21,7 +21,7 @@ class TestDataset(HypergolTestCase):
             location='test_dataset_location',
             project='test_dataset',
             branch='branch',
-            chunks=16,
+            chunkCount=16,
             methodName=methodName
         )
 
@@ -90,7 +90,7 @@ class TestDataset(HypergolTestCase):
             self.datasetNew.init(mode='r')
 
     def test_init_in_read_mode_fails_if_existing_dataset_def_does_not_match(self):
-        differentDataset = self.datasetFactory.get(dataType=DataClass1, name='data_class', chunks=256)
+        differentDataset = self.datasetFactory.get(dataType=DataClass1, name='data_class', chunkCount=256)
         with self.assertRaises(DatasetDefFileDoesNotMatchException):
             differentDataset.init(mode='r')
 

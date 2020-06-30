@@ -45,7 +45,7 @@ def test_pipeline(threads=1, force=False):
         location=LOCATION,
         project=PROJECT,
         branch=BRANCH,
-        chunks=16,
+        chunkCount=16,
         repoData=repoData
     )
     dataModelTestClasses = dsf.get(dataType=DataModelTestClass, name='data_model_test_classes')

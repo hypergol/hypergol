@@ -39,7 +39,7 @@ def process_blogposts(threads=1, force=False):
         location=LOCATION,
         project=PROJECT,
         branch=BRANCH,
-        chunks=16,
+        chunkCount=16,
         repoData=repoData
     )
     articles = dsf.get(dataType=Article, name='articles')

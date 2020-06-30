@@ -59,7 +59,7 @@ class TestTask(HypergolTestCase):
             location='test_task_location',
             project='test_task',
             branch='branch',
-            chunks=16,
+            chunkCount=16,
             methodName=methodName
         )
 

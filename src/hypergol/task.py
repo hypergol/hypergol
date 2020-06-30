@@ -34,16 +34,16 @@ class Task(Repr):
 
     def get_jobs(self):
         jobs = []
-        if len({inputDataset.chunks for inputDataset in self.inputDatasets}) > 1:
+        if len({inputDataset.chunkCount for inputDataset in self.inputDatasets}) > 1:
             raise ValueError(f'{self.__class__.__name__}: All datasets must have the same number of chunks')
-        if self.inputDatasets[0].chunks != self.outputDataset.chunks:
+        if self.inputDatasets[0].chunkCount != self.outputDataset.chunkCount:
             raise ValueError(f'{self.__class__.__name__}: Input and output datasets must have the same number of chunks')
         for jobIndex, outputChunk in enumerate(self.outputDataset.get_data_chunks(mode='w')):
             jobs.append(Job(
                 inputChunks=[],
                 outputChunk=outputChunk,
                 jobIndex=jobIndex,
-                jobCount=self.inputDatasets[0].chunks
+                jobCount=self.inputDatasets[0].chunkCount
             ))
         for inputDataset in self.inputDatasets:
             for jobIndex, inputChunk in enumerate(inputDataset.get_data_chunks(mode='r')):

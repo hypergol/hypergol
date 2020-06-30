@@ -43,7 +43,7 @@ class TestSource(HypergolTestCase):
             location='test_source_location',
             project='test_source',
             branch='branch',
-            chunks=16,
+            chunkCount=16,
             methodName=methodName
         )
 
