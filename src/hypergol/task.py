@@ -8,9 +8,11 @@ from hypergol.utils import Repr
 
 class Job(Repr):
 
-    def __init__(self, inputChunks, outputChunk):
+    def __init__(self, inputChunks, outputChunk, jobIndex, jobCount):
         self.inputChunks = inputChunks
         self.outputChunk = outputChunk
+        self.jobIndex = jobIndex
+        self.jobCount = jobCount
 
 
 class JobReport(Repr):
@@ -31,12 +33,22 @@ class Task(Repr):
         self.threads = threads
 
     def get_jobs(self):
-        inputChunkIterator = zip(*[inputDataset.get_chunks(mode='r') for inputDataset in self.inputDatasets])
-        return [
-            Job(inputChunks=inputChunks, outputChunk=outputChunk)
-            for inputChunks, outputChunk
-            in zip(inputChunkIterator, self.outputDataset.get_chunks(mode='w'))
-        ]
+        jobs = []
+        if len({inputDataset.chunks for inputDataset in self.inputDatasets}) > 1:
+            raise ValueError(f'{self.__class__.__name__}: All datasets must have the same number of chunks')
+        if self.inputDatasets[0].chunks != self.outputDataset.chunks:
+            raise ValueError(f'{self.__class__.__name__}: Input and output datasets must have the same number of chunks')
+        for jobIndex, outputChunk in enumerate(self.outputDataset.get_data_chunks(mode='w')):
+            jobs.append(Job(
+                inputChunks=[],
+                outputChunk=outputChunk,
+                jobIndex=jobIndex,
+                jobCount=self.inputDatasets[0].chunks
+            ))
+        for inputDataset in self.inputDatasets:
+            for jobIndex, inputChunk in enumerate(inputDataset.get_data_chunks(mode='r')):
+                jobs[jobIndex].inputChunks.append(inputChunk)
+        return jobs
 
     def execute(self, job):
         if not isinstance(job, Job):
