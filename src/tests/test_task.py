@@ -16,6 +16,9 @@ class OutputDataClass(BaseData):
         self.data2 = data2
         self.value = value
 
+    def get_id(self):
+        return (self.id_, )
+
     def to_data(self):
         data = self.__dict__.copy()
         data['data1'] = data['data1'].to_data()

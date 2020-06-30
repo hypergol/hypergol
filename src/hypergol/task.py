@@ -8,11 +8,12 @@ from hypergol.utils import Repr
 
 class Job(Repr):
 
-    def __init__(self, inputChunks, outputChunk, jobIndex, jobCount):
+    def __init__(self, inputChunks, outputChunk, jobIndex, jobCount, force):
         self.inputChunks = inputChunks
         self.outputChunk = outputChunk
         self.jobIndex = jobIndex
         self.jobCount = jobCount
+        self.force = force
 
 
 class JobReport(Repr):
@@ -23,7 +24,7 @@ class JobReport(Repr):
 
 class Task(Repr):
 
-    def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, threads=None):
+    def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, threads=None, force=False):
         if len(inputDatasets) == 0:
             raise ValueError('If there are no inputs to this task use Source')
         self.inputDatasets = inputDatasets
@@ -31,6 +32,7 @@ class Task(Repr):
         for inputDataset in self.inputDatasets:
             self.outputDataset.add_dependency(dataset=inputDataset)
         self.threads = threads
+        self.force = force
 
     def get_jobs(self):
         jobs = []
@@ -43,7 +45,8 @@ class Task(Repr):
                 inputChunks=[],
                 outputChunk=outputChunk,
                 jobIndex=jobIndex,
-                jobCount=self.inputDatasets[0].chunkCount
+                jobCount=self.inputDatasets[0].chunkCount,
+                force=self.force
             ))
         for inputDataset in self.inputDatasets:
             for jobIndex, inputChunk in enumerate(inputDataset.get_data_chunks(mode='r')):
@@ -62,6 +65,8 @@ class Task(Repr):
         outputChunk = job.outputChunk.open()
         self.init()
         for inputData in zip(*inputChunks):
+            if len({value.get_hash_id() for value in inputData}) > 1 and not job.force:
+                raise ValueError('different hashIds in a single run() call, set force=True in the task to continue')
             outputChunk.append(self.run(*inputData))
         for inputChunk in inputChunks:
             inputChunk.close()
