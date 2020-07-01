@@ -32,6 +32,19 @@ class DataClass2(BaseData):
         return hash((self.id_, self.value2))
 
 
+class DataClass3(BaseData):
+
+    def __init__(self, id_: int, value3: int):
+        self.id_ = id_
+        self.value3 = value3
+
+    def get_id(self):
+        return (self.id_, )
+
+    def __hash__(self):
+        return hash((self.id_, self.value3))
+
+
 class HypergolTestCase(TestCase):
 
     def __init__(self, location, project, branch, chunkCount, methodName):
