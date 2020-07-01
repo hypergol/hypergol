@@ -42,7 +42,7 @@ class BaseTask(Repr):
 
     def _check_same_hash(self, inputData):
         if len({value.get_hash_id() for value in inputData}) > 1:
-            raise ValueError('different hashIds in the input of a single run() call, set force=True in the task to continue')
+            raise ValueError(f'different hashIds in the input of a single run() call, set force=True in {self.__class__.__name__} to continue')
 
     def _check_same_chunk_count(self):
         chunkCount = self.inputDatasets[0].chunkCount
