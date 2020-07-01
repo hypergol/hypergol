@@ -6,6 +6,8 @@ from hypergol.hypergol_project import HypergolProject
 
 
 def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False, simple=True):
+    if source and simple:
+        raise ValueError('Task type cannot be determined, --source and --simple used together')
     if source:
         taskType = NameString('Source')
     elif simple:
