@@ -5,19 +5,20 @@ from hypergol.name_string import NameString
 from hypergol.hypergol_project import HypergolProject
 
 
-VALID_TASK_TYPES = {'Task', 'Source'}
+def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False, simple=False):
+    if source and simple:
+        raise ValueError('Task type cannot be determined, --source and --simple used together')
+    if source:
+        taskType = NameString('Source')
+    elif simple:
+        taskType = NameString('SimpleTask')
+    else:
+        # TODO(Laszlo): Task not done yet
+        raise ValueError('# TODO(Laszlo): Task not done yet')
+        # taskType = NameString('Task')
 
-
-def get_task_type(taskType, source):
-    if taskType is None or taskType in VALID_TASK_TYPES:
-        return NameString('Source' if source else (taskType or 'Task'))
-    raise ValueError(f'Unkown task type: {taskType}')
-
-
-def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False, taskType=None):
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     className = NameString(className)
-    taskType = get_task_type(taskType, source)
 
     dependencies = [NameString(value) for value in args]
     project.check_dependencies(dependencies)

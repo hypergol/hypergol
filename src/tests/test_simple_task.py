@@ -6,7 +6,7 @@ from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import DataClass2
 from tests.hypergol_test_case import DataClass3
 from hypergol.base_data import BaseData
-from hypergol.task import Task
+from hypergol.simple_task import SimpleTask
 
 
 class OutputDataClass(BaseData):
@@ -39,7 +39,7 @@ class OutputDataClass(BaseData):
         return hash((self.id_, hash(self.data1), hash(self.data2), self.value))
 
 
-class TaskExample(Task):
+class TaskExample(SimpleTask):
 
     def __init__(self, increment, *args, **kwargs):
         super(TaskExample, self).__init__(*args, **kwargs)
@@ -129,7 +129,6 @@ class TestTask(HypergolTestCase):
             outputDataset=self.outputDataset,
             increment=1
         )
-        # TODO(Laszlo): this tests run not execute, change when sync/debug added to Taskgs
         with self.assertRaises(ValueError):
             for job in task.get_jobs():
                 taskCopy = pickle.loads(pickle.dumps(task))
