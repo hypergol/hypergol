@@ -5,7 +5,7 @@ from hypergol.name_string import NameString
 from hypergol.hypergol_project import HypergolProject
 
 
-def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False, simple=True):
+def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False, simple=False):
     if source and simple:
         raise ValueError('Task type cannot be determined, --source and --simple used together')
     if source:
@@ -13,7 +13,9 @@ def create_task(className, *args, projectDirectory='.', dryrun=None, force=None,
     elif simple:
         taskType = NameString('SimpleTask')
     else:
-        taskType = NameString('Task')
+        # TODO(Laszlo): Task not done yet
+        raise ValueError('# TODO(Laszlo): Task not done yet')
+        # taskType = NameString('Task')
 
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     className = NameString(className)
