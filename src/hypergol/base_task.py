@@ -80,19 +80,17 @@ class BaseTask(Repr):
     def log(self, message):
         logging.info(f'{self.__class__.__name__} - {message}')
 
-    def _open_chunks(self, job):
+    def _open_input_chunks(self, job):
         self.inputChunks = [inputChunk.open() for inputChunk in job.inputChunks]
-        self.outputChunk = job.outputChunk.open()
         self.loadedData = []
         for loadInputChunk in job.loadedInputChunks:
             loadInputChunkIterator = loadInputChunk.open()
             self.loadedData.append(list(loadInputChunkIterator))
             loadInputChunk.close()
 
-    def _close_chunks(self):
+    def _close_input_chunks(self):
         for inputChunk in self.inputChunks:
             inputChunk.close()
-        return self.outputChunk.close()
 
     def execute(self, job: Job):
         raise NotImplementedError(f'execute() function must be implemented in {self.__class__.__name__}')

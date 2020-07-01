@@ -8,12 +8,14 @@ class SimpleTask(BaseTask):
     def execute(self, job: Job):
         self.init()
         self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - START')
-        self._open_chunks(job)
+        self._open_input_chunks(job)
+        self.outputChunk = job.outputChunk.open()
         for inputData in zip(*self.inputChunks):
             if not self.force:
                 self._check_same_hash(inputData)
             self.outputChunk.append(self.run(*inputData, *self.loadedData))
-        outputChecksum = self._close_chunks()
+        self._close_input_chunks()
+        outputChecksum = self.outputChunk.close()
         self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - END')
         return JobReport(outputChecksum=outputChecksum)
 
