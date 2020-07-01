@@ -4,28 +4,35 @@ import pickle
 from tests.hypergol_test_case import HypergolTestCase
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import DataClass2
+from tests.hypergol_test_case import DataClass3
 from hypergol.base_data import BaseData
 from hypergol.task import Task
 
 
 class OutputDataClass(BaseData):
 
-    def __init__(self, id_: int, data1: DataClass1, data2: DataClass2, value: int):
+    def __init__(self, id_: int, data1: DataClass1, data2: DataClass2, data3: DataClass3, value: int):
         self.id_ = id_
         self.data1 = data1
         self.data2 = data2
+        self.data3 = data3
         self.value = value
+
+    def get_id(self):
+        return (self.id_, )
 
     def to_data(self):
         data = self.__dict__.copy()
         data['data1'] = data['data1'].to_data()
         data['data2'] = data['data2'].to_data()
+        data['data3'] = data['data3'].to_data()
         return data
 
     @classmethod
     def from_data(cls, data):
         data['data1'] = DataClass1.from_data(data['data1'])
         data['data2'] = DataClass2.from_data(data['data2'])
+        data['data3'] = DataClass3.from_data(data['data3'])
         return cls(**data)
 
     def __hash__(self):
@@ -41,13 +48,15 @@ class TaskExample(Task):
     def init(self):
         self.increment = self.increment + 1
 
-    def run(self, data1, data2):
+    def run(self, data1, data2, lstData3):
         if data1.id_ != data2.id_:
             raise ValueError('ids are not matching')
+        data3 = next(data for data in lstData3 if data.id_ == data1.id_)
         return OutputDataClass(
             id_=data1.id_,
             data1=data1,
             data2=data2,
+            data3=data3,
             value=self.increment
         )
 
@@ -75,6 +84,10 @@ class TestTask(HypergolTestCase):
             dataset=self.datasetFactory.get(dataType=DataClass2, name='data2'),
             content=[DataClass2(id_=k, value2=k) for k in range(self.sampleLength)]
         )
+        self.dataset3 = self.create_test_dataset(
+            dataset=self.datasetFactory.get(dataType=DataClass3, name='data3'),
+            content=[DataClass3(id_=k, value3=k) for k in range(self.sampleLength)]
+        )
         self.reversedDataset = self.create_test_dataset(
             dataset=self.datasetFactory.get(dataType=DataClass2, name='rev_data2'),
             content=[DataClass2(id_=k, value2=k) for k in reversed(range(self.sampleLength))]
@@ -85,6 +98,7 @@ class TestTask(HypergolTestCase):
                 id_=k,
                 data1=DataClass1(id_=k, value1=k),
                 data2=DataClass2(id_=k, value2=k),
+                data3=DataClass3(id_=k, value3=k),
                 value=self.increment + 1
             ) for k in range(100)}
 
@@ -92,6 +106,7 @@ class TestTask(HypergolTestCase):
         super().tearDown()
         self.delete_if_exists(dataset=self.dataset1)
         self.delete_if_exists(dataset=self.dataset2)
+        self.delete_if_exists(dataset=self.dataset3)
         self.delete_if_exists(dataset=self.reversedDataset)
         self.delete_if_exists(dataset=self.outputDataset)
         self.clean_directories()
@@ -100,6 +115,7 @@ class TestTask(HypergolTestCase):
         task = TaskExample(
             inputDatasets=[self.dataset1, self.dataset2],
             outputDataset=self.outputDataset,
+            loadedInputDatasets=[self.dataset3],
             increment=1
         )
         for job in task.get_jobs():
