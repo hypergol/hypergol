@@ -51,11 +51,16 @@ class Task(BaseTask):
             (chunk, k, self.outputDataset.chunkCount)
             for k, chunk in enumerate(self.outputDataset.get_data_chunks(mode='w'))
         ]
-        pool = Pool(self.threads or threads)
-        checksums = pool.map(_merge_function, jobs)
-        pool.close()
-        pool.join()
-        pool.terminate()
+        if threads == 0:
+            checksums = []
+            for job in jobs:
+                checksums.append(_merge_function(job))
+        else:
+            pool = Pool(self.threads or threads)
+            checksums = pool.map(_merge_function, jobs)
+            pool.close()
+            pool.join()
+            pool.terminate()
         for inputChunkId in self.inputDatasets[0].get_chunk_ids():
             temporaryDataset = self._get_temporary_dataset(inputChunkId)
             temporaryDataset.delete()
