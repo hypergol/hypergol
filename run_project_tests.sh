@@ -15,7 +15,7 @@ python src/hypergol/cli/create_data_model.py --projectDirectory=example ArticleP
 python src/hypergol/cli/create_data_model.py --projectDirectory=example ArticleText articleTextId:int:id publishDate:datetime title:str text:str url:str && \
 python src/hypergol/cli/create_data_model.py --projectDirectory=example LabelledArticle labelledArticleId:int:id articleId:int labelId:int && \
 python src/hypergol/cli/create_task.py --projectDirectory=example LoadHtmlPagesTask ArticlePage --source && \
-python src/hypergol/cli/create_task.py --projectDirectory=example CreateArticleTextsTask ArticleText && \
-python src/hypergol/cli/create_task.py --projectDirectory=example CreateArticlesTask Article Sentence Token && \
+python src/hypergol/cli/create_task.py --projectDirectory=example CreateArticleTextsTask ArticleText --simple && \
+python src/hypergol/cli/create_task.py --projectDirectory=example CreateArticlesTask Article Sentence Token --simple && \
 python src/hypergol/cli/create_pipeline.py --projectDirectory=example ProcessBlogposts LoadHtmlPagesTask CreateArticleTextsTask CreateArticlesTask Article ArticleText ArticlePage && \
 diff --suppress-common-lines --no-ignore-file-name-case --recursive example/ src/test_projects/example/
