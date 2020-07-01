@@ -1,13 +1,12 @@
-from hypergol import SimpleTask
-{%- for name in dependencies %}
-from data_models.{{ name.asSnake }} import {{ name }}
-{%- endfor %}
+from hypergol import Task
+from data_models.article import Article
+from data_models.sentence import Sentence
 
 
-class {{ className }}(SimpleTask):
+class CreateSentencesTask(Task):
 
     def __init__(self, exampleParameter, *args, **kwargs):
-        super({{ className }}, self).__init__(*args, **kwargs)
+        super(CreateSentencesTask, self).__init__(*args, **kwargs)
         # TODO: all member variables must be pickle-able, otherwise use the "Delayed" methodology
         # TODO: (e.g. for a DB connection), see the documentation <add link here>
         self.exampleParameter = exampleParameter
@@ -18,4 +17,4 @@ class {{ className }}(SimpleTask):
 
     def run(self, exampleInputObject1, exampleInputObject2):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
-        return exampleOutputObject
+        self.output.append(data)
