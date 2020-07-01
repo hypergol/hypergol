@@ -48,7 +48,7 @@ class Task(BaseTask):
     def finish(self, jobReports, threads):
         self.outputDataset.delete()
         jobs = [
-            (chunk, k, self.outputDataset.chunkCount)
+            (chunk, self.__class__.__name__, k, self.outputDataset.chunkCount)
             for k, chunk in enumerate(self.outputDataset.get_data_chunks(mode='w'))
         ]
         if threads == 0:
@@ -68,9 +68,9 @@ class Task(BaseTask):
 
 
 def _merge_function(args):
-    chunk, k, total = args
+    chunk, name, k, total = args
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-    logging.info(f'{k:3}/{total:3} - finish - START')
+    logging.info(f'{name} - {k:3}/{total:3} - finish - START')
     chunk.open()
     pattern = str(Path(
         chunk.dataset.location, chunk.dataset.project, f'{chunk.dataset.name}_temp',
@@ -80,5 +80,5 @@ def _merge_function(args):
         with gzip.open(filePath, 'rt') as inputFile:
             for line in inputFile:
                 chunk.write(line)
-    logging.info(f'{k:3}/{total:3} - finish - END')
+    logging.info(f'{name} - {k:3}/{total:3} - finish - END')
     return chunk.close()
