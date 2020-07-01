@@ -56,6 +56,9 @@ class Task(BaseTask):
         pool.close()
         pool.join()
         pool.terminate()
+        for inputChunkId in self.inputDatasets[0].get_chunk_ids():
+            temporaryDataset = self._get_temporary_dataset(inputChunkId)
+            temporaryDataset.delete()
         self.outputDataset.make_chk_file(checksums=checksums)
 
 

@@ -39,10 +39,10 @@ class OutputDataClass(BaseData):
         return hash((self.id_, hash(self.data1), hash(self.data2), self.value))
 
 
-class TaskExample(SimpleTask):
+class SimpleTaskExample(SimpleTask):
 
     def __init__(self, increment, *args, **kwargs):
-        super(TaskExample, self).__init__(*args, **kwargs)
+        super(SimpleTaskExample, self).__init__(*args, **kwargs)
         self.increment = increment
 
     def init(self):
@@ -112,7 +112,7 @@ class TestTask(HypergolTestCase):
         self.clean_directories()
 
     def test_task(self):
-        task = TaskExample(
+        task = SimpleTaskExample(
             inputDatasets=[self.dataset1, self.dataset2],
             outputDataset=self.outputDataset,
             loadedInputDatasets=[self.dataset3],
@@ -124,7 +124,7 @@ class TestTask(HypergolTestCase):
         self.assertEqual(set(self.outputDataset.open('r')), self.expectedOutputDataset)
 
     def test_execute_throws_error_if_ids_do_not_match(self):
-        task = TaskExample(
+        task = SimpleTaskExample(
             inputDatasets=[self.dataset1, self.reversedDataset],
             outputDataset=self.outputDataset,
             increment=1

@@ -217,12 +217,15 @@ class Dataset(Repr):
             return DatasetReader(dataset=self)
         raise ValueError(f'Invalid mode: {mode} in {self.name}')
 
-    def get_data_chunks(self, mode):
-        def _get_chunk_ids():
-            return [f'{k:0{VALID_CHUNKS[self.chunkCount]}x}' for k in range(self.chunkCount)]
+    def get_chunk_ids(self):
+        return [f'{k:0{VALID_CHUNKS[self.chunkCount]}x}' for k in range(self.chunkCount)]
 
+    def get_data_chunks(self, mode):
         self.init(mode=mode)
-        return [DataChunk(dataset=self, chunkId=chunkId, mode=mode) for chunkId in _get_chunk_ids()]
+        return [
+            DataChunk(dataset=self, chunkId=chunkId, mode=mode)
+            for chunkId in self.get_chunk_ids()
+        ]
 
     def get_object_chunk_id(self, objectId):
         return _get_hash(objectId)[:VALID_CHUNKS[self.chunkCount]]
