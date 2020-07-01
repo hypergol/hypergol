@@ -20,6 +20,6 @@ class SimpleTask(BaseTask):
     def run(self, *args, **kwargs):
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
 
-    def finish(self, jobReports):
+    def finish(self, jobReports, threads):
         checksums = [jobReport.outputChecksum for jobReport in jobReports]
         self.outputDataset.make_chk_file(checksums=checksums)

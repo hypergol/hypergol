@@ -1,3 +1,7 @@
+import glob
+import gzip
+from pathlib import Path
+from multiprocessing import Pool
 from hypergol.base_task import BaseTask
 from hypergol.base_task import Job
 from hypergol.base_task import JobReport
@@ -7,7 +11,7 @@ from hypergol.dataset import DatasetFactory
 class Task(BaseTask):
 
     def __init__(self, outputDataset, *args, **kwargs):
-        super(Task, self).__init__(outputDataset, *args, **kwargs)
+        super(Task, self).__init__(outputDataset=outputDataset, *args, **kwargs)
         self.output = None
         self.datasetFactory = DatasetFactory(
             location=outputDataset.location,
@@ -40,18 +44,21 @@ class Task(BaseTask):
     def run(self, *args, **kwargs):
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
 
-    def finish(self, jobReports):
-        raise ValueError('not done yet')
-        # self.log(f'{job.jobIndex:3}/{job.jobCount:3} - finish - START')
-
-        # pool = Pool(task.threads or threads)
-        # jobReports = pool.map(task.execute, task.get_jobs())
-        # task.finish(jobReports=jobReports)
-        # pool.close()
-        # pool.join()
-        # pool.terminate()
-
-
-        # checksums = [jobReport.outputChecksum for jobReport in jobReports]
-        # self.log(f'{job.jobIndex:3}/{job.jobCount:3} - finish - END')
-        # self.outputDataset.make_chk_file(checksums=checksums)
+    def finish(self, jobReports, threads):
+        def _merge_function(chunk):
+            chunk.open()
+            pattern = str(Path(
+                chunk.dataset.location, chunk.dataset.project, f'{chunk.dataset.name}_temp',
+                f'{chunk.dataset.name}_*', f'*_{chunk.chunkId}.json.gz'
+            ))
+            for filePath in sorted(glob.glob(pattern)):
+                with gzip.open(filePath, 'rt') as inputFile:
+                    for line in inputFile:
+                        chunk.write(line)
+            return chunk.close()
+        pool = Pool(self.threads or threads)
+        checksums = pool.map(_merge_function, self.outputDataset.get_data_chunks(mode='w'))
+        pool.close()
+        pool.join()
+        pool.terminate()
+        self.outputDataset.make_chk_file(checksums=checksums)

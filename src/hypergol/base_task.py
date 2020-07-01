@@ -24,7 +24,7 @@ class JobReport(Repr):
 
 class BaseTask(Repr):
 
-    def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, loadedInputDatasets: List[Dataset] = None, force=False):
+    def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, loadedInputDatasets: List[Dataset] = None, threads=None, force=False):
         if len(inputDatasets) == 0:
             raise ValueError('If there are no inputs to this task use Source')
         self.inputDatasets = inputDatasets
@@ -34,6 +34,7 @@ class BaseTask(Repr):
             self.outputDataset.add_dependency(dataset=inputDataset)
         for loadedInputDataset in self.loadedInputDatasets:
             self.outputDataset.add_dependency(dataset=loadedInputDataset)
+        self.threads = threads
         self.force = force
         self.inputChunks = None
         self.outputChunk = None
@@ -99,5 +100,5 @@ class BaseTask(Repr):
     def run(self, *args, **kwargs):
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
 
-    def finish(self, jobReports):
+    def finish(self, jobReports, threads):
         raise NotImplementedError(f'finish() function must be implemented in {self.__class__.__name__}')

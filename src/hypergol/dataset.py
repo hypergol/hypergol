@@ -94,7 +94,9 @@ class DataChunk(Repr):
             raise DatasetTypeDoesNotMatchDataTypeException(f"Trying to append an object of type {value.__class__.__name__} into a dataset of type {self.dataset.dataType.__name__}")
         if self.dataset.get_object_chunk_id(value.get_hash_id()) != self.chunkId:
             raise ValueError(f'Incorrect hashId {self.dataset.get_object_chunk_id(value)} was inserted into {self.dataset.name} chunk {self.chunkId}.')
-        data = f'{json.dumps(value.to_data(), sort_keys=True)}\n'
+        self.write(f'{json.dumps(value.to_data(), sort_keys=True)}\n')
+
+    def write(self, data):
         self.hasher.update(data.encode('utf-8'))
         self.file.write(data)
 
