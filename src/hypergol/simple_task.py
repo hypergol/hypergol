@@ -23,7 +23,7 @@ class JobReport(Repr):
         self.outputChecksum = outputChecksum
 
 
-class Task(Repr):
+class SimpleTask(Repr):
 
     def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, loadedInputDatasets: List[Dataset] = None, threads=None, force=False):
         if len(inputDatasets) == 0:

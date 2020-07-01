@@ -27,10 +27,10 @@ class TestSource(Source):
 """.lstrip()
 
 TEST_TASK = """
-from hypergol import Task
+from hypergol import SimpleTask
 
 
-class TestTask(Task):
+class TestTask(SimpleTask):
 
     def __init__(self, exampleParameter, *args, **kwargs):
         super(TestTask, self).__init__(*args, **kwargs)
@@ -75,9 +75,5 @@ class TestCreateTask(HypergolCreateTestCase):
         self.assertEqual(content, TEST_TASK)
 
     def test_create_task_creates_content_source(self):
-        content = create_task(className='TestSource', taskType='Source', projectDirectory=self.projectDirectory, dryrun=True)
+        content = create_task(className='TestSource', source=True, projectDirectory=self.projectDirectory, dryrun=True)
         self.assertEqual(content, TEST_SOURCE)
-
-    def test_create_task_throws_error_if_bad_task_type(self):
-        with self.assertRaises(ValueError):
-            _ = create_task(className='TestSource', taskType='BadTask', projectDirectory=self.projectDirectory, dryrun=True)

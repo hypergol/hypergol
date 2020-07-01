@@ -1,10 +1,10 @@
-from hypergol import Task
+from hypergol import SimpleTask
 from data_models.article import Article
 from data_models.sentence import Sentence
 from data_models.token import Token
 
 
-class CreateArticlesTask(Task):
+class CreateArticlesTask(SimpleTask):
 
     def __init__(self, exampleParameter, *args, **kwargs):
         super(CreateArticlesTask, self).__init__(*args, **kwargs)

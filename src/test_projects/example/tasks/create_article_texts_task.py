@@ -1,8 +1,8 @@
-from hypergol import Task
+from hypergol import SimpleTask
 from data_models.article_text import ArticleText
 
 
-class CreateArticleTextsTask(Task):
+class CreateArticleTextsTask(SimpleTask):
 
     def __init__(self, exampleParameter, *args, **kwargs):
         super(CreateArticleTextsTask, self).__init__(*args, **kwargs)

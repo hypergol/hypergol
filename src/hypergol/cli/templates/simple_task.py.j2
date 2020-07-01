@@ -1,10 +1,10 @@
-from hypergol import Task
+from hypergol import SimpleTask
 {%- for name in dependencies %}
 from data_models.{{ name.asSnake }} import {{ name }}
 {%- endfor %}
 
 
-class {{ className }}(Task):
+class {{ className }}(SimpleTask):
 
     def __init__(self, exampleParameter, *args, **kwargs):
         super({{ className }}, self).__init__(*args, **kwargs)

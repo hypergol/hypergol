@@ -1,6 +1,6 @@
 from multiprocessing import Pool
 from hypergol.source import Source
-from hypergol.task import Task
+from hypergol.simple_task import SimpleTask
 
 
 class Pipeline:
@@ -12,7 +12,7 @@ class Pipeline:
         for task in self.tasks:
             if isinstance(task, Source):
                 task.execute()
-            elif isinstance(task, Task):
+            elif isinstance(task, SimpleTask):
                 pool = Pool(task.threads or threads)
                 jobReports = pool.map(task.execute, task.get_jobs())
                 task.outputDataset.make_chk_file(checksums=[jobReport.outputChecksum for jobReport in jobReports])
