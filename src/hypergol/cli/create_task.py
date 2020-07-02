@@ -13,9 +13,7 @@ def create_task(className, *args, projectDirectory='.', dryrun=None, force=None,
     elif simple:
         taskType = NameString('SimpleTask')
     else:
-        # TODO(Laszlo): Task not done yet
-        raise ValueError('# TODO(Laszlo): Task not done yet')
-        # taskType = NameString('Task')
+        taskType = NameString('Task')
 
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     className = NameString(className)
