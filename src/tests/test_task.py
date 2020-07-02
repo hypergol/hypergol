@@ -86,5 +86,5 @@ class TestTask(HypergolTestCase):
         for job in task.get_jobs():
             taskCopy = pickle.loads(pickle.dumps(task))
             taskCopy.execute(job)
-        task.finish(jobReports=None, threads=3)
+        task.finalise(jobReports=None, threads=3)
         self.assertEqual(set(self.outputDataset.open('r')), self.expectedOutputDataset)

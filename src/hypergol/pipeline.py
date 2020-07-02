@@ -16,7 +16,7 @@ class Pipeline:
             elif isinstance(task, (SimpleTask, Task)):
                 pool = Pool(task.threads or threads)
                 jobReports = pool.map(task.execute, task.get_jobs())
-                task.finish(jobReports=jobReports, threads=task.threads or threads)
+                task.finalise(jobReports=jobReports, threads=task.threads or threads)
                 pool.close()
                 pool.join()
                 pool.terminate()

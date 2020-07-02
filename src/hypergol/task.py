@@ -1,3 +1,4 @@
+import os
 import glob
 import gzip
 import logging
@@ -30,7 +31,7 @@ class Task(BaseTask):
         )
 
     def execute(self, job: Job):
-        self.init()
+        self.initialise()
         self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - START')
         self._open_input_chunks(job)
         with self._get_temporary_dataset(self.inputChunks[0].chunkId).open('w') as self.output:
@@ -45,7 +46,7 @@ class Task(BaseTask):
     def run(self, *args, **kwargs):
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
 
-    def finish(self, jobReports, threads):
+    def finalise(self, jobReports, threads):
         self.outputDataset.delete()
         jobs = [
             (chunk, self.__class__.__name__, k, self.outputDataset.chunkCount)
@@ -64,7 +65,14 @@ class Task(BaseTask):
         for inputChunkId in self.inputDatasets[0].get_chunk_ids():
             temporaryDataset = self._get_temporary_dataset(inputChunkId)
             temporaryDataset.delete()
+        temporayBranchDirectory = Path(self.outputDataset.location, self.outputDataset.project, f'{self.outputDataset.name}_temp')
+        try:
+            if os.path.exists(temporayBranchDirectory):
+                os.rmdir(temporayBranchDirectory)
+        except OSError as ex:
+            self.log(f'temporary directory cannot be deleted {ex}')
         self.outputDataset.make_chk_file(checksums=checksums)
+        self.finish(jobReports, threads)
 
 
 def _merge_function(args):

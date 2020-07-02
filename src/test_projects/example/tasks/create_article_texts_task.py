@@ -12,7 +12,7 @@ class CreateArticleTextsTask(SimpleTask):
 
     def init(self):
         # TODO: initialise members that are NOT "Delayed" here (e.g. load spacy model)
-        super().init()
+        pass
 
     def run(self, exampleInputObject1, exampleInputObject2):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')

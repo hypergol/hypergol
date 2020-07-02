@@ -6,7 +6,7 @@ from hypergol.base_task import JobReport
 class SimpleTask(BaseTask):
 
     def execute(self, job: Job):
-        self.init()
+        self.initialise()
         self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - START')
         self._open_input_chunks(job)
         self.outputChunk = job.outputChunk.open()
@@ -22,6 +22,7 @@ class SimpleTask(BaseTask):
     def run(self, *args, **kwargs):
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
 
-    def finish(self, jobReports, threads):
+    def finalise(self, jobReports, threads):
         checksums = [jobReport.outputChecksum for jobReport in jobReports]
         self.outputDataset.make_chk_file(checksums=checksums)
+        self.finish(jobReports, threads)

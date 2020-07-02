@@ -71,11 +71,15 @@ class BaseTask(Repr):
                 jobs[jobIndex].loadedInputChunks.append(loadedInputChunk)
         return jobs
 
-    def init(self):
+    def initialise(self):
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
         for k, v in self.__dict__.items():
             if isinstance(v, Delayed):
                 setattr(self, k, v.make())
+        self.init()
+
+    def init(self):
+        pass
 
     def log(self, message):
         logging.info(f'{self.__class__.__name__} - {message}')
@@ -98,5 +102,8 @@ class BaseTask(Repr):
     def run(self, *args, **kwargs):
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
 
+    def finalise(self, jobReports, threads):
+        self.finish(jobReports=jobReports, threads=threads)
+
     def finish(self, jobReports, threads):
-        raise NotImplementedError(f'finish() function must be implemented in {self.__class__.__name__}')
+        pass
