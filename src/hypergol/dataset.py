@@ -106,8 +106,14 @@ class DataChunk(Repr):
 
 
 class Dataset(Repr):
+    """
+    Dataset class to store BaseData objects that is readable/writable in a parallel manner.
+    """
 
     def __init__(self, dataType, location, project, branch, name, repoData, chunkCount=16):
+        """
+        Test
+        """
         self.dataType = dataType
         self.location = location
         self.project = project
