@@ -6,9 +6,9 @@ from hypergol.base_task import JobReport
 class SimpleTask(BaseTask):
 
     def execute(self, job: Job):
-        self.initialise()
         self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - START')
         self._open_input_chunks(job)
+        self.initialise()
         self.outputChunk = job.outputChunk.open()
         for inputData in zip(*self.inputChunks):
             if not self.force:

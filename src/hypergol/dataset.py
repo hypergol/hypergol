@@ -54,6 +54,16 @@ class RepoData(BaseData):
         self.comitterName = comitterName
         self.comitterEmail = comitterEmail
 
+    @classmethod
+    def get_dummy(cls):
+        return RepoData(
+            branchName='dummy',
+            commitHash='0000000000000000000000000000000000000000',
+            commitMessage='dummy',
+            comitterName='Dummy Dummy',
+            comitterEmail='dummy@dummy.com'
+        )
+
 
 class DataChunkChecksum(Repr):
 
@@ -110,7 +120,7 @@ class Dataset(Repr):
     Dataset class to store BaseData objects that is readable/writable in a parallel manner.
     """
 
-    def __init__(self, dataType, location, project, branch, name, repoData, chunkCount=16):
+    def __init__(self, dataType, location, project, branch, name, repoData=None, chunkCount=16):
         """
         Test
         """
@@ -121,7 +131,7 @@ class Dataset(Repr):
         self.name = name
         self.chunkCount = chunkCount
         self.dependencies = []
-        self.repoData = repoData
+        self.repoData = repoData or RepoData.get_dummy()
 
     def add_dependency(self, dataset):
         self.dependencies.append(dataset)

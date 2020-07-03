@@ -10,7 +10,8 @@ Hypergol provides:
 -  code generation to setup the project structure with virtual environment, testing, linting and git files;
 -  code generation at project start to build the domain data model, and generate pipeline skeleton code;
 -  data format to store the domain objects that is both accessible from notebooks and in parallel execution;
--  simple parallel processing pipeline without external dependencies (based on python's own ``multiprocessing`` package), you only write the single threaded code and it seamlessly parallelises it on your data.
+-  simple parallel processing pipeline without external dependencies (based on python's own ``multiprocessing`` package), you only write the single threaded code and it seamlessly parallelises it on your data;
+-  include version control information in your datasets to track the actual code that was used to create them and enable schema evolution (change the definition of domain objects and translate old data into the new one) (WIP);
 
 Audience
 --------
