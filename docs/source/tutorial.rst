@@ -253,9 +253,9 @@ The task can have multiple inputs but only one output dataset and all of them mu
 
 .. code:: bash
 
-    $ python3 -m hypergol.cli.create_task ExampleTask OtherExample --simple
+    $ python3 -m hypergol.cli.create_task ExampleSimpleTask OtherExample --simple
 
-This will create a ``tasks/example_task.py`` with stubs for two functions ``init()`` and ``run()``. The pipeline will execute the task in the following way:
+This will create a ``tasks/example_simple_task.py`` with stubs for two functions ``init()`` and ``run()``. The pipeline will execute the task in the following way:
 
 - Create the chunks for each input/output dataset
 - Creates ``Jobs`` for each chunk in the (probably multiple) input datasets and the output dataset
@@ -310,3 +310,64 @@ Having the same id on the input and the output is a strong restriction. To avoid
 
 Task
 ~~~~
+
+Sometimes the simple pipelining even with the loaded data is not enough and for each input object in each ``run()`` function multiple output classes with different ids need to be created. To failitate this the last task type is available.
+
+.. code:: bash
+
+    $ python3 -m hypergol.cli.create_task ExampleTask OtherExample
+
+This will generate the following stubs:
+
+.. code-block:: python
+
+    def init(self):
+        # TODO: initialise members that are NOT "Delayed" here (e.g. load spacy model)
+        pass
+
+    def run(self, exampleInputObject1, exampleInputObject2):
+        raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
+        self.output.append(data)
+
+From interface purposes it work exactly as ``SimpleTask``, apart from a ``self.output`` field is available in the ``run()`` function. The ``run()`` function can create any number of objects that match the output dataset's type and append it to the self.output field. Regardless of its id/hash_id it will end up in the right chunk in the output dataset. The pipeline will solve the sorting in the ``finalise`` function by launching a smaller, I/O only multithreaded task.
+
+Creating a pipeline
+-------------------
+
+.. code-block:: bash
+
+    $ python3 -m hypergol.cli.create_pipeline PipelineName Source1 Task1 Task2 ExampleClass1 ExampleClass2
+
+This will create ``pipelines/pipeline_name.py`` and ``pipeline_name.sh``. The shell script has examples how to pass parameters to the script and also (optionally) disables multithreading on popular numerical packages as these may interfere with parallel execution. Pipeline uses ``python-fire`` package to handle command line arguments so just follow the example to add more.
+
+In the python script stubs for several functionalities are generated:
+
+- ``Repo``: is the python interface to the local git repository, before execution the repo is checked for being "dirty", namely if there is any uncommited changes and if yes processing is halted unless a ``--force`` switch is used. This will may result in saving a commit message into the datasets that doesn't allow recovering the actual code that created the dataset, so use it with caution.
+- ``RepoData``: is the data class that is saved with each datasets, it contains the commit message, hash the email of the commiter and the branch name.
+- a ``DatasetFactory``: This is a convenience method that is used if several datasets for a pipeline needs to be created. Enables to create datasets by specifing only the type and the name.
+- Several datasets: For each classname specified in the ``create_pipeline`` command a dataset is created in the ``exampleClasses = dsf.get(dataType=ExampleClass, name='example_classes')`` manner.
+- Stubs for several tasks: Constructors with dummy datasets parameters to be filled by the user.
+- Pipeline instance: tasks included in the same order as a ``create_pipeline`` command.
+
+To finish the pipeline fill in the location, project, branch names and the input/output datasets of the tasks and other parameters. Execute the pipeline with the generated shell script. Because the shell script potentially running for several hours it is recommended that a window manager like ``screen`` or ``tmux`` to be used.
+
+Delayed
+~~~~~~~
+
+Sometimes a class must be passed onto a task that cannot be pickled (e.g. logging.Logger or a database connection). For this the ``Delayed`` mechanism is provided.
+
+.. code-block:: python
+
+    # This will throw an error if attempted to be executed
+    exampleTask = ExampleTask(
+        value1=CannotPickle(value2=123),
+        value2=canPickle
+    )
+
+    # Turn it into this:
+    exampleTask = ExampleTask(
+        value1=Delayed(CannotPickle, value1=123),
+        value2=canPickle
+    )
+
+This will result in delaying the creation of ``CannotPickle`` object until the task object is recreated inside the thread. This happen exactly between the ``loadedInputs`` loading and the ``init()`` function, can be used in the latter.

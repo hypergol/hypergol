@@ -30,7 +30,7 @@ Join us on `GitHub <https://github.com/hypergol/hypergol>`_.
 History
 -------
 
-Hypergol was born in July 2020. The original version was designed and written by Laszlo Sragner and Rhys Patten.
+Hypergol was written in July 2020. The original version was designed and written by Laszlo Sragner and Rhys Patten.
 Many people have contributed to the success of Hypergol. Some of the contributors are listed in the :doc:`credits. <credits>`
 
 Documentation
