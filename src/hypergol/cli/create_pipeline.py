@@ -6,6 +6,34 @@ from hypergol.hypergol_project import HypergolProject
 
 
 def create_pipeline(pipeLineName, *args, projectDirectory='.', dryrun=None, force=None):
+    """Generates pipeline script from the parameters
+
+    Fails if the target file already exist unless ``force=True`` or ``--force`` in CLI is set.
+
+    Generates pipe_line_name.py in pipelines, imports all the classes listed in ``*args`` and creates stubs for them to be filled. Also creates the executable ``pipe_line_name.sh`` in the project directory with examples how to pass parameters from the shell.
+
+    Parameters
+    ----------
+    pipeLineName : string (CamelCase)
+        Name of the pipeline to be created
+    projectDirectory : string (default='.')
+        Location of the project directory, the code will be created in ``projectDirectory/data_models/class_name.py``.
+    dryrun : bool (default=None)
+        If set to ``True`` it returns the generated code as a string
+    force : bool (default=None)
+        If set to ``True`` it overwritest the target file
+    *args : List of strings (CamelCase)
+        Classes to be imported into the generated code from the datamodel, fails if class not found in either ``data_models`` or ``tasks``
+
+    Returns
+    -------
+
+    content : string
+        The generated code if ``dryrun`` is specified
+    scriptContent : string
+        The generated shell script to run the pipeline if ``dryrun`` is specified
+
+    """
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     pipeLineName = NameString(pipeLineName)
     dependencies = [NameString(value) for value in args]

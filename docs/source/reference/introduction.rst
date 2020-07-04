@@ -18,10 +18,11 @@ Datasets
 
 This is another cool topic, write here about the interoperation of classes in dataset.py.
 
-Here is a bunch of link
-:doc:`Dataset </reference/classes/dataset>`,
+Here is a bunch of link (the first works, get permalink where you want to link and cut the beginning)
+`Dataset <classes.html#dataset-class-for-storing-domain-objects>`__,
 :doc:`DatasetWriter </reference/classes/dataset_writer>`,
 :doc:`DatasetReader </reference/classes/dataset_reader>`,
+
 
 Tasks
 -----

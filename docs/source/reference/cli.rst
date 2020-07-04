@@ -4,7 +4,20 @@
 CLI Functions
 *************
 
-Hypergol provides a set of functions to autogenerate components of the framework.
+Hypergol provides a set of functions to autogenerate components of the framework. All functions can be called in the command line, boolean flags can be specified as ``--dryrun`` or ``--dryrun=False`` for example:
+
+.. code:: bash
+
+    $ python3 -m hypergol.cli.create_<...>  <parameters>
+
+The same command can be executed in python as:
+
+.. code:: python
+
+    from hypergol.cli.create_<...> import create_<...>
+    create_<...>(<parameters>)
+
+Hypergol uses `Python Fire <https://google.github.io/python-fire/guide/>`__ to wrap python functions and enable CLI execution.
 
 =================================================
 create_project - Autogenerate project directories

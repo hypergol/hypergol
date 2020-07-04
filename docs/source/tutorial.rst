@@ -338,7 +338,7 @@ Creating a pipeline
 
     $ python3 -m hypergol.cli.create_pipeline PipelineName Source1 Task1 Task2 ExampleClass1 ExampleClass2
 
-This will create ``pipelines/pipeline_name.py`` and ``pipeline_name.sh``. The shell script has examples how to pass parameters to the script and also (optionally) disables multithreading on popular numerical packages as these may interfere with parallel execution. Pipeline uses ``python-fire`` package to handle command line arguments so just follow the example to add more.
+This will create ``pipelines/pipeline_name.py`` and ``pipeline_name.sh``. The shell script has examples how to pass parameters to the script and also (optionally) disables multithreading on popular numerical packages as these may interfere with parallel execution. Pipeline uses the `Python Fire <https://google.github.io/python-fire/guide/>`__ package to handle command line arguments so just follow the example to add more.
 
 In the python script stubs for several functionalities are generated:
 

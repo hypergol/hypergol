@@ -20,6 +20,27 @@ Dataset - Class for storing domain objects
 .. currentmodule:: hypergol
 .. autoclass:: Dataset
 
+==========================================
+DatasetWriter - Class for writing datasets
+==========================================
+
+.. currentmodule:: hypergol.dataset
+.. autoclass:: DatasetWriter
+
+==========================================
+DatasetReader - Class for reading datasets
+==========================================
+
+.. currentmodule:: hypergol.dataset
+.. autoclass:: DatasetReader
+
+=============================================
+DataChunk - Internal class for handling files
+=============================================
+
+.. currentmodule:: hypergol.dataset
+.. autoclass:: DataChunk
+
 ********************
 Task Related Classes
 ********************

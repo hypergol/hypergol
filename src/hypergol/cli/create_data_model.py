@@ -73,6 +73,30 @@ class DataModel:
 
 
 def create_data_model(className, *args, projectDirectory='.', dryrun=None, force=None):
+    """Generates domain class from the parameters derived from :class:`.BaseData`
+
+    Fails if the target file already exist unless ``force=True`` or ``--force`` in CLI is set.
+
+    Parameters
+    ----------
+    className : string (CamelCase)
+        Name of the class to be created
+    projectDirectory : string (default='.')
+        Location of the project directory, the code will be created in ``projectDirectory/data_models/class_name.py``.
+    dryrun : bool (default=None)
+        If set to ``True`` it returns the generated code as a string
+    force : bool (default=None)
+        If set to ``True`` it overwritest the target file
+    *args : List of strings
+        member variables string
+        representation of the member variable in "name:type", "name:List[type]" or "name:type:id" format
+
+    Returns
+    -------
+
+    content : string
+        The generated code if ``dryrun`` is specified
+    """
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     dataModel = DataModel(className=NameString(className), project=project)
     for value in args:
