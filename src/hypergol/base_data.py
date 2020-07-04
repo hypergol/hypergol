@@ -9,6 +9,17 @@ class NoIdException(Exception):
 
 
 class BaseData(Repr):
+    """
+    Base class for all domain objects.
+
+    Extends the Repr convenience base class that provides printing facilities.
+
+    Provides to_data/from_data serialisation interface.
+
+
+
+
+    """
 
     def __eq__(self, other):
         if not isinstance(self, type(other)):
@@ -22,19 +33,30 @@ class BaseData(Repr):
             return False
 
     def get_id(self):
+        """Returns the class's id if exists"""
         raise NoIdException(f"{self.__class__.__name__} doesn't have an id")
 
     def get_hash_id(self):
+        """Returns the class's hash id if exists, defaults to get_id()"""
         return self.get_id()
 
     def to_data(self):
+        """converts class to dictionary, usually overriden"""
         return self.__dict__.copy()
 
     @classmethod
     def from_data(cls, data):
+        """creates a class from data, usually overriden
+
+        Parameters
+        ----------
+        data : dictionary form of data representing the object
+            Usually the result of a previous to_data() call.
+        """
         return cls(**data)
 
     def test_get_hash_id(self):
+        """Tests if the derived class correctly returns a tuple for an id"""
         try:
             classId = self.get_hash_id()  # pylint: disable=assignment-from-no-return
         except NoIdException:
@@ -44,6 +66,7 @@ class BaseData(Repr):
         return True
 
     def test_to_data(self):
+        """Tests if the output of the derived class's to_data() function can be converted to string by ``json.dumps()``."""
         originalData = self.__dict__.copy()
         data = self.to_data()
         for k, v in self.__dict__.items():
@@ -56,6 +79,7 @@ class BaseData(Repr):
         return True
 
     def test_from_data(self):
+        """Tests if a roundtrip of ``self.from_data(self.to_data())`` modifies the class."""
         selfCopy = self.from_data(self.to_data())
         if not isinstance(self, type(selfCopy)):
             raise AssertionError(f'{self.__class__.__name__}.from_data() does not return the correct type: {self.__class__.__name__} vs {selfCopy.__class__.__name__}, from_data() return value should be "cls(**data)"')

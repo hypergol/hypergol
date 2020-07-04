@@ -121,8 +121,29 @@ class Dataset(Repr):
     """
 
     def __init__(self, dataType, location, project, branch, name, repoData=None, chunkCount=16):
-        """
-        Test
+        """Decides whether the given set or dictionary represents a valid
+        maximal matching in ``G``.
+
+        A *maximal matching* in a graph is a matching in which adding any
+        edge would cause the set to no longer be a valid matching.
+
+        Parameters
+        ----------
+        G : NetworkX graph
+
+        matching : dict or set
+            A dictionary or set representing a matching. If a dictionary, it
+            must have ``matching[u] == v`` and ``matching[v] == u`` for each
+            edge ``(u, v)`` in the matching. If a set, it must have elements
+            of the form ``(u, v)``, where ``(u, v)`` is an edge in the
+            matching.
+
+        Returns
+        -------
+        bool
+            Whether the given set or dictionary represents a valid maximal
+            matching in the graph.
+
         """
         self.dataType = dataType
         self.location = location
