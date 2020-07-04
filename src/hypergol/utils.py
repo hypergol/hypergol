@@ -74,6 +74,10 @@ def create_directory(path, mode):
 
 
 class Repr:
+    """Convencience class to automatically add standard ``__repr__()`` and ``__str__()`` functions to class.
+
+    Uses ``__dict__`` property.
+    """
 
     def __repr__(self):
         members = ', '.join(f'{k}={str(v)[:MAX_MEMBER_REPR_LENGTH]}' for k, v in self.__dict__.items())

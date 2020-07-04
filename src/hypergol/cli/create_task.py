@@ -21,7 +21,7 @@ def create_task(className, *args, projectDirectory='.', dryrun=None, force=None,
     dryrun : bool (default=None)
         If set to ``True`` it returns the generated code as a string
     force : bool (default=None)
-        If set to ``True`` it overwritest the target file
+        If set to ``True`` it overwrites the target file
     source : bool (default=False)
         If set to ``True`` the class will be derived from :class:`.Source`
     simple : bool (default=False)

@@ -86,7 +86,7 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
     dryrun : bool (default=None)
         If set to ``True`` it returns the generated code as a string
     force : bool (default=None)
-        If set to ``True`` it overwritest the target file
+        If set to ``True`` it overwrites the target file
     *args : List of strings
         member variables string
         representation of the member variable in "name:type", "name:List[type]" or "name:type:id" format

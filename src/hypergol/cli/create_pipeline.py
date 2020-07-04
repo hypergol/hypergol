@@ -21,7 +21,7 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', dryrun=None, forc
     dryrun : bool (default=None)
         If set to ``True`` it returns the generated code as a string
     force : bool (default=None)
-        If set to ``True`` it overwritest the target file
+        If set to ``True`` it overwrites the target file
     *args : List of strings (CamelCase)
         Classes to be imported into the generated code from the datamodel, fails if class not found in either ``data_models`` or ``tasks``
 

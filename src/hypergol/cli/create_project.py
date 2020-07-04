@@ -33,7 +33,7 @@ def create_project(projectName, dryrun=None, force=None):
     dryrun : bool (default=None)
         If set to ``True`` it returns the generated code as a string
     force : bool (default=None)
-        If set to ``True`` it overwritest the target file
+        If set to ``True`` it overwrites the target file
     """
 
     projectName = NameString(projectName)

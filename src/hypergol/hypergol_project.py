@@ -15,8 +15,27 @@ def locate(fname):
 
 
 class HypergolProject:
+    """Owner of all information about the project
+
+    CLI functions define what needs to be created and this class creates them. It also consistently handles the mode flags (normal/dryrun/force)
+
+    It also verifies if a requested class exists in the respective directory (data_models, tasks) and identifies its type, e.g.: for ``HelloWorld`` it checks if ``data_models/hello_world.py`` or ``tasks/hello_world.py`` exists and assumes its role from that. Used in :func:`.create_data_model` and :func:`.create_pipeline`
+
+    """
 
     def __init__(self, projectDirectory, projectName=None, dryrun=None, force=None):
+        """
+        Parameters
+        ----------
+        projectDirectory : string
+            location of the project
+        projectName: string
+            name of the project, file and directories will be created under ``projectDirectory/project_name``
+        dryrun : bool (default=None)
+            If set to ``True`` it returns the generated code as a string
+        force : bool (default=None)
+            If set to ``True`` it overwrites the target file
+        """
         self.projectName = projectName
         self.projectDirectory = projectDirectory
         self.dataModelsPath = Path(projectDirectory, 'data_models')
