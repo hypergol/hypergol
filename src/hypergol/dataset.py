@@ -35,6 +35,8 @@ class DatasetChecksumMismatchException(Exception):
 
 
 def _get_hash(data):
+    if not isinstance(data, (str, int, tuple)):
+        raise ValueError(f'Wrong type in _get_hash() {data.__class__.__name__}')
     if isinstance(data, (str, int)):
         data = [data]
     hasher = hashlib.sha1(''.encode('utf-8'))
@@ -46,8 +48,18 @@ def _get_hash(data):
 
 
 class RepoData(BaseData):
+    """Stores the information about the repository in the dataset"""
 
     def __init__(self, branchName, commitHash, commitMessage, comitterName, comitterEmail):
+        """
+        Parameters
+        ----------
+        branchName : str
+        commitHash : str
+        commitMessage : str
+        comitterName : str
+        comitterEmail : str
+        """
         self.branchName = branchName
         self.commitHash = commitHash
         self.commitMessage = commitMessage
@@ -56,6 +68,7 @@ class RepoData(BaseData):
 
     @classmethod
     def get_dummy(cls):
+        """Creates an empty RepoData if the Dataset was created outside a git repository"""
         return RepoData(
             branchName='dummy',
             commitHash='0000000000000000000000000000000000000000',
@@ -73,8 +86,23 @@ class DataChunkChecksum(Repr):
 
 
 class DataChunk(Repr):
+    """This class represents the file that the data is actually stored in.
+
+    When opened for writing it implements the :func:`append()` method and when reading the :func:`__iter__` iterator. Upon close it returns the checksum (SHA1 hash) of the the content that was written into it.
+
+    """
 
     def __init__(self, dataset, chunkId, mode):
+        """
+        Parameters
+        ----------
+        dataset : Dataset
+            The dataset this class chunk belongs to
+        chunkId : str
+            The hexadecimal identified of this chunk
+        mode : str = ('w' or 'r')
+            The mode this chunk was created to be opened in, determined by :func:`Dataset.get_data_chunks()`
+        """
         self.dataset = dataset
         self.chunkId = chunkId
         self.mode = mode
@@ -84,15 +112,18 @@ class DataChunk(Repr):
 
     @property
     def fileName(self):
+        """Name of the file the data will be stored"""
         return f'{self.dataset.name}_{self.chunkId}.json.gz'
 
     def open(self):
+        """Opens the chunk according to the mode specified at creation"""
         fileName = f'{self.dataset.directory}/{self.fileName}'
         self.file = gzip.open(fileName, f'{self.mode}t')
         self.hasher = hashlib.sha1((self.checksum or '').encode('utf-8'))
         return self
 
     def close(self):
+        """Closes the file handler and gets the checksum and returns it as ``DataChunkChecksum`` object"""
         self.file.close()
         self.file = None
         self.checksum = self.hasher.hexdigest()
@@ -100,6 +131,13 @@ class DataChunk(Repr):
         return DataChunkChecksum(chunk=self, value=self.checksum)
 
     def append(self, value):
+        """Adds a datamodel object to the file, raises error if the type doesn't match the dataset's type or the hash of the object doesn't match the chunkId
+
+        Parameters
+        ----------
+        value : object
+            Datamodel object matching the type of the Dataset this chunk belongs to
+        """
         if not isinstance(value, self.dataset.dataType):
             raise DatasetTypeDoesNotMatchDataTypeException(f"Trying to append an object of type {value.__class__.__name__} into a dataset of type {self.dataset.dataType.__name__}")
         if self.dataset.get_object_chunk_id(value.get_hash_id()) != self.chunkId:
@@ -107,10 +145,12 @@ class DataChunk(Repr):
         self.write(data=f'{json.dumps(value.to_data(), sort_keys=True)}\n')
 
     def write(self, data):
+        """Writes into the file and updates the hash, used in multithreaded rechunking in :class:`Task`"""
         self.hasher.update(data.encode('utf-8'))
         self.file.write(data)
 
     def __iter__(self):
+        """Iterator to read all the data from the file"""
         for line in self.file:
             yield self.dataset.dataType.from_data(json.loads(line.rstrip()))
 
@@ -118,32 +158,29 @@ class DataChunk(Repr):
 class Dataset(Repr):
     """
     Dataset class to store BaseData objects that is readable/writable in a parallel manner.
+
+    Files will be stored in: ``location/project/branch/name/name\_???.json.gz``
+
     """
 
     def __init__(self, dataType, location, project, branch, name, repoData=None, chunkCount=16):
-        """Decides whether the given set or dictionary represents a valid
-        maximal matching in ``G``.
-
-        A *maximal matching* in a graph is a matching in which adding any
-        edge would cause the set to no longer be a valid matching.
-
+        """
         Parameters
         ----------
-        G : NetworkX graph
-
-        matching : dict or set
-            A dictionary or set representing a matching. If a dictionary, it
-            must have ``matching[u] == v`` and ``matching[v] == u`` for each
-            edge ``(u, v)`` in the matching. If a set, it must have elements
-            of the form ``(u, v)``, where ``(u, v)`` is an edge in the
-            matching.
-
-        Returns
-        -------
-        bool
-            Whether the given set or dictionary represents a valid maximal
-            matching in the graph.
-
+        dataType : BaseData
+            Type of this dataset, only ``dataType`` objects can be stored in this dataset
+        location : str
+            path the project is in
+        project : str
+            project name
+        branch : str
+            branch name
+        name : str
+            name of this dataset
+        repoData : RepoData = None
+            stores the commit information at the creation of the dataset
+        chunkCount : int = {16 ( default), 256, 4096}
+            How many files the data will be stored in, sets the granularity of multithreaded processing
         """
         self.dataType = dataType
         self.location = location
@@ -155,27 +192,41 @@ class Dataset(Repr):
         self.repoData = repoData or RepoData.get_dummy()
 
     def add_dependency(self, dataset):
+        """Adds the ``.def`` file of a dataset to the ``.def`` file of this dataset so data lineage can be retraced
+
+        Parameters
+        ----------
+        dataset : Dataset
+            dataset that contributes to the generation of this dataset
+        """
         self.dependencies.append(dataset)
 
     @property
     def directory(self):
+        """Full path of the directory this dataset will be in"""
         return Path(self.location, self.project, self.branch, self.name)
 
     @property
     def defFilename(self):
+        """Full path of the definition file for this dataset"""
         return f'{self.directory}/{self.name}.def'
 
     @property
     def chkFilename(self):
+        """Full path of the checksum file for this dataset"""
         return f'{self.directory}/{self.name}.chk'
 
-    def get_chk_file_data(self):
-        return json.loads(open(self.chkFilename, 'rt').read())
-
     def get_checksum(self):
-        return _get_hash(data=self.get_chk_file_data())
+        """Hashes the content of the be stored in the dependent dataset's ``.def`` file"""
+        return _get_hash(data=open(self.chkFilename, 'rt').read())
 
     def make_chk_file(self, checksums):
+        """Creates the ``.chk`` file
+        Parameters
+        ----------
+        checksums : List[str]
+            SHA1 hash of the content of each chunk file
+        """
         chkData = {checksum.chunk.fileName: checksum.value for checksum in checksums}
         chkData[f'{self.name}.def'] = _get_hash(open(self.defFilename, 'rt').read())
         chkDataString = json.dumps(chkData, sort_keys=True, indent=4)
@@ -183,7 +234,9 @@ class Dataset(Repr):
             chkFile.write(chkDataString)
 
     def check_chk_file(self):
-        chkFileData = self.get_chk_file_data()
+        """Verifies a dataset file's checksum file by loading the entire contents and recalculating the SHA1 values. Can take a long time so never called automatically.
+        """
+        chkFileData = json.loads(open(self.chkFilename, 'rt').read())
         mv = memoryview(bytearray(CHECKSUM_BUFFER_SIZE))
         for fileName, chkFileChecksum in chkFileData.items():
             if fileName.endswith('.def'):
@@ -200,9 +253,12 @@ class Dataset(Repr):
         return True
 
     def get_def_file_data(self):
+        """Loads the data from the ``.def`` file"""
         return json.loads(open(self.defFilename, 'rt').read())
 
     def make_def_file(self):
+        """Creates the ``.def`` file, adds the dependencies ``.def`` data with that dataset's own checksum (which is the SHA1 of the contend of that dataset's ``.chk`` file)
+        """
         dependencyData = []
         for dataset in self.dependencies:
             data = dataset.get_def_file_data()
@@ -223,6 +279,7 @@ class Dataset(Repr):
             defFile.write(json.dumps(defData, sort_keys=True, indent=4))
 
     def check_def_file(self):
+        """Checks if a dataset already exists the definition of the object matches to that on disk"""
         defFileData = self.get_def_file_data()
         isDefValuesMatch = (
             defFileData['dataType'] == self.dataType.__name__ and
@@ -236,6 +293,20 @@ class Dataset(Repr):
         return True
 
     def init(self, mode):
+        """Checks the existence of the dataset
+
+        Parameters
+        ----------
+        mode : str = ('w', 'r')
+            The mode the dataset is about to be opened
+
+
+        Based on the mode if
+
+        - mode=='w' : fails if the dataset already exists otherwise creates the ``.def`` file
+        - mode=='r' : fails if the dataset doesn't exist otherwise compares the data in the ``.def.`` file to the definiton in the class.
+        - otherwise : fails due to unknown mode
+        """
         if mode == 'w':
             if self.exists():
                 raise DatasetAlreadyExistsException(f"Dataset {self.defFilename} already exist, delete the dataset first with Dataset.delete()")
@@ -248,6 +319,16 @@ class Dataset(Repr):
             raise ValueError(f'Invalid mode: {mode} in {self.name}')
 
     def open(self, mode):
+        """Opens the dataset for reading or writing
+
+        Parameters
+        ----------
+        mode : str = ('w', 'r')
+            The mode the dataset is about to be opened
+
+
+        Returns a :class:`DatasetWriter` or :class:`DatasetReader` object that handles the reading or writing of the files through the dataset's chunks.
+        """
         if mode == 'w':
             return DatasetWriter(dataset=self)
         if mode == 'r':
@@ -255,19 +336,23 @@ class Dataset(Repr):
         raise ValueError(f'Invalid mode: {mode} in {self.name}')
 
     def get_chunk_ids(self):
+        """Returns the list of :term:`chunk id`-s """
         return [f'{k:0{VALID_CHUNKS[self.chunkCount]}x}' for k in range(self.chunkCount)]
 
     def get_data_chunks(self, mode):
+        """Initialises the dataset and creates all the :class:`Datachunk` classes"""
         self.init(mode=mode)
         return [
             DataChunk(dataset=self, chunkId=chunkId, mode=mode)
             for chunkId in self.get_chunk_ids()
         ]
 
-    def get_object_chunk_id(self, objectId):
-        return _get_hash(objectId)[:VALID_CHUNKS[self.chunkCount]]
+    def get_object_chunk_id(self, objectHashId):
+        """Finds out which chunk the object belongs based on the :term:`hash id` """
+        return _get_hash(objectHashId)[:VALID_CHUNKS[self.chunkCount]]
 
     def delete(self):
+        """Deletes the files and the directory of the dataset"""
         if not self.exists():
             raise DatasetDoesNotExistException(f'Dataset {self.name} does not exist')
         for filename in glob.glob(f'{self.directory}/*'):
@@ -275,10 +360,15 @@ class Dataset(Repr):
         os.rmdir(self.directory)
 
     def exists(self):
+        """True if the dataset's ``.def`` file exists"""
         return os.path.exists(self.defFilename)
 
 
 class DatasetReader(Repr):
+    """Class to read from a dataset
+
+    Implements context manager and iterator, doesn't open any file until reading actually happen and then opens each chunk one by one.
+    """
 
     def __init__(self, dataset):
         self.dataset = dataset
@@ -301,16 +391,28 @@ class DatasetReader(Repr):
 
 
 class DatasetWriter(Repr):
+    """Class to write into a dataset"""
 
     def __init__(self, dataset):
+        """Opens all chunks at once and puts them in a dictionary for easy lookup
+
+        Implements context manager for proper file open/close.
+
+        Parameters
+        ----------
+        dataset : Dataset
+            dataset to be written into, at this point it is already established that it doesn't yet exists
+        """
         self.dataset = dataset
         self.dataChunks = {dataChunk.chunkId: dataChunk.open() for dataChunk in self.dataset.get_data_chunks(mode='w')}
 
     def append(self, elem):
+        """Writes a single object into the right chunks"""
         chunkHash = self.dataset.get_object_chunk_id(elem.get_hash_id())
         self.dataChunks[chunkHash].append(elem)
 
     def close(self):
+        """Closes the files and writes the ``.chk`` file"""
         checksums = []
         for chunk in self.dataChunks.values():
             checksum = chunk.close()
@@ -325,8 +427,23 @@ class DatasetWriter(Repr):
 
 
 class DatasetFactory(Repr):
-
+    """Convenience class to create lots of datasets at once. Used in pipelines where multiple datasets are created into the same location, project, branch
+    """
     def __init__(self, location, project, branch, chunkCount, repoData):
+        """
+        Parameters
+        ----------
+        location : str
+            path the project is in
+        project : str
+            project name
+        branch : str
+            branch name
+        repoData : RepoData
+            stores the commit information at the creation of the dataset
+        chunkCount : int = {16 , 256, 4096}
+            How many files the data will be stored in, sets the granularity of multithreaded processing
+        """
         self.location = location
         self.project = project
         self.branch = branch
@@ -334,6 +451,17 @@ class DatasetFactory(Repr):
         self.repoData = repoData
 
     def get(self, dataType, name, chunkCount=None):
+        """Creates a dataset with the parameters given and the factory's own parameters
+
+        Parameters
+        ----------
+        dataType : BaseData
+            Type of the dataset
+        name : str
+            Name of the dataset (recommended to be in snakecase)
+        chunkCount : int=None
+            Number of chunks, if None, the factory's own value will be used
+        """
         return Dataset(
             dataType=dataType,
             location=self.location,

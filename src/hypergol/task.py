@@ -91,6 +91,10 @@ class Task(BaseTask):
 
 
 def _merge_function(args):
+    """This is the actual function that is running multithreaded. Must be external to the class as after inititalise and execute, it is not possible to ensure that the task class is pickle-able.
+
+    Returns the checksum so the caller can create the ``.chk`` file.
+    """
     chunk, name, k, total = args
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
     logging.info(f'{name} - {k:3}/{total:3} - finish - START')

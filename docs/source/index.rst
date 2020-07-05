@@ -44,6 +44,7 @@ Documentation
 .. toctree::
    :maxdepth: 1
 
+   read_this
    install
    tutorial
    reference/index

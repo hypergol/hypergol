@@ -41,6 +41,13 @@ DataChunk - Internal class for handling files
 .. currentmodule:: hypergol.dataset
 .. autoclass:: DataChunk
 
+=====================================================
+DatasetFactory - Convenience class to create datasets
+=====================================================
+
+.. currentmodule:: hypergol
+.. autoclass:: DatasetFactory
+
 ********************
 Task Related Classes
 ********************
@@ -106,10 +113,11 @@ Delayed - Helper class to allow passing any class to threads
 
 .. currentmodule:: hypergol
 .. autoclass:: Delayed
+    :private-members:
 
-*************
-Miscellaneous
-*************
+*********************
+Miscellaneous Classes
+*********************
 
 =============================================
 Repr - Convenience class for default printing
@@ -131,3 +139,10 @@ HypergolProject - Helper class for the CLI functions
 
 .. currentmodule:: hypergol.hypergol_project
 .. autoclass:: HypergolProject
+
+=========================================================
+RepoData - Data class for storing Repository informations
+=========================================================
+
+.. currentmodule:: hypergol.dataset
+.. autoclass:: RepoData
