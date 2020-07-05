@@ -51,6 +51,7 @@ Documentation
    license
    credits
    citing
+   contact
 
 Indices and tables
 ------------------
