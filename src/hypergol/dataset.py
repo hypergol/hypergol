@@ -159,7 +159,7 @@ class Dataset(Repr):
     """
     Dataset class to store BaseData objects that is readable/writable in a parallel manner.
 
-    Files will be stored in: ``location/project/branch/name/name\_???.json.gz``
+    Files will be stored in: ``location/project/branch/name/name_???.json.gz``
 
     """
 
@@ -429,6 +429,7 @@ class DatasetWriter(Repr):
 class DatasetFactory(Repr):
     """Convenience class to create lots of datasets at once. Used in pipelines where multiple datasets are created into the same location, project, branch
     """
+
     def __init__(self, location, project, branch, chunkCount, repoData):
         """
         Parameters
