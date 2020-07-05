@@ -51,6 +51,7 @@ BaseTask - Base class for tasks
 
 .. currentmodule:: hypergol.base_task
 .. autoclass:: BaseTask
+    :private-members:
 
 ==================================================
 Source - Class for creating datasets from raw data
@@ -72,6 +73,7 @@ Task - Class for create datasets from other datasets
 
 .. currentmodule:: hypergol
 .. autoclass:: Task
+    :private-members:
 
 **************************
 Pipelining Related Classes
@@ -83,6 +85,20 @@ Pipeline - Class for organising tasks and datasets together
 
 .. currentmodule:: hypergol
 .. autoclass:: Pipeline
+
+======================================================
+Job - Class for passing information on chunks to tasks
+======================================================
+
+.. currentmodule:: hypergol.base_task
+.. autoclass:: Job
+
+====================================================================
+JobReport - Class for passing results of a task back to the pipeline
+====================================================================
+
+.. currentmodule:: hypergol.base_task
+.. autoclass:: JobReport
 
 ============================================================
 Delayed - Helper class to allow passing any class to threads

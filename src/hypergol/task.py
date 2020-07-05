@@ -11,8 +11,12 @@ from hypergol.dataset import DatasetFactory
 
 
 class Task(BaseTask):
-
+    """Class to create other datasets, created domain objects in :func:`run()` must be appended to the output with ``self.output.append(object)`` (any number of the same type)
+    """
     def __init__(self, outputDataset, *args, **kwargs):
+        """
+        Also creates dataset factory for temporary datasets
+        """
         super(Task, self).__init__(outputDataset=outputDataset, *args, **kwargs)
         self.output = None
         self.datasetFactory = DatasetFactory(
@@ -24,6 +28,7 @@ class Task(BaseTask):
         )
 
     def _get_temporary_dataset(self, inputChunkId):
+        """Based on the input chunk creates a temporary dataset and opens all chunks for writing, so the various output classes can be appended to the right chunk"""
         return self.datasetFactory.get(
             dataType=self.outputDataset.dataType,
             name=f'{self.outputDataset.name}_{inputChunkId}',
@@ -31,6 +36,8 @@ class Task(BaseTask):
         )
 
     def execute(self, job: Job):
+        """Same as :class:`SimpleTask` apart from :func:`run()` doesn't have a return value because output is updated by calling ``self.output.append()``
+        """
         self.initialise()
         self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - START')
         self._open_input_chunks(job)
@@ -47,6 +54,14 @@ class Task(BaseTask):
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
 
     def finalise(self, jobReports, threads):
+        """After func:`execute` finished, all the temporary datasets are opened and copied into the the output dataset in a multithreaded way.
+
+        Parameters
+        ----------
+            jobReports : IGNORED
+                checksums's are recalculated for the actual output dataset
+            threads : number of concurent threads to do the merging
+        """
         self.outputDataset.delete()
         jobs = [
             (chunk, self.__class__.__name__, k, self.outputDataset.chunkCount)

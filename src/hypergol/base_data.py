@@ -14,11 +14,11 @@ class BaseData(Repr):
 
     Extends the Repr convenience base class that provides printing facilities.
 
-    Provides to_data/from_data serialisation interface.
+    Provides to_data and from_data serialisation interface.
 
+    Provides get_id, get_hash_id interfaces.
 
-
-
+    Provide test capabilities for all of the above so changes to the derived classes can be checked quickly.
     """
 
     def __eq__(self, other):

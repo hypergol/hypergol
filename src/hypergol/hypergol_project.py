@@ -85,12 +85,15 @@ class HypergolProject:
         create_directory(self.testsPath, self.mode)
 
     def is_data_model_class(self, value: NameString):
+        """Checks if a name is a data_model class (based on if the snakecase .py file exists)"""
         return value in self._dataModelClasses
 
     def is_task_class(self, value: NameString):
+        """Checks if a name is in tasks class (based on if the snakecase .py file exists)"""
         return value in self._taskClasses
 
     def check_dependencies(self, dependencies):
+        """Raises error if any dependency is unknown"""
         for dependency in dependencies:
             if dependency not in self._dataModelClasses + self._taskClasses:
                 raise ValueError(f'Unknown dependency {dependency}')
@@ -99,6 +102,17 @@ class HypergolProject:
         create_text_file(filePath=filePath, content=content, mode=self.mode)
 
     def render(self, templateName, templateData, filePath):
+        """creates a file from a template using jinja2
+
+        Parameters
+        ----------
+        templateName : string
+            filename of the template
+        templateData : dict
+            data to fill the template with
+        filePath : Path
+            full path of the destination file (ignored if self.mode != Mode.DRY_RUN)
+        """
         # TODO(Laszlo): jinja seems to be stripping ending newlines
         content = self.templateEnvironment.get_template(templateName).render(templateData)
         if len(content) > 0 and content[-1] != '\n':
