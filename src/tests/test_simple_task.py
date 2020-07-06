@@ -127,6 +127,7 @@ class TestTask(HypergolTestCase):
         task = SimpleTaskExample(
             inputDatasets=[self.dataset1, self.reversedDataset],
             outputDataset=self.outputDataset,
+            loadedInputDatasets=[self.dataset3],
             increment=1
         )
         with self.assertRaises(ValueError):

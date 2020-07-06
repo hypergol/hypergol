@@ -19,10 +19,11 @@ class SimpleTask(BaseTask):
         self._open_input_chunks(job)
         self.initialise()
         self.outputChunk = job.outputChunk.open()
-        for inputData in zip(*self.inputChunks):
+        for inputValues in zip(*self.inputChunks):
+            outputValue = self.run(*inputValues, *self.loadedData)
             if not self.force:
-                self._check_same_hash(inputData)
-            self.outputChunk.append(self.run(*inputData, *self.loadedData))
+                self._check_if_same_hash(inputValues, outputValue)
+            self.outputChunk.append(outputValue)
         self._close_input_chunks()
         outputChecksum = self.outputChunk.close()
         self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - END')
