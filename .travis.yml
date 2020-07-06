@@ -1,18 +1,21 @@
 language: python
 python:
-  - 3.7
+- 3.7
 install:
-  - pip install tox-travis
-jobs: 
+- pip install tox-travis
+jobs:
   include:
-    - name: "Run unittests"
-      env:
-      - TOXENV=unittest
-    - name: "Run lint"
-      env:
-      - TOXENV=lint
-    - name: "Run project tests"
-      env:
-      - TOXENV=projecttest
+  - name: Run unittests
+    env:
+    - TOXENV=unittest
+  - name: Run lint
+    env:
+    - TOXENV=lint
+  - name: Run project tests
+    env:
+    - TOXENV=projecttest
 script:
-  - tox
+- tox
+notifications:
+  slack:
+    secure: RGv84bXEaZx9V31ZylVkJMGEiJY4iy6CqCNB491t2iNZHCvhLdoB4ORhsv/OaPuP8HiCspFR9oe6GMQzzSvC6dMn8cjzUXHZJO/KaJx2wUzfMwX/EgZ8e3vWNpmtNe8eq8I6+J2byWZZ+uFBVqhIHLw7JSG4Y+lO8XymmIOnrEXMwb4PFFI509rQecb7V0MT/XkJ739xjQ9ox02GfhmYftkoxHmDZO/0sZ6okwzf9BC86+odYSS8WkFauJ75pdhAIBws2wHsW40UZZx4Wo/R/WlY1YlGPaR/rpK4+aGfq0y2cAHvCoEONoNuauxsugyjIEpAAmoQLFLEtekC057STByyt8ZsK9OIGyun81frEXTFc/2mBKvBpxMMFvh3Dq4ICwtBCZabY7C61mdYUBZK/DRocVZxD63vC5utG+hCqdKQQLvITJd4NfILdCYBK7H7fL6QfPm89X0ZZ4d9jsIXpGwUjHkdAbqp5r2kGTjYpCJ4FJFCEnNI/O3mZ9HFJAgIT6hsktGw1RntiH9uNoLFl32uYpIcw/SK96LhJnV/U1U1jBMxBw551/+S/vaIwhZHqYqr4FzOu3eFNGGyGbWwjGL6hfZKqMaETsovHzyu5YPd7+gPWJGISvPluy9O2GFo5mNVUKMr6DN/0wbvZPAvD+nZcrSmkJ8IbM0WPavJdvo=
