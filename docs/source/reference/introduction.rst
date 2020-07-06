@@ -15,17 +15,21 @@ Datasets
 
 The :class:`Dataset` object is the primary storage format in Hypergol. It enable parallel processing by the pipeline and also interactive access from notebooks. The circumstances of the creation of the file is saved into the `.def` file: the location of the file, the type of data stored in it, the git commit and commiter. The gzipped JSON files content (before compression) is hashed with SHA1 which is then saved into ``.chk`` file so it can be verified that the file wasn't changed. The dataset's own checksum is calculated by hashing the entire ``.chk`` file with SHA1, as this contains the hash of all the files in the dataset it uniquely verifies the dataset. No part of it can be changed and have the same hash. If another dataset is used in the creation of the dataset (as in a pipeline) the hash of that dataset is added to the ``.def`` file, whose hash is added to the ``.chk`` file whose hash is added to the further downstream dataset's ``.def`` file. This way the entire processing is verified by a single hash.
 
-
-
-
-`Dataset <classes.html#dataset-class-for-storing-domain-objects>`__,
-
-This is another cool topic, write here about the interoperation of classes in dataset.py.
-
-Here is a bunch of link (the first works, get permalink where you want to link and cut the beginning)
-`Dataset <classes.html#dataset-class-for-storing-domain-objects>`__,
-
 Tasks
 -----
 
-There are three types of tasks: :class:`Source`, :class:`SimpleTask`, :class:`Task`.
+Tasks are computational routines that operate on domain data. They stream objects from datasets and stream their output to disk as well, therefore make it easy to work with larger than machine memory datasets. Because datasets can be operated on by multiple threads it allow tasks to ran parallel on the same dataset. This is combined with the memory efficient data handling to achieve optimal throughput time. Completion speed is only limited by the additional memory requirements of a task.
+
+There are three types of tasks: :class:`Source`, :class:`SimpleTask`, :class:`Task`. :class:`Source` is used to process data into the `Hypergol` framework (this is single threaded). :class:`SimpleTask` is used to process each piece of data along the pipeline (one object on the input and one object on the output). :class:`Task` is used to create new objects and datasets: (one object on the input and multiple object on the output).
+
+Pipeline
+--------
+
+Pipelines are used to combine tasks and datasets. It manages the parallel execution and the handling of the data. It executes each task alone, so no inter-task concurency problems can happen. It also handles data versioning through git and shell execution.
+
+Testing
+-------
+
+Hypegol creates example unittests for the project so it is easy to verify assumptions about the code and extend the coverage based on the examples. Adds pylint as well, so the linting can be performed as well.
+
+

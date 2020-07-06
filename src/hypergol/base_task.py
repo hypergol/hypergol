@@ -84,10 +84,14 @@ class BaseTask(Repr):
         self.outputChunk = None
         self.loadedData = None
 
-    def _check_same_hash(self, inputData):
+    def _check_if_same_hash(self, inputValues, outputValue=None):
         """Raises error if inputs of ``run()`` have different :term:`hash id`"""
-        if len({value.get_hash_id() for value in inputData}) > 1:
+        # TODO(Laszlo): Maybe we need to test get_id()-s here
+        hashIds = {value.get_hash_id() for value in inputValues}
+        if len(hashIds) > 1:
             raise ValueError(f'different hashIds in the input of a single run() call, set force=True in {self.__class__.__name__} to continue')
+        if outputValue is not None and outputValue.get_hash_id() != next(iter(hashIds)):
+            raise ValueError(f'different hashIds for input and output values in a single run() call, set force=True in {self.__class__.__name__} to continue')
 
     def _check_same_chunk_count(self):
         """Raises error if any of the input/output datasets :term:`chunk count` differs, cannot be overriden by `force=True`"""

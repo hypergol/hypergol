@@ -44,7 +44,7 @@ class Task(BaseTask):
         with self._get_temporary_dataset(self.inputChunks[0].chunkId).open('w') as self.output:
             for inputData in zip(*self.inputChunks):
                 if not self.force:
-                    self._check_same_hash(inputData)
+                    self._check_if_same_hash(inputData)
                 self.run(*inputData, *self.loadedData)
         self._close_input_chunks()
         self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - END')
