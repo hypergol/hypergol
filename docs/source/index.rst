@@ -1,5 +1,8 @@
 .. _contents:
 
+This project is under construction, please contact the authors with feedback by the `Contact page <contact.html#contact>`_.
+
+
 Hypergol Documentation
 ======================
 
