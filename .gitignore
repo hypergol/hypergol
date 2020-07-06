@@ -6,8 +6,10 @@ __pycache__/*
 hypergol.egg-info
 src/build
 src/dist
+docs/build
 # TODO(Laszlo): Remove these later
 injector.py
 injections.txt
 /alpha/
 /example/
+/test_example/

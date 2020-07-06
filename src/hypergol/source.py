@@ -8,15 +8,25 @@ class SourceIteratorNotIterableException(Exception):
 
 
 class Source(Repr):
+    """Class for single threaded execution and creating datasets"""
 
     def __init__(self, outputDataset):
+        """
+        Parameters
+        ----------
+        outputDataset : Dataset
+            output dataset
+        """
         self.outputDataset = outputDataset
         # TODO(Laszlo): test that run returns the same class as the type of the dataset (runtime)
 
     def source_iterator(self):
+        """Must be implemented in the derived class, iterates over and yield's data that is fed into the :func:`run()` functions
+        """
         raise NotImplementedError(f'f{self.__class__.__name__} must implement source_iterator()')
 
     def execute(self):
+        """Organising the execution of the task: open's outputDataset for writing, iterates over :func:`source_iterator()` and calls :func:`run` with the data"""
         with self.outputDataset.open(mode='w') as outputDatasetWriter:
             sourceIterator = self.source_iterator()
             if not isinstance(sourceIterator, Iterable):
@@ -25,4 +35,11 @@ class Source(Repr):
                 outputDatasetWriter.append(self.run(data))
 
     def run(self, data):
+        """This is the main computation of the task
+
+        Parameters
+        ----------
+        data : object
+            Any data that the :func:`source_iterator()` returns
+        """
         raise NotImplementedError('run() function must be implemented')

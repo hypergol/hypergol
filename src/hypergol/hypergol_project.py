@@ -15,8 +15,27 @@ def locate(fname):
 
 
 class HypergolProject:
+    """Owner of all information about the project
+
+    CLI functions define what needs to be created and this class creates them. It also consistently handles the mode flags (normal/dryrun/force)
+
+    It also verifies if a requested class exists in the respective directory (data_models, tasks) and identifies its type, e.g.: for ``HelloWorld`` it checks if ``data_models/hello_world.py`` or ``tasks/hello_world.py`` exists and assumes its role from that. Used in :func:`.create_data_model` and :func:`.create_pipeline`
+
+    """
 
     def __init__(self, projectDirectory, projectName=None, dryrun=None, force=None):
+        """
+        Parameters
+        ----------
+        projectDirectory : string
+            location of the project
+        projectName: string
+            name of the project, file and directories will be created under ``projectDirectory/project_name``
+        dryrun : bool (default=None)
+            If set to ``True`` it returns the generated code as a string
+        force : bool (default=None)
+            If set to ``True`` it overwrites the target file
+        """
         self.projectName = projectName
         self.projectDirectory = projectDirectory
         self.dataModelsPath = Path(projectDirectory, 'data_models')
@@ -66,12 +85,15 @@ class HypergolProject:
         create_directory(self.testsPath, self.mode)
 
     def is_data_model_class(self, value: NameString):
+        """Checks if a name is a data_model class (based on if the snakecase .py file exists)"""
         return value in self._dataModelClasses
 
     def is_task_class(self, value: NameString):
+        """Checks if a name is in tasks class (based on if the snakecase .py file exists)"""
         return value in self._taskClasses
 
     def check_dependencies(self, dependencies):
+        """Raises error if any dependency is unknown"""
         for dependency in dependencies:
             if dependency not in self._dataModelClasses + self._taskClasses:
                 raise ValueError(f'Unknown dependency {dependency}')
@@ -80,6 +102,17 @@ class HypergolProject:
         create_text_file(filePath=filePath, content=content, mode=self.mode)
 
     def render(self, templateName, templateData, filePath):
+        """creates a file from a template using jinja2
+
+        Parameters
+        ----------
+        templateName : string
+            filename of the template
+        templateData : dict
+            data to fill the template with
+        filePath : Path
+            full path of the destination file (ignored if self.mode != Mode.DRY_RUN)
+        """
         # TODO(Laszlo): jinja seems to be stripping ending newlines
         content = self.templateEnvironment.get_template(templateName).render(templateData)
         if len(content) > 0 and content[-1] != '\n':
