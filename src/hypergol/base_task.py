@@ -84,8 +84,6 @@ class BaseTask(Repr):
         self.outputChunk = None
         self.loadedData = None
 
-
-
     def _check_if_same_hash(self, inputValues, outputValue=None):
         """Raises error if inputs of ``run()`` have different :term:`hash id`"""
         hashIds = {value.get_hash_id() for value in inputValues}
