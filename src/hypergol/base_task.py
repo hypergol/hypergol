@@ -1,9 +1,8 @@
-import logging
-
 from typing import List
 from hypergol.delayed import Delayed
 from hypergol.dataset import Dataset
 from hypergol.utils import Repr
+from hypergol.logger import Logger
 
 
 class Job(Repr):
@@ -53,7 +52,7 @@ class JobReport(Repr):
 class BaseTask(Repr):
     """Base class for multithreaded abstract classes SimpleTask and Task"""
 
-    def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, loadedInputDatasets: List[Dataset] = None, threads=None, force=False):
+    def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, loadedInputDatasets: List[Dataset] = None, logger=None, threads=None, force=False):
         """
         Parameters
         ----------
@@ -78,11 +77,14 @@ class BaseTask(Repr):
             self.outputDataset.add_dependency(dataset=inputDataset)
         for loadedInputDataset in self.loadedInputDatasets:
             self.outputDataset.add_dependency(dataset=loadedInputDataset)
+        self.logger = logger or Logger()
         self.threads = threads
         self.force = force
         self.inputChunks = None
         self.outputChunk = None
         self.loadedData = None
+
+
 
     def _check_if_same_hash(self, inputValues, outputValue=None):
         """Raises error if inputs of ``run()`` have different :term:`hash id`"""
@@ -124,7 +126,6 @@ class BaseTask(Repr):
 
     def initialise(self):
         """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes and calls the task's custom `init()` see also: :class:`.SimpleTask` in Tutorial`"""
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
         for k, v in self.__dict__.items():
             if isinstance(v, Delayed):
                 setattr(self, k, v.make())
@@ -135,7 +136,7 @@ class BaseTask(Repr):
 
     def log(self, message):
         """Standard logging"""
-        logging.info(f'{self.__class__.__name__} - {message}')
+        self.logger.info(f'{self.__class__.__name__} - {message}')
 
     def _open_input_chunks(self, job):
         """Opens input chunks and loads loaded input chunks"""

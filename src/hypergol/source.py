@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 
 from hypergol.utils import Repr
-
+from hypergol.logger import Logger
 
 class SourceIteratorNotIterableException(Exception):
     pass
@@ -10,7 +10,7 @@ class SourceIteratorNotIterableException(Exception):
 class Source(Repr):
     """Class for single threaded execution and creating datasets"""
 
-    def __init__(self, outputDataset):
+    def __init__(self, outputDataset, logger=None):
         """
         Parameters
         ----------
@@ -18,6 +18,7 @@ class Source(Repr):
             output dataset
         """
         self.outputDataset = outputDataset
+        self.logger = logger or Logger()
         # TODO(Laszlo): test that run returns the same class as the type of the dataset (runtime)
 
     def source_iterator(self):
