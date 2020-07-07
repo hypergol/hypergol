@@ -113,7 +113,6 @@ class HypergolProject:
         filePath : Path
             full path of the destination file (ignored if self.mode != Mode.DRY_RUN)
         """
-        # TODO(Laszlo): jinja seems to be stripping ending newlines
         content = self.templateEnvironment.get_template(templateName).render(templateData)
         if len(content) > 0 and content[-1] != '\n':
             content += '\n'

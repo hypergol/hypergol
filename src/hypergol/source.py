@@ -19,7 +19,6 @@ class Source(Repr):
         """
         self.outputDataset = outputDataset
         self.logger = logger or Logger()
-        # TODO(Laszlo): test that run returns the same class as the type of the dataset (runtime)
 
     def source_iterator(self):
         """Must be implemented in the derived class, iterates over and yield's data that is fed into the :func:`run()` functions
