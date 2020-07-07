@@ -7,7 +7,9 @@ class Logger:
     DEBUG = logging.DEBUG
 
     def __init__(self, path=None, level=logging.INFO, overWrite=False):
-        self.path = str(path)
+        if path is not None:
+            path = str(path)
+        self.path = path
         self.level = level
         self.overWrite = overWrite
 
