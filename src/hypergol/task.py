@@ -1,7 +1,6 @@
 import os
 import glob
 import gzip
-import logging
 from pathlib import Path
 from multiprocessing import Pool
 from hypergol.base_task import BaseTask
