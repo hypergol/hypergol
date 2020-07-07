@@ -17,16 +17,15 @@ class Logger:
         for handler in handlers:
             self._logger.removeHandler(handler)
 
-        handler=logging.StreamHandler(stream=None)
+        handler = logging.StreamHandler(stream=None)
         handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
         handler.setLevel(level=self.level)
         self._logger.addHandler(handler)
         if self.path is not None:
-            handler=logging.FileHandler(self.path, mode='w' if self.overWrite else 'a')
+            handler = logging.FileHandler(self.path, mode='w' if self.overWrite else 'a')
             handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
             handler.setLevel(level=self.level)
             self._logger.addHandler(handler)
-
 
     def __reduce_ex__(self, protocol):
         return self.__class__, (self.path, self.level, self.overWrite)
