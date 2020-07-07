@@ -15,9 +15,10 @@ class SimpleTask(BaseTask):
         job : Job
             parameters of chunks to be opened
         """
-        self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - START')
+
         self._open_input_chunks(job)
         self.initialise()
+        self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - START')
         self.outputChunk = job.outputChunk.open()
         for inputValues in zip(*self.inputChunks):
             outputValue = self.run(*inputValues, *self.loadedData)

@@ -146,3 +146,10 @@ RepoData - Data class for storing Repository informations
 
 .. currentmodule:: hypergol.dataset
 .. autoclass:: RepoData
+
+==========================
+Logger - Class for logging
+==========================
+
+.. currentmodule:: hypergol.logger
+.. autoclass:: Logger
