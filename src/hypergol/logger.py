@@ -22,8 +22,6 @@ class Logger:
         overWrite : bool (default=False)
             Indicate if an existing log file should be overwritten or appended
         """
-        if path is not None:
-            path = str(path)
         self.path = path
         self.level = level
         self.overWrite = overWrite

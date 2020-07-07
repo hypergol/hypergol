@@ -2,13 +2,14 @@ import os
 import pickle
 from unittest import TestCase
 from hypergol import Logger
+from pathlib import Path
 
 
 class TestLogger(TestCase):
 
     def __init__(self, methodName):
         super(TestLogger, self).__init__(methodName=methodName)
-        self.logFile = 'testLogFile.tmp'
+        self.logFile = Path('testLogFile.tmp')
 
     def tearDown(self):
         super().tearDown()
