@@ -29,7 +29,7 @@ Once this is done, the next step is to create the project's own virtual environm
    $ git remote add origin git@github.com:<your_user_name>/<project_name>.git
    $ git push -u origin master
    $ ./make_venv.sh
-   $ source ./venv/bin/activate
+   $ source .venv/bin/activate
 
 If you have dependencies that you will use in the future (e.g. ``numpy`` add them to ``requirements.txt`` and call:
 
@@ -47,7 +47,7 @@ Creating a simple class
 
 .. code:: bash
 
-   $ python3 -m hypergol.cli.create_datamodel ExampleClass classId:int:id value:float name:str creation:datetime
+   $ python3 -m hypergol.cli.create_data_model ExampleClass classId:int:id value:float name:str creation:datetime
 
 This will create the following class (use the ``--dryrun`` switch to display the code instead of writing into ``data_models/example_class.py``
 
@@ -90,7 +90,7 @@ Again use ``--dryrun`` switch to display the code instead of writing it out. Bec
 
 .. code:: bash
 
-    $ python3 -m hypergol.cli.create_datamodel OtherExample classId:int:id name:str "values:List[ExampleClass]" "times:List[time]"
+    $ python3 -m hypergol.cli.create_data_model OtherExample classId:int:id name:str "values:List[ExampleClass]" "times:List[time]"
 
 Don't forget the double quotes or your shell will fail to correctly process the square brackets. This will result in the following code in ``data_models/other_example.py``
 
