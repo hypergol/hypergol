@@ -29,7 +29,7 @@ Once this is done, the next step is to create the project's own virtual environm
    $ git remote add origin git@github.com:<your_user_name>/<project_name>.git
    $ git push -u origin master
    $ ./make_venv.sh
-   $ source ./venv/bin/activate
+   $ source .venv/bin/activate
 
 If you have dependencies that you will use in the future (e.g. ``numpy`` add them to ``requirements.txt`` and call:
 
