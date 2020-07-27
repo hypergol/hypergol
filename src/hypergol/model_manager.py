@@ -4,11 +4,11 @@ from pathlib import Path
 
 class ModelManager:
 
-    def __init__(self, model, optimizer, batchGenerator, outputDataManager, modelSavePath, tensorboardPath=None, saveProtobuf=True, restoreVariablesPath=None):
+    def __init__(self, model, optimizer, batchGenerator, outputSaver, modelSavePath, tensorboardPath, saveProtobuf=True, restoreVariablesPath=None):
         self.model = model
         self.optimizer = optimizer
         self.batchGenerator = batchGenerator
-        self.outputDataManager = outputDataManager
+        self.outputSaver = outputSaver
         self.modelSavePath = modelSavePath
         self.tensorboardPath = tensorboardPath
         self.saveProtobuf = saveProtobuf
@@ -52,7 +52,6 @@ class ModelManager:
         if withMetadata and self.globalStep > 0:
             tf.summary.trace_on(graph=True, profiler=False)
         outputs, loss, metrics = self.model.run_evaluation(inputs=batch['inputs'], targets=batch['targets'])
-        self.outputDataManager.process_model_outputs(batch=batch, outputs=outputs, globalStep=self.globalStep)
         if withLogging:
             with self.evaluationSummaryWriter.as_default():
                 tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
@@ -62,6 +61,7 @@ class ModelManager:
                     tf.summary.histogram(name=f'Evaluation/{histogramName}', data=histogramMetric, step=self.globalStep)
                 if withMetadata and self.globalStep > 0:
                     tf.summary.trace_export(name=f'{self.model.__class__.__name__}{self.globalStep}', step=self.globalStep, profiler_outdir=f'{self.tensorboardPath}/evaluateGraph')
+        self.outputSaver.save_outputs(batch=batch, outputs=outputs, globalStep=self.globalStep)
         return outputs, loss, metrics
 
     def checkpoint(self):
