@@ -43,7 +43,7 @@ class ModelManager:
             with self.trainingSummaryWriter.as_default():
                 tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
                 if withMetadata and self.globalStep > 0:
-                    tf.summary.trace_export(name=f'{self.model.__class__.__name__}{self.globalStep}', step=self.globalStep, profiler_outdir=get_path(self.tensorboardPath, 'trainGraph'))
+                    tf.summary.trace_export(name=f'{self.model.__class__.__name__}{self.globalStep}', step=self.globalStep, profiler_outdir=f'{self.tensorboardPath}/trainGraph')
         self.globalStep += 1
         return loss
 
@@ -61,7 +61,7 @@ class ModelManager:
                 for histogramName, histogramMetric in metrics.get_histogram_metrics().items():
                     tf.summary.histogram(name=f'Evaluation/{histogramName}', data=histogramMetric, step=self.globalStep)
                 if withMetadata and self.globalStep > 0:
-                    tf.summary.trace_export(name=f'{self.model.__class__.__name__}{self.globalStep}', step=self.globalStep, profiler_outdir=get_path(self.tensorboardPath, 'evaluateGraph'))
+                    tf.summary.trace_export(name=f'{self.model.__class__.__name__}{self.globalStep}', step=self.globalStep, profiler_outdir=f'{self.tensorboardPath}/evaluateGraph')
         return outputs, loss, metrics
 
     def checkpoint(self):
