@@ -19,7 +19,9 @@ class ModelManager:
 
     @property
     def checkpointFolder(self):
-        return Path(self.modelSavePath, 'models', str(self.globalStep))
+        folder = Path(self.modelSavePath, 'models', str(self.globalStep))
+        folder.mkdir(parents=True, exist_ok=True)
+        return folder
 
     def restore_variables(self, path):
         self.model.restore_variables(path=path)
@@ -63,8 +65,6 @@ class ModelManager:
         return outputs, loss, metrics
 
     def checkpoint(self):
-        if not self.saveProtobuf:
-            self.checkpointFolder.mkdir(parents=True, exist_ok=True)
         self.model.checkpoint(path=self.checkpointFolder, packageModel=self.saveProtobuf)
 
     def run(self, stepCount, evaluationSteps, tensorboardSteps, metricSteps, trainingSteps=None):
