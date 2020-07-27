@@ -68,7 +68,7 @@ class DataModel:
             m.from_ = 'from_data'
             m.type_ = NameString(m.type_)
             self.conversions.append(m)
-        elif m.type_ not in ['int', 'str', 'float']:
+        elif m.type_ not in ['int', 'str', 'float', 'bool']:
             raise ValueError(f'Unknown type: {value}')
 
 
