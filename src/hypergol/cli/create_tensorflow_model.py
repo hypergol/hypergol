@@ -9,9 +9,11 @@ from hypergol.hypergol_project import HypergolProject
 def create_model_block(modelBlockName, project):
     content = (
         DataModelRenderer()
-            .add('from hypergol import BaseModelBlock        ')
-            .add('                                      ')
-            .add('                                      ')
+            .add('import tensorflow as tf            ')
+            .add('                                   ')
+            .add('from hypergol import BaseModelBlock')
+            .add('                                   ')
+            .add('                                   ')
             .add('class {className}(BaseModelBlock):         ', className=modelBlockName.asClass)
             .add('                                      ')
             .add('    def __init__(self, *args, **kwargs):  ')
@@ -21,12 +23,12 @@ def create_model_block(modelBlockName, project):
             .add('        """Contains the layer specification of a given block, attached to instance of the block"""')
             .add('        raise NotImplementedError(f"Model block {{self.__class__}} should implement `build` function")')
             .add('                                               ')
-            .add('    def call(self, inputs, training, **kwargs):')
+            .add('    def call(self, blockInputs, **kwargs):')
             .add('        """Contains code for how inputs should be processed, use `training` parameter to switch between tensorflow modes (for dropout etc)"""')
             .add('        raise NotImplementedError(f"model {{self.__class__}} must implement `call`")')
             .add('                                               ')
     ).get()
-    project.create_text_file(content=content, filePath=Path(project.tensorflowModelsPath, modelBlockName.asFileName))
+    project.create_text_file(content=content, filePath=Path(project.tensorflowModelsPath, 'blocks', modelBlockName.asFileName))
 
 
 def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None):
@@ -53,8 +55,8 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
 
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     modelName = NameString(modelName)
-    for block in args:
-        blockName = NameString(block)
+    blockNames = [NameString(block) for block in args]
+    for blockName in blockNames:
         create_model_block(modelBlockName=blockName, project=project)
 
     # TODO(Mike): specify blocks before model, so can take into account dependencies like in DataModel
@@ -63,11 +65,12 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
             .add('import tensorflow as tf               ')
             .add('                                      ')
             .add('from hypergol import BaseModel        ')
+            .add('from hypergol import TensorflowMetrics')
             .add('                                      ')
             .add('                                      ')
             .add('class {className}(BaseModel):         ', className=modelName.asClass)
             .add('                                      ')
-            .add('    def __init__(self, *args, **kwargs):  ')  # TODO(Mike): blocks in here
+            .add('    def __init__(self, {blocks}, *args, **kwargs):  ', blocks=', '.join([blockName.asVariable for blockName in blockNames]))
             .add('        super().__init__(*args, **kwargs) ')
             .add('                                          ')
             .add('    def call(self, inputs, training, **kwargs):')
@@ -85,6 +88,10 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
             .add('    def get_loss(self, outputs, targets):             ')
             .add('        """Fill in the loss function here"""')
             .add('        raise NotImplementedError(f"model {{self.__class__}} must implement `get_loss`")')
+            .add('                                                                ')
+            .add('    def get_metrics(self, inputs, outputs, targets):             ')
+            .add('        """Metric processing, returns TensorflowMetrics class"""')
+            .add('        raise NotImplementedError(f"model {{self.__class__}} must implement `get_metrics`")')
     ).get()
     project.create_text_file(content=content, filePath=Path(project.tensorflowModelsPath, modelName.asFileName))
 

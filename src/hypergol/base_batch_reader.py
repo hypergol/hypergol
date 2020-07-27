@@ -1,4 +1,3 @@
-import tensorflow as tf
 
 
 class BaseBatchReader:
@@ -6,7 +5,7 @@ class BaseBatchReader:
     """
     Base class for batch readers.
 
-    Converts Hypergol datasets to tensorflow datasets for CPU prefetching of batches.
+    Converts Hypergol datasets to batches for training models.
     """
 
     def __init__(self, dataset, batchSize):
@@ -21,10 +20,7 @@ class BaseBatchReader:
         """
         self.dataset = dataset
         self.batchSize = batchSize
-        self.datasetIterator = iter(tf.data.Dataset.from_generator(
-            generator=self.read_batch(),
-            output_types=self.outputTypes
-        ).prefetch(1))
+        self.datasetIterator = iter(self.read_batch())
 
     def __next__(self):
         return next(self.datasetIterator)
@@ -42,8 +38,3 @@ class BaseBatchReader:
     def process_batch(self, batch):
         """Additional batch processing code for model-specific uses"""
         raise NotImplementedError(f'{self.__class__.__name__} must implement process_batch')
-
-    @property
-    def outputTypes(self):
-        """Output types for tensors after batch has been processed"""
-        raise NotImplementedError(f'{self.__class__.__name__} must implement tensorBatchTypes')

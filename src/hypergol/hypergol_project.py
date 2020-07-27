@@ -42,6 +42,7 @@ class HypergolProject:
         self.tasksPath = Path(projectDirectory, 'tasks')
         self.pipelinesPath = Path(projectDirectory, 'pipelines')
         self.tensorflowModelsPath = Path(projectDirectory, 'tensorflow_models')
+        self.tensorflowModelBlocksPath = Path(self.tensorflowModelsPath, 'blocks')
         self.testsPath = Path(projectDirectory, 'tests')
         self._dataModelClasses = []
         self._taskClasses = []
@@ -84,6 +85,9 @@ class HypergolProject:
 
     def create_tensorflow_model_directory(self):
         create_directory(self.tensorflowModelsPath, self.mode)
+
+    def create_tensorflow_model_blocks_directory(self):
+        create_directory(self.tensorflowModelBlocksPath, self.mode)
 
     def create_tests_directory(self):
         create_directory(self.testsPath, self.mode)

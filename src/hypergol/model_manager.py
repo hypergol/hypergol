@@ -1,13 +1,14 @@
 import tensorflow as tf
+from tqdm.auto import tqdm
 from pathlib import Path
 
 
 class ModelManager:
 
-    def __init__(self, model, optimizer, batchGenerator, outputSaver, modelSavePath, tensorboardPath, saveProtobuf=True, restoreVariablesPath=None):
+    def __init__(self, model, optimizer, batchReader, outputSaver, modelSavePath, tensorboardPath, saveProtobuf=True, restoreVariablesPath=None):
         self.model = model
         self.optimizer = optimizer
-        self.batchGenerator = batchGenerator
+        self.batchReader = batchReader
         self.outputSaver = outputSaver
         self.modelSavePath = modelSavePath
         self.tensorboardPath = tensorboardPath
@@ -36,7 +37,7 @@ class ModelManager:
             self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
 
     def train(self, withLogging, withMetadata):
-        batch = next(self.batchGenerator)
+        batch = next(self.batchReader)
         if withMetadata and self.globalStep > 0:
             tf.summary.trace_on(graph=True, profiler=False)
         loss = self.model.train(inputs=batch['inputs'], targets=batch['targets'], optimizer=self.optimizer)
@@ -49,10 +50,10 @@ class ModelManager:
         return loss
 
     def evaluate(self, withLogging, withMetadata):
-        batch = next(self.batchGenerator)
+        batch = next(self.batchReader)
         if withMetadata and self.globalStep > 0:
             tf.summary.trace_on(graph=True, profiler=False)
-        outputs, loss, metrics = self.model.run_evaluation(inputs=batch['inputs'], targets=batch['targets'])
+        outputs, loss, metrics = self.model.evaluate(inputs=batch['inputs'], targets=batch['targets'])
         if withLogging:
             with self.evaluationSummaryWriter.as_default():
                 tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
@@ -68,14 +69,14 @@ class ModelManager:
     def checkpoint(self):
         self.model.checkpoint(path=self.checkpointFolder, packageModel=self.saveProtobuf)
 
-    def run(self, stepCount, evaluationSteps, tensorboardSteps, metricSteps, trainingSteps=None):
+    def run(self, stepCount, evaluationSteps, tensorboardSteps, metadataSteps, trainingSteps=None):
         if trainingSteps is None:
-            trainingSteps = list(range(evaluationSteps))
+            trainingSteps = range(len(evaluationSteps))
         self.initialize()
-        for k in range(stepCount):
+        for k in tqdm(range(stepCount)):
             if k in trainingSteps:
-                self.train(withLogging=k in tensorboardSteps, withMetadata=k in metricSteps)
+                self.train(withLogging=k in tensorboardSteps, withMetadata=k in metadataSteps)
             if k in evaluationSteps:
                 self.model.checkpoint(path=self.checkpointFolder)
-                self.evaluate(withLogging=k in tensorboardSteps, withMetadata=k in metricSteps)
+                self.evaluate(withLogging=k in tensorboardSteps, withMetadata=k in metadataSteps)
         self.model.checkpoint(path=self.checkpointFolder)
