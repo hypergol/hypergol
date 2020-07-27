@@ -16,6 +16,7 @@ class ModelManager:
         self.globalStep = 0
         self.trainingSummaryWriter = None
         self.evaluationSummaryWriter = None
+        self.initialize()
 
     @property
     def checkpointFolder(self):
