@@ -1,34 +1,17 @@
 from pathlib import Path
 import fire
 
-from hypergol.cli.data_model_renderer import DataModelRenderer
 from hypergol.name_string import NameString
 from hypergol.hypergol_project import HypergolProject
 
 
 def create_model_block(modelBlockName, project):
-    content = (
-        DataModelRenderer()
-            .add('import tensorflow as tf            ')
-            .add('                                   ')
-            .add('from hypergol import BaseModelBlock')
-            .add('                                   ')
-            .add('                                   ')
-            .add('class {className}(BaseModelBlock):         ', className=modelBlockName.asClass)
-            .add('                                      ')
-            .add('    def __init__(self, *args, **kwargs):  ')
-            .add('        super().__init__(*args, **kwargs) ')
-            .add('                                          ')
-            .add('    def build(self, **kwargs):')
-            .add('        """Contains the layer specification of a given block, attached to instance of the block"""')
-            .add('        raise NotImplementedError(f"Model block {{self.__class__}} should implement `build` function")')
-            .add('                                               ')
-            .add('    def call(self, blockInputs, **kwargs):')
-            .add('        """Contains code for how inputs should be processed, use `training` parameter to switch between tensorflow modes (for dropout etc)"""')
-            .add('        raise NotImplementedError(f"model {{self.__class__}} must implement `call`")')
-            .add('                                               ')
-    ).get()
-    project.create_text_file(content=content, filePath=Path(project.tensorflowModelsPath, 'blocks', modelBlockName.asFileName))
+    content = project.render(
+        templateName='tensorflow_model_block.py.j2',
+        templateData={'blockName': modelBlockName.asClass},
+        filePath=Path(project.tensorflowModelsPath, 'blocks', modelBlockName.asFileName)
+    )
+    return content
 
 
 def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None):
@@ -60,40 +43,15 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
         create_model_block(modelBlockName=blockName, project=project)
 
     # TODO(Mike): specify blocks before model, so can take into account dependencies like in DataModel
-    content = (
-        DataModelRenderer()
-            .add('import tensorflow as tf               ')
-            .add('                                      ')
-            .add('from hypergol import BaseModel        ')
-            .add('from hypergol import TensorflowMetrics')
-            .add('                                      ')
-            .add('                                      ')
-            .add('class {className}(BaseModel):         ', className=modelName.asClass)
-            .add('                                      ')
-            .add('    def __init__(self, {blocks}, *args, **kwargs):  ', blocks=', '.join([blockName.asVariable for blockName in blockNames]))
-            .add('        super().__init__(*args, **kwargs) ')
-            .add('                                          ')
-            .add('    def call(self, inputs, training, **kwargs):')
-            .add('        """Model processing code in here"""    ')
-            .add('        raise NotImplementedError(f"model {{self.__class__}} must implement `call`")')
-            .add('                                               ')
-            .add('    @tf.function(input_signature=[                    ')
-            .add('        tf.TensorSpec(shape=[None], dtype=tf.float32, name="firstInput"),')
-            .add('        tf.TensorSpec(shape=[None], dtype=tf.float32, name="secondInput")')
-            .add('    ])                                                                   ')
-            .add('    def get_outputs(self, first_input, second_input):                    ')
-            .add('        """Signature definitions + processing for model serving come from here"""')
-            .add('        raise NotImplementedError(f"model {{self.__class__}} must implement `get_outputs`")')
-            .add('                                                              ')
-            .add('    def get_loss(self, outputs, targets):             ')
-            .add('        """Fill in the loss function here"""')
-            .add('        raise NotImplementedError(f"model {{self.__class__}} must implement `get_loss`")')
-            .add('                                                                ')
-            .add('    def get_metrics(self, inputs, outputs, targets):             ')
-            .add('        """Metric processing, returns TensorflowMetrics class"""')
-            .add('        raise NotImplementedError(f"model {{self.__class__}} must implement `get_metrics`")')
-    ).get()
-    project.create_text_file(content=content, filePath=Path(project.tensorflowModelsPath, modelName.asFileName))
+    content = project.render(
+        templateName='tensorflow_model.py.j2',
+        templateData={
+            'modelName': modelName.asClass,
+            'concatBlockNames': ', '.join([blockName.asVariable for blockName in blockNames]),
+            'blockNames': blockNames
+        },
+        filePath=Path(project.tensorflowModelsPath, modelName.asFileName)
+    )
 
     # TODO(Mike): need tests
     print('')

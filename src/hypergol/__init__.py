@@ -8,7 +8,7 @@ from .dataset import Dataset
 from .dataset import DatasetFactory
 from .dataset import RepoData
 from .model_manager import ModelManager
-from .pickle_saver import PickleSaver
+from .model_output_pickle_saver import ModelOutputPickleSaver
 from .simple_task import SimpleTask
 from .source import Source
 from .task import Task

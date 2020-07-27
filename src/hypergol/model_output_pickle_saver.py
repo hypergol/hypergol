@@ -2,7 +2,7 @@ import pickle
 from pathlib import Path
 
 
-class PickleSaver:
+class ModelOutputPickleSaver:
 
     def __init__(self, savePath):
         self.savePath = savePath

@@ -1,0 +1,33 @@
+import tensorflow as tf
+
+from hypergol import BaseModel
+from hypergol import TensorflowMetrics
+
+
+class {{ modelName }}(BaseModel):
+
+    def __init__(self, {{ concatBlockNames }}, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        {%- for blockName in blockNames %}
+        self.{{ blockName.asVariable }} = {{ blockName.asVariable }}
+        {%- endfor %}
+
+    def call(self, inputs, training, **kwargs):
+        """Model processing code in here"""
+        raise NotImplementedError(f"model {self.__class__} must implement `call`")
+
+    @tf.function(input_signature=[
+        tf.TensorSpec(shape=[None], dtype=tf.float32, name="firstInput"),
+        tf.TensorSpec(shape=[None], dtype=tf.float32, name="secondInput")
+    ])
+    def get_outputs(self, first_input, second_input):
+        """Signature definitions + processing for model serving come from here"""
+        raise NotImplementedError(f"model {self.__class__} must implement `get_outputs`")
+
+    def get_loss(self, outputs, targets):
+        """Fill in the loss function here"""
+        raise NotImplementedError(f"model {self.__class__} must implement `get_loss`")
+
+    def get_metrics(self, inputs, outputs, targets):
+        """Metric processing, returns TensorflowMetrics class"""
+        raise NotImplementedError(f"model {self.__class__} must implement `get_metrics`")
