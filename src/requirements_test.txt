@@ -4,3 +4,4 @@ pylint==2.5.3
 mock==4.0.2
 Jinja2==2.11.2
 tensorflow==2.1.0
+tqdm==4.48.0
