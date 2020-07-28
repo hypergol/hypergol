@@ -4,7 +4,9 @@ from hypergol.base_model_output_saver import BaseModelOutputSaver
 
 
 class ModelOutputPickleSaver(BaseModelOutputSaver):
-
+    """
+        Saves model outputs as .pkl files
+    """
     def __init__(self, savePath):
         super().__init__(savePath=savePath)
 
