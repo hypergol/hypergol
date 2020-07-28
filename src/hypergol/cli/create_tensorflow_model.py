@@ -14,7 +14,7 @@ def create_model_block(modelBlockName, project):
     return content
 
 
-def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None):
+def create_model(modelName, batchReaderName, *args, projectDirectory='.', dryrun=None, force=None):
     """Generates model class
 
     Fails if the target file already exist unless ``force=True`` or ``--force`` in CLI is set.
@@ -23,6 +23,8 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
     ----------
     modelName : string (CamelCase)
         Name of the model to be created
+    batchReaderName: string (CamelCase)
+        Name of the batchReader to be created for the model
     projectDirectory : string (default='.')
         Location of the project directory, the code will be created in ``projectDirectory/data_models/class_name.py``.
     dryrun : bool (default=None)
@@ -38,12 +40,13 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
 
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     modelName = NameString(modelName)
+    batchReaderName = NameString(batchReaderName)
     blockNames = [NameString(block) for block in args]
     for blockName in blockNames:
         create_model_block(modelBlockName=blockName, project=project)
 
     # TODO(Mike): specify blocks before model, so can take into account dependencies like in DataModel?
-    content = project.render(
+    modelContent = project.render(
         templateName='tensorflow_model.py.j2',
         templateData={
             'modelName': modelName.asClass,
@@ -53,12 +56,30 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
         filePath=Path(project.tensorflowModelsPath, modelName.asFileName)
     )
 
+    batchReaderContent = project.render(
+        templateName='tensorflow_batch_reader.py.j2',
+        templateData={
+            'batchReaderName': batchReaderName
+        },
+        filePath=Path(project.tensorflowModelsPath, batchReaderName.asFileName)
+    )
+
+    trainingScriptContent = project.render(
+        templateName='tensorflow_model_training_script.py.j2',
+        templateData={
+            'modelName': modelName,
+            'batchReaderName': batchReaderName,
+            'blockNames': blockNames
+        },
+        filePath=Path(project.tensorflowModelsPath, f'{modelName.asSnake}_training_script.py')
+    )
+
     print('')
     print(f'Class {modelName} was created.{project.modeMessage}')
     print('')
 
     if project.isDryRun:
-        return content
+        return modelContent, batchReaderContent
     return None
 
 

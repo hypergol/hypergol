@@ -10,8 +10,8 @@ class {{ blockName }}(BaseModelBlock):
 
     def build(self, **kwargs):
         """Contains the layer specification of a given block, attached to instance of the block"""
-        raise NotImplementedError(f"Model block {{self.__class__}} should implement `build` function")
+        raise NotImplementedError(f"Model block {self.__class__} should implement `build` function")
 
     def call(self, blockInputs, **kwargs):
         """Contains code for how inputs should be processed, use `training` parameter to switch between tensorflow modes (for dropout etc)"""
-        raise NotImplementedError(f"model {{self.__class__}} must implement `call`")
+        raise NotImplementedError(f"model {self.__class__} must implement `call`")

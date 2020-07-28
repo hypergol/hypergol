@@ -1,0 +1,19 @@
+from hypergol import BaseBatchReader
+
+
+class {{ batchReaderName }}(BaseBatchReader):
+
+    def __init__(self, dataset, batchSize):
+        super().__init__(dataset=dataset, batchSize=batchSize)
+
+    def process_batch(self, batch):
+        """Contains batch processing code"""
+        batch = {
+            'batchIds': [],
+            'inputs': {
+                'input1': [],
+                'input2': []
+            },
+            'targets': []
+        }
+        raise NotImplementedError(f"Model block {self.__class__} should implement `process_batch` function")
