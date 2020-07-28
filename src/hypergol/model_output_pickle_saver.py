@@ -1,11 +1,12 @@
 import pickle
 from pathlib import Path
+from hypergol.base_model_output_saver import BaseModelOutputSaver
 
 
-class ModelOutputPickleSaver:
+class ModelOutputPickleSaver(BaseModelOutputSaver):
 
     def __init__(self, savePath):
-        self.savePath = savePath
+        super().__init__(savePath=savePath)
 
     def save_outputs(self, batch, outputs, globalStep):
         savePath = Path(self.savePath, 'predictions', str(globalStep))

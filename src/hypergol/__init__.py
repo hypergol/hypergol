@@ -3,11 +3,12 @@ from .base_batch_reader import BaseBatchReader
 from .base_data import BaseData
 from .base_model import BaseModel
 from .base_model_block import BaseModelBlock
+from .base_model_output_saver import BaseModelOutputSaver
 from .delayed import Delayed
 from .dataset import Dataset
 from .dataset import DatasetFactory
 from .dataset import RepoData
-from .model_manager import ModelManager
+from .tensorflow_model_manager import TensorflowModelManager
 from .model_output_pickle_saver import ModelOutputPickleSaver
 from .simple_task import SimpleTask
 from .source import Source

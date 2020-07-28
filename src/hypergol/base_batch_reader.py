@@ -1,7 +1,6 @@
 
 
 class BaseBatchReader:
-
     """
     Base class for batch readers.
 
@@ -10,7 +9,6 @@ class BaseBatchReader:
 
     def __init__(self, dataset, batchSize):
         """
-
         Parameters
         ----------
         dataset: Dataset
