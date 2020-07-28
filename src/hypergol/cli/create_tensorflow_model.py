@@ -42,7 +42,7 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
     for blockName in blockNames:
         create_model_block(modelBlockName=blockName, project=project)
 
-    # TODO(Mike): specify blocks before model, so can take into account dependencies like in DataModel
+    # TODO(Mike): specify blocks before model, so can take into account dependencies like in DataModel?
     content = project.render(
         templateName='tensorflow_model.py.j2',
         templateData={
@@ -53,7 +53,6 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
         filePath=Path(project.tensorflowModelsPath, modelName.asFileName)
     )
 
-    # TODO(Mike): need tests
     print('')
     print(f'Class {modelName} was created.{project.modeMessage}')
     print('')
