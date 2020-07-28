@@ -79,7 +79,7 @@ def create_model(modelName, batchReaderName, *args, projectDirectory='.', dryrun
     print('')
 
     if project.isDryRun:
-        return modelContent, batchReaderContent
+        return modelContent, batchReaderContent, trainingScriptContent
     return None
 
 
