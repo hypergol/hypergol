@@ -27,14 +27,14 @@ class TestBaseTensorflowModelBlock(TestCase):
         super(TestBaseTensorflowModelBlock, self).__init__(methodName=methodName)
         self.location = 'test_tensorflow_model_block'
         self.exampleEmbeddingSize = 1
+        self.exampleLogits = tf.constant([2, 3, 4], dtype=tf.float32)
+        self.expectedOutput = np.array([0.09003057, 0.24472848, 0.66524094], dtype=np.float32)
 
     def setUp(self):
         super().setUp()
         Path(self.location).mkdir()
         self.block = ModelBlockExample(exampleEmbeddingSize=self.exampleEmbeddingSize)
         self.blockSaveFile = f'{self.location}/{self.block.get_name()}.json'
-        self.logits = tf.constant([2, 3, 4], dtype=tf.float32)
-        self.expectedOutput = np.array([0.09003057, 0.24472848, 0.66524094], dtype=np.float32)
 
     def tearDown(self):
         super().tearDown()
@@ -49,7 +49,7 @@ class TestBaseTensorflowModelBlock(TestCase):
 
     def test_block_call(self):
         self.block.build(inputs_shape=0)
-        outputTensor = self.block(self.logits)
+        outputTensor = self.block(self.exampleLogits)
         self.assertTrue((outputTensor.numpy() == self.expectedOutput).all())
 
     def test_get_config(self):

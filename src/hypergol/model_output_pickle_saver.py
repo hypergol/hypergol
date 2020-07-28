@@ -10,8 +10,15 @@ class ModelOutputPickleSaver(BaseModelOutputSaver):
     def __init__(self, savePath):
         super().__init__(savePath=savePath)
 
-    def save_outputs(self, batch, outputs, globalStep):
+    def get_file_save_path(self, globalStep):
         savePath = Path(self.savePath, 'predictions', str(globalStep))
         savePath.mkdir(parents=True, exist_ok=True)
-        pickle.dump(batch['batchIds'], open(f'{savePath}/batchIds.pkl', 'wb'))
-        pickle.dump(outputs, open(f'{savePath}/outputs.pkl', 'wb'))
+        return savePath
+
+    def save_outputs(self, batch, outputs, globalStep):
+        savePath = self.get_file_save_path(globalStep=globalStep)
+        saveData = {
+            'batchIds': batch['batchIds'],
+            'outputs': outputs
+        }
+        pickle.dump(saveData, open(f'{savePath}/outputs.pkl', 'wb'))
