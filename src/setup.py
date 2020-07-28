@@ -1,6 +1,9 @@
 import os
 from setuptools import setup
 
+with open("../README.md", "r") as fh:
+    long_description = fh.read()
+
 setupDirectory = os.path.dirname(os.path.realpath(__file__))
 
 setup(
@@ -9,7 +12,7 @@ setup(
     author="Laszlo Sragner",
     author_email="hypergol.developer@gmail.com",
     description="An opinionated multithreaded Data Science framework",
-    long_description='',
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hypergol/hypergol",
     packages=['hypergol', 'hypergol.cli'],
