@@ -5,8 +5,8 @@ from hypergol import BaseTensorflowModelBlock
 
 class {{ blockName }}(BaseTensorflowModelBlock):
 
-    def __init__(self, *args, **kwargs):
-        super({{ blockName }}).__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super({{ blockName }}).__init__(**kwargs)
 
     def build(self, **kwargs):
         """Contains the layer specification of a given block, attached to instance of the block"""

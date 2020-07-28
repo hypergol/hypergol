@@ -6,7 +6,7 @@ from hypergol import TensorflowMetrics
 
 class {{ modelName }}(BaseTensorflowModel):
 
-    def __init__(self, {{ concatBlockNames }}, *args, **kwargs):
+    def __init__(self, {{ concatBlockNames }}, **kwargs):
         super().__init__(*args, **kwargs)
         {%- for blockName in blockNames %}
         self.{{ blockName.asVariable }} = {{ blockName.asVariable }}

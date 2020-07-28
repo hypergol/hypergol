@@ -15,7 +15,7 @@ class ModelBlockExample(BaseTensorflowModelBlock):
     def build(self, inputs_shape):
         self.softmaxLayer = tf.keras.layers.Softmax(axis=-1)
 
-    def call(self, inputs, *args, **kwargs):
+    def call(self, inputs, **kwargs):
         return self.softmaxLayer(inputs)
 
 

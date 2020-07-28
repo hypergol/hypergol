@@ -27,6 +27,6 @@ class BaseTensorflowModelBlock(layers.Layer):
         """Contains the layer specification of a given block, attached to instance of the block"""
         raise NotImplementedError(f'Model block {self.__class__} should implement `build` function')
 
-    def call(self, inputs, *args, **kwargs):
+    def call(self, inputs, **kwargs):
         """Contains code for how inputs should be processed"""
         raise NotImplementedError(f'Model block {self.__class__} should implement `call` function')
