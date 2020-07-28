@@ -1,3 +1,5 @@
+# pylint: disable=E0611
+
 import inspect
 import json
 from tensorflow.python.keras import layers

@@ -1,3 +1,5 @@
+# pylint: disable=E0611
+
 import inspect
 import tensorflow as tf
 from tensorflow.python import keras
