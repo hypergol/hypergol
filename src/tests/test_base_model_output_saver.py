@@ -1,8 +1,8 @@
 import os
 import json
 from pathlib import Path
+from unittest import TestCase
 from hypergol.base_model_output_saver import BaseModelOutputSaver
-from tests.hypergol_test_case import HypergolTestCase
 
 
 TEST_SAVE_FILENAME = 'test_save_{globalStep}.json'
@@ -23,39 +23,30 @@ class ModelOutputSaverExample(BaseModelOutputSaver):
         json.dump(saveData, open(f'{self.savePath}/{fileName}', 'w'))
 
 
-class TestBaseModelOutputSaver(HypergolTestCase):
+class TestBaseModelOutputSaver(TestCase):
 
     def __init__(self, methodName='runTest'):
-        super(TestBaseModelOutputSaver, self).__init__(
-            location='test_output_saver_location',
-            project='test_output_saver',
-            branch='branch',
-            chunkCount=16,
-            methodName=methodName
-        )
+        super(TestBaseModelOutputSaver, self).__init__(methodName=methodName)
+        self.location = 'test_output_saver_location'
 
     def setUp(self):
         super().setUp()
-        self.saveDir = Path('./test_output_saver_location')
-        self.saveDir.mkdir()
+        Path(self.location).mkdir()
         self.saveData = {
             'batch': list(range(3)),
             'outputs': list(range(10)),
             'globalStep': 3
         }
         self.saveFilename = TEST_SAVE_FILENAME.format(globalStep=self.saveData["globalStep"])
-        self.fullSavePath = f'{self.saveDir}/{self.saveFilename}'
+        self.fullSavePath = f'{self.location}/{self.saveFilename}'
 
     def tearDown(self):
         super().tearDown()
-        try:
-            os.remove(self.fullSavePath)
-        except FileNotFoundError:
-            pass
-        self.clean_directories()
+        os.remove(self.fullSavePath)
+        os.rmdir(self.location)
 
     def test_model_output_saver(self):
-        outputSaver = ModelOutputSaverExample(savePath=self.saveDir)
+        outputSaver = ModelOutputSaverExample(savePath=self.location)
         outputSaver.save_outputs(batch=self.saveData['batch'], outputs=self.saveData['outputs'], globalStep=self.saveData['globalStep'])
         reloadedData = json.load(open(self.fullSavePath, 'r'))
         self.assertEqual(reloadedData, self.saveData)
