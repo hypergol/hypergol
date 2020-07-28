@@ -64,7 +64,7 @@ class Test(BaseData):
 TEST_CLASS_WITH_DATA_MODEL_DEPENDENCY = """
 from typing import List
 from hypergol import BaseData
-from .other_test import OtherTest
+from data_models.other_test import OtherTest
 
 
 class Test(BaseData):
