@@ -25,8 +25,8 @@ class TestBaseBatchReader(HypergolTestCase):
 
     def __init__(self, methodName='runTest'):
         super(TestBaseBatchReader, self).__init__(
-            location='test_task_location',
-            project='test_task',
+            location='test_batch_reader_location',
+            project='test_batch_reader',
             branch='branch',
             chunkCount=16,
             methodName=methodName
