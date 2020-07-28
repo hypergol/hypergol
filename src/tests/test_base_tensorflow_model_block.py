@@ -1,61 +1,49 @@
-from hypergol.base_batch_reader import BaseBatchReader
-from tests.hypergol_test_case import DataClass1
-from tests.hypergol_test_case import HypergolTestCase
+import numpy as np
+import tensorflow as tf
+from unittest import TestCase
+from hypergol.base_tensorflow_model_block import BaseTensorflowModelBlock
+tf.config.experimental.set_visible_devices([], 'GPU')
 
 
-class BatchReaderExample(BaseBatchReader):
+class ModelBlockExample(BaseTensorflowModelBlock):
 
-    def __init__(self, dataset, batchSize):
-        super(BatchReaderExample, self).__init__(dataset=dataset, batchSize=batchSize)
+    def __init__(self, exampleEmbeddingSize):
+        super(ModelBlockExample, self).__init__()
+        self.exampleEmbeddingSize = exampleEmbeddingSize
+        self.softmaxLayer = None
 
-    def process_batch(self, batch):
-        # needs to produce unordered sets for testing, because it's hard to know the order in which data will be read from Dataset
-        output = {
-            'batchIds': {v.id_ for v in batch},
-            'inputs': {
-                'input1': {v.id_ for v in batch},
-                'input2': {v.value1 for v in batch}
-            },
-            'targets': {v.value1 for v in batch}
-        }
-        return output
+    def build(self, inputs_shape):
+        self.softmaxLayer = tf.keras.layers.Softmax(axis=-1)
+
+    def call(self, inputs, *args, **kwargs):
+        return self.softmaxLayer(inputs)
 
 
-class TestBaseBatchReader(HypergolTestCase):
+class TestBaseTensorflowModelBlock(TestCase):
 
     def __init__(self, methodName='runTest'):
-        super(TestBaseBatchReader, self).__init__(
-            location='test_batch_reader_location',
-            project='test_batch_reader',
-            branch='branch',
-            chunkCount=16,
-            methodName=methodName
-        )
+        super(TestBaseTensorflowModelBlock, self).__init__(methodName=methodName)
+        self.location = 'test_tensorflow_model_block'
+        self.exampleEmbeddingSize = 1
 
     def setUp(self):
         super().setUp()
-        self.sampleLength = 3
-        self.dataset1 = self.create_test_dataset(
-            dataset=self.datasetFactory.get(dataType=DataClass1, name='data1'),
-            content=[DataClass1(id_=k, value1=k + 1) for k in range(self.sampleLength)]
-        )
-        self.expectedOutput = {
-            'batchIds': set(range(0, self.sampleLength)),
-            'inputs': {
-                'input1': set(range(0, self.sampleLength)),
-                'input2': set(range(1, self.sampleLength + 1))
-            },
-            'targets': set(range(1, self.sampleLength + 1))
-        }
+        self.block = ModelBlockExample(exampleEmbeddingSize=self.exampleEmbeddingSize)
+        self.logits = tf.constant([2, 3, 4], dtype=tf.float32)
+        self.expectedOutput = np.array([0.09003057, 0.24472848, 0.66524094], dtype=np.float32)
 
     def tearDown(self):
         super().tearDown()
-        self.delete_if_exists(dataset=self.dataset1)
-        self.clean_directories()
 
-    def test_batch_reader(self):
-        batchReader = BatchReaderExample(
-            dataset=self.dataset1,
-            batchSize=self.sampleLength
-        )
-        self.assertEqual(next(batchReader), self.expectedOutput)
+    def test_block_build(self):
+        self.block.build(inputs_shape=0)
+
+    def test_block_call(self):
+        self.block.build(inputs_shape=0)
+        outputTensor = self.block(self.logits)
+        self.assertTrue((outputTensor.numpy() == self.expectedOutput).all())
+
+    def test_get_config(self):
+        self.block.build(inputs_shape=0)
+        config = self.block.get_config()
+        self.assertEqual(config['exampleEmbeddingSize'], self.exampleEmbeddingSize)
