@@ -23,10 +23,6 @@ class BaseTensorflowModelBlock(layers.Layer):
     def load_from_dictionary(cls, directory):
         return cls.from_config(config=json.load(open(f'{directory}/{cls.__name__}.json', 'r')))
 
-    def copy(self, **kwargs):
-        config = self.get_config()
-        return self.__class__.from_config(config={**config, **kwargs})
-
     def build(self, inputs_shape):
         """Contains the layer specification of a given block, attached to instance of the block"""
         raise NotImplementedError(f'Model block {self.__class__} should implement `build` function')
