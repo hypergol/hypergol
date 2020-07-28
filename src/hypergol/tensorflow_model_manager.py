@@ -1,6 +1,6 @@
+from pathlib import Path
 import tensorflow as tf
 from tqdm.auto import tqdm
-from pathlib import Path
 
 
 class TensorflowModelManager:
