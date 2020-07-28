@@ -1,9 +1,9 @@
 import tensorflow as tf
 
-from hypergol import BaseModelBlock
+from hypergol import BaseTensorflowModelBlock
 
 
-class {{ blockName }}(BaseModelBlock):
+class {{ blockName }}(BaseTensorflowModelBlock):
 
     def __init__(self, *args, **kwargs):
         super({{ blockName }}).__init__(*args, **kwargs)

@@ -3,15 +3,15 @@ import json
 from tensorflow.python.keras import layers
 
 
-class BaseModelBlock(layers.Layer):
+class BaseTensorflowModelBlock(layers.Layer):
     """Subclasses tensorflow-keras layers to provide logical groupings of functionality/layers."""
 
     def __init__(self, *args, **kwargs):
-        super(BaseModelBlock, self).__init__(*args, **kwargs)
+        super(BaseTensorflowModelBlock, self).__init__(*args, **kwargs)
 
     def get_config(self):
         parameters = {k: v for k, v in self.__dict__.items() if k in inspect.signature(self.__class__).parameters.keys()}
-        config = super(BaseModelBlock, self).get_config()
+        config = super(BaseTensorflowModelBlock, self).get_config()
         for name, value in parameters.items():
             config.update({name: value})
         return config

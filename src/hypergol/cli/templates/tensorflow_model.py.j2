@@ -1,10 +1,10 @@
 import tensorflow as tf
 
-from hypergol import BaseModel
+from hypergol import BaseTensorflowModel
 from hypergol import TensorflowMetrics
 
 
-class {{ modelName }}(BaseModel):
+class {{ modelName }}(BaseTensorflowModel):
 
     def __init__(self, {{ concatBlockNames }}, *args, **kwargs):
         super().__init__(*args, **kwargs)

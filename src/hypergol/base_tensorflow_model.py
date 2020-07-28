@@ -2,13 +2,13 @@ import inspect
 import tensorflow as tf
 from tensorflow.python import keras
 
-from hypergol.base_model_block import BaseModelBlock
+from hypergol.base_tensorflow_model_block import BaseTensorflowModelBlock
 
 
-class BaseModel(keras.Model):
+class BaseTensorflowModel(keras.Model):
 
     def __init__(self, *args, **kwargs):
-        super(BaseModel, self).__init__(*args, **kwargs)
+        super(BaseTensorflowModel, self).__init__(*args, **kwargs)
 
     def call(self, inputs, training, **kwargs):
         raise NotImplementedError(f'{self.__class__} model must implement `call` method')
@@ -44,7 +44,7 @@ class BaseModel(keras.Model):
             self.package_model(path=f'{path}/packaged_model')
         parameters = {k: v for k, v in self.__dict__.items() if k in inspect.signature(self.__class__).parameters.keys()}
         for k, v in parameters.items():
-            if isinstance(v, BaseModelBlock):
+            if isinstance(v, BaseTensorflowModelBlock):
                 v.save_to_dictionary(directory=path)
         self.save_variables(path=path)
 
