@@ -107,7 +107,7 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
         .add('from typing import List               ', dataModel.isListDependent)
         .add('from datetime import {0}              ', sorted(list({m.type_ for m in dataModel.conversions if str(m.type_) in TEMPORAL})))
         .add('from hypergol import BaseData         ')
-        .add('from .{snake} import {name}', [{'snake': m.type_.asSnake, 'name': m.type_} for m in dataModel.conversions if str(m.type_) not in TEMPORAL])
+        .add('from data_models.{snake} import {name}', [{'snake': m.type_.asSnake, 'name': m.type_} for m in dataModel.conversions if str(m.type_) not in TEMPORAL])
         .add('                                      ')
         .add('                                      ')
         .add('class {className}(BaseData):          ', className=dataModel.className)
