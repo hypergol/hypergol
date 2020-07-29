@@ -8,7 +8,7 @@ class TensorflowModelManager:
     Class for managing tensorflow model training.
     """
 
-    def __init__(self, model, optimizer, batchReader, modelSavePath, tensorboardPath, outputSaver=None, saveProtobuf=True, restoreVariablesPath=None):
+    def __init__(self, model, optimizer, batchReader, modelSavePath, tensorboardPath, outputSaver=None, restoreVariablesPath=None):
         """
         Parameters
         ----------
@@ -24,8 +24,6 @@ class TensorflowModelManager:
             tensorboard path for metrics logging
         outputSaver: BaseModelOutputSaver
             subclass of model output saver class that can save each evaluation batch
-        saveProtobuf: bool
-            save the model protobuf at each checkpoint step
         restoreVariablesPath: path
             path to restore variables from previously trained model
         """
@@ -35,7 +33,6 @@ class TensorflowModelManager:
         self.outputSaver = outputSaver
         self.modelSavePath = modelSavePath
         self.tensorboardPath = tensorboardPath
-        self.saveProtobuf = saveProtobuf
         self.restoreVariablesPath = restoreVariablesPath
         self.globalStep = 0
         self.trainingSummaryWriter = None
@@ -119,7 +116,7 @@ class TensorflowModelManager:
 
     def checkpoint(self):
         """checkpoint the model"""
-        self.model.checkpoint(path=self.checkpointFolder, packageModel=self.saveProtobuf)
+        self.model.checkpoint(path=self.checkpointFolder)
 
     def run(self, stepCount, evaluationSteps, tensorboardSteps, metadataSteps, trainingSteps=None):
         """runs a training schedule

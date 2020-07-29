@@ -1,4 +1,4 @@
-# pylint: disable=E0611
+# pylint: disable=E0611, W0235
 
 import inspect
 import json

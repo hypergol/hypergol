@@ -1,4 +1,4 @@
-# pylint: disable=E0611
+# pylint: disable=E0611, W0235
 
 import inspect
 import tensorflow as tf
@@ -41,9 +41,8 @@ class BaseTensorflowModel(keras.Model):
     def restore_variables(self, path):
         self.load_weights(f'{path}/{self.__class__.__name__}.h5')
 
-    def checkpoint(self, path, packageModel=False):
-        if packageModel:
-            self.package_model(path=f'{path}/packaged_model')
+    def checkpoint(self, path):
+        self.package_model(path=f'{path}/packaged_model')
         parameters = {k: v for k, v in self.__dict__.items() if k in inspect.signature(self.__class__).parameters.keys()}
         for k, v in parameters.items():
             if isinstance(v, BaseTensorflowModelBlock):
