@@ -1,5 +1,6 @@
 from .pipeline import Pipeline
 from .base_data import BaseData
+from .base_tensorflow_model_block import BaseTensorflowModelBlock
 from .delayed import Delayed
 from .dataset import Dataset
 from .dataset import DatasetFactory
