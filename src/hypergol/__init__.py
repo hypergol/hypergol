@@ -1,4 +1,5 @@
 from .pipeline import Pipeline
+from .base_batch_reader import BaseBatchReader
 from .base_data import BaseData
 from .delayed import Delayed
 from .dataset import Dataset
