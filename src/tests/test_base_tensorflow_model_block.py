@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import shutil
 import tensorflow as tf
 from pathlib import Path
 from unittest import TestCase
@@ -38,14 +39,11 @@ class TestBaseTensorflowModelBlock(TestCase):
 
     def tearDown(self):
         super().tearDown()
-        try:
-            os.remove(self.blockSaveFile)
-        except FileNotFoundError:
-            pass
-        os.rmdir(self.location)
+        shutil.rmtree(self.location)
 
     def test_block_build(self):
         self.block.build(inputs_shape=0)
+        self.assertNotEqual(self.block.softmaxLayer, None)
 
     def test_block_call(self):
         self.block.build(inputs_shape=0)
@@ -56,9 +54,3 @@ class TestBaseTensorflowModelBlock(TestCase):
         self.block.build(inputs_shape=0)
         config = self.block.get_config()
         self.assertEqual(config['exampleEmbeddingSize'], self.exampleEmbeddingSize)
-
-    def test_dictionary_round_trip(self):
-        self.block.build(inputs_shape=0)
-        self.block.save_to_dictionary(directory=self.location)
-        newBlock = ModelBlockExample.load_from_dictionary(directory=self.location)
-        self.assertEqual(self.block.get_config(), newBlock.get_config())

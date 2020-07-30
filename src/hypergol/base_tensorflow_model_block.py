@@ -1,7 +1,6 @@
 # pylint: disable=E0611, W0235
 
 import inspect
-import json
 from tensorflow.python.keras import layers
 
 
@@ -12,21 +11,15 @@ class BaseTensorflowModelBlock(layers.Layer):
         super(BaseTensorflowModelBlock, self).__init__(**kwargs)
 
     def get_config(self):
-        parameters = {k: v for k, v in self.__dict__.items() if k in inspect.signature(self.__class__).parameters.keys()}
+        constructorParameters = inspect.signature(self.__class__).parameters.keys()
         config = super(BaseTensorflowModelBlock, self).get_config()
-        for name, value in parameters.items():
-            config.update({name: value})
+        for name, value in self.__dict__.items():
+            if name in constructorParameters:
+                config[name] = value
         return config
 
     def get_name(self):
         return self.__class__.__name__
-
-    def save_to_dictionary(self, directory):
-        json.dump(self.get_config(), open(f'{directory}/{self.get_name()}.json', 'w'))
-
-    @classmethod
-    def load_from_dictionary(cls, directory):
-        return cls.from_config(config=json.load(open(f'{directory}/{cls.__name__}.json', 'r')))
 
     def build(self, inputs_shape):
         """Contains the layer specification of a given block, attached to instance of the block"""
