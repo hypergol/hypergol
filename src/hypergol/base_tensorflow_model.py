@@ -9,7 +9,7 @@ class BaseTensorflowModel(keras.Model):
     def __init__(self, **kwargs):
         super(BaseTensorflowModel, self).__init__(**kwargs)
 
-    def call(self, inputs, training, **kwargs):
+    def call(self, inputs, **kwargs):
         raise NotImplementedError(f'{self.__class__} model must implement `call` method')
 
     def train(self, inputs, targets, optimizer):
