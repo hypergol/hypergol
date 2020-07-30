@@ -26,7 +26,7 @@ class BatchProcessorExample(BaseBatchProcessor):
         super(BatchProcessorExample, self).__init__(inputDataset=inputDataset, inputBatchSize=inputBatchSize, outputDataset=outputDataset)
 
     def process_input_batch(self, batch):
-        # sorting needs to happen for testing, because impossible to know ordering of items in batch
+        # sorting needs to happen for testing, because impossible to know ordering of items that come out of dataset
         output = {
             'batchIds': sorted([v.id_ for v in batch]),
             'inputs': {

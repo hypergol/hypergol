@@ -13,10 +13,10 @@ class BaseBatchProcessor:
         ----------
         inputDataset: Dataset
             Hypergol dataset to retrieve batches from
-        outputDataset: Dataset
-            Hypergol dataset to save batches of model-processed samples
         inputBatchSize: int
             number of samples to retrieve
+        outputDataset: Dataset
+            Hypergol dataset to save batches of model-processed samples
         """
         self.inputDataset = inputDataset
         self.inputBatchSize = inputBatchSize
@@ -42,9 +42,9 @@ class BaseBatchProcessor:
 
     def save_batch(self, modelInputs, modelOutputs):
         """Saves batch of model inputs + outputs into Hypergol dataset"""
-        datasetOutputs = self.process_output_batch(modelInputs=modelInputs, modelOutputs=modelOutputs)
+        data = self.process_output_batch(modelInputs=modelInputs, modelOutputs=modelOutputs)
         with self.outputDataset.open('w') as datasetWriter:
-            for output in datasetOutputs:
+            for output in data:
                 datasetWriter.append(output)
 
     def process_output_batch(self, modelInputs, modelOutputs):
