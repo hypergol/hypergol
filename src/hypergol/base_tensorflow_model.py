@@ -1,10 +1,7 @@
 # pylint: disable=E0611, W0235
 
-import inspect
 import tensorflow as tf
 from tensorflow.python import keras
-
-from hypergol.base_tensorflow_model_block import BaseTensorflowModelBlock
 
 
 class BaseTensorflowModel(keras.Model):
@@ -35,25 +32,8 @@ class BaseTensorflowModel(keras.Model):
     def get_metrics(self, inputs, outputs, targets):
         raise NotImplementedError('Must implement `get_metrics` function')
 
-    def save_variables(self, path):
-        self.save_weights(f'{path}/{self.__class__.__name__}.h5', save_format='h5')
-
-    def restore_variables(self, path):
-        self.load_weights(f'{path}/{self.__class__.__name__}.h5')
-
-    def checkpoint(self, path):
-        self.package_model(path=f'{path}/packaged_model')
-        parameters = {k: v for k, v in self.__dict__.items() if k in inspect.signature(self.__class__).parameters.keys()}
-        for k, v in parameters.items():
-            if isinstance(v, BaseTensorflowModelBlock):
-                v.save_to_dictionary(directory=path)
-        self.save_variables(path=path)
-
     def get_outputs(self, **kwargs):
         raise NotImplementedError('Must implement `get_outputs` function')
 
     def get_signatures(self):
         return {'signature_default': self.get_outputs}
-
-    def package_model(self, path):
-        tf.saved_model.save(self, export_dir=path, signatures=self.get_signatures())
