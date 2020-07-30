@@ -1,5 +1,4 @@
 import numpy as np
-import os
 import shutil
 import tensorflow as tf
 from pathlib import Path
@@ -8,6 +7,22 @@ from hypergol.base_tensorflow_model import BaseTensorflowModel
 
 from .test_base_tensorflow_model_block import ModelBlockExample
 tf.config.experimental.set_visible_devices([], 'GPU')
+
+
+class ExampleTrainableBlock:
+
+    class ModelBlockExample(BaseTensorflowModelBlock):
+
+    def __init__(self, exampleEmbeddingSize, **kwargs):
+        super(ModelBlockExample, self).__init__(**kwargs)
+        self.exampleEmbeddingSize = exampleEmbeddingSize
+        self.softmaxLayer = None
+
+    def build(self, inputs_shape):
+        self.softmaxLayer = tf.keras.layers.Softmax(axis=-1)
+
+    def call(self, inputs, **kwargs):
+        return self.softmaxLayer(inputs)
 
 
 class ModelExample(BaseTensorflowModel):
@@ -50,21 +65,32 @@ class TestBaseTensorflowModel(TestCase):
         super().tearDown()
         shutil.rmtree(self.location)
 
-    # def test_block_build(self):
-    #     self.block.build(inputs_shape=0)
-    #
-    # def test_block_call(self):
-    #     self.block.build(inputs_shape=0)
-    #     outputTensor = self.block(self.exampleLogits)
-    #     self.assertTrue((outputTensor.numpy() == self.expectedOutput).all())
-    #
-    # def test_get_config(self):
-    #     self.block.build(inputs_shape=0)
-    #     config = self.block.get_config()
-    #     self.assertEqual(config['exampleEmbeddingSize'], self.exampleEmbeddingSize)
-    #
-    # def test_dictionary_round_trip(self):
-    #     self.block.build(inputs_shape=0)
-    #     self.block.save_to_dictionary(directory=self.location)
-    #     newBlock = ModelBlockExample.load_from_dictionary(directory=self.location)
-    #     self.assertEqual(self.block.get_config(), newBlock.get_config())
+
+    def test_model_call(self, inputs, training, **kwargs):
+        raise NotImplementedError(f'{self.__class__} model must implement `call` method')
+
+    def test_model_train(self, inputs, targets, optimizer):
+        with tf.GradientTape() as tape:
+            outputs = self.call(inputs=inputs, training=True)
+            loss = self.get_loss(outputs=outputs, targets=targets)
+        grads = tape.gradient(loss, self.trainable_variables)
+        optimizer.apply_gradients(zip(grads, self.trainable_variables))
+        return loss
+
+    def test_model_evaluate(self, inputs, targets):
+        outputs = self.call(inputs=inputs, training=False)
+        loss = self.get_loss(outputs=outputs, targets=targets)
+        metrics = self.get_metrics(inputs=inputs, outputs=outputs, targets=targets)
+        return outputs, loss, metrics
+
+    def test_model_get_loss(self, outputs, targets):
+        raise NotImplementedError('Must implement `get_loss` function')
+
+    def test_model_get_metrics(self, inputs, outputs, targets):
+        raise NotImplementedError('Must implement `get_metrics` function')
+
+    def test_model_get_outputs(self, **kwargs):
+        raise NotImplementedError('Must implement `get_outputs` function')
+
+    def test_model_get_signatures(self):
+        return {'signature_default': self.get_outputs}
