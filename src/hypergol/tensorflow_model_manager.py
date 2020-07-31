@@ -119,13 +119,13 @@ class TensorflowModelManager:
         ----------
         stepCount: int
             num total steps in schedule
-        evaluationSteps: list(int)
+        evaluationSteps: List[int]
             which steps to produce metrics on an evaluation sample
-        tensorboardSteps: list(int)
+        tensorboardSteps: List[int]
             which steps to log taining loss to tensorboard
-        metadataSteps: list(int)
+        metadataSteps: List[int]
             which steps to log metadata to tensorboard
-        trainingSteps: list(int)
+        trainingSteps: List[int]
             which steps to train model
         """
         if trainingSteps is None:
