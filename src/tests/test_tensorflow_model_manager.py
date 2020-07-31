@@ -4,10 +4,10 @@ import tensorflow as tf
 from pathlib import Path
 
 from hypergol.tensorflow_model_manager import TensorflowModelManager
-from tests.example_tensorflow_classes import ExampleOutputDataClass
-from tests.example_tensorflow_classes import ExampleTensorflowBatchProcessor
-from tests.example_tensorflow_classes import ExampleTrainableBlock
-from tests.example_tensorflow_classes import TensorflowModelExample
+from tests.tensorflow_test_classes import ExampleOutputDataClass
+from tests.tensorflow_test_classes import ExampleTensorflowBatchProcessor
+from tests.tensorflow_test_classes import ExampleTrainableBlock
+from tests.tensorflow_test_classes import TensorflowModelExample
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import HypergolTestCase
 
