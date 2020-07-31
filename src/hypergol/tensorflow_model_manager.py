@@ -9,7 +9,7 @@ class TensorflowModelManager:
     Class for managing tensorflow model training.
     """
 
-    def __init__(self, model, optimizer, batchProcessor, saveDirectory, tensorboardPath, restoreWeightsPath=None):
+    def __init__(self, model, optimizer, batchProcessor, location, project, branch, name=None, restoreWeightsPath=None):
         """
         Parameters
         ----------
@@ -29,25 +29,29 @@ class TensorflowModelManager:
         self.model = model
         self.optimizer = optimizer
         self.batchProcessor = batchProcessor
-        self.saveDirectory = saveDirectory
-        self.tensorboardPath = tensorboardPath
+        self.location = location
+        self.project = project
+        self.branch = branch
+        self.name = name or self.model.get_name()
         self.restoreWeightsPath = restoreWeightsPath
         self.globalStep = 0
         self.trainingSummaryWriter = None
         self.evaluationSummaryWriter = None
 
     @property
-    def modelSaveDirectory(self):
-        saveDir = Path(self.saveDirectory, 'saved_models', str(self.globalStep))
-        saveDir.mkdir(parents=True, exist_ok=True)
-        return str(saveDir)
+    def tensorboardPath(self):
+        tensorboardPath = Path(self.location, self.project, 'tensorboard', self.branch, self.name)
+        tensorboardPath.mkdir(parents=True, exist_ok=True)
+        return str(tensorboardPath)
 
     def save_model(self):
         """ saves tensorflow model, block definitions, and weights """
-        tf.saved_model.save(self.model, export_dir=self.modelSaveDirectory, signatures=self.model.get_signatures())
+        modelDirectory = Path(self.location, self.project, self.branch, 'models', self.name, str(self.globalStep))
+        modelDirectory.mkdir(parents=True, exist_ok=True)
+        tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures=self.model.get_signatures())
         for modelBlock in self.model.get_model_blocks():
-            json.dump(modelBlock.get_config(), open(f'{self.modelSaveDirectory}/{modelBlock.get_name()}.json', 'w'))
-        self.model.save_weights(f'{self.modelSaveDirectory}/{self.model.get_name()}.h5', save_format='h5')
+            json.dump(modelBlock.get_config(), open(f'{modelDirectory}/{modelBlock.get_name()}.json', 'w'))
+        self.model.save_weights(f'{modelDirectory}/{self.model.get_name()}.h5', save_format='h5')
 
     def restore_model_weights(self):
         """ restores tensorflow model weights """

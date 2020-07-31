@@ -18,10 +18,12 @@ class TestTensorflowModelManager(HypergolTestCase):
 
     def __init__(self, methodName='runTest'):
         self.location = 'test_tensorflow_model_manager_location'
+        self.project = 'test_tensorflow_model_manager'
+        self.branch = 'branch'
         super(TestTensorflowModelManager, self).__init__(
             location=self.location,
-            project='test_tensorflow_model_manager',
-            branch='branch',
+            project=self.project,
+            branch=self.branch,
             chunkCount=16,
             methodName=methodName
         )
@@ -45,8 +47,10 @@ class TestTensorflowModelManager(HypergolTestCase):
             model=self.model,
             optimizer=tf.keras.optimizers.Adam(lr=1),
             batchProcessor=self.batchReader,
-            saveDirectory=Path(self.location, 'save_dir'),
-            tensorboardPath=Path(self.location, 'tensorboard'),
+            location=self.location,
+            project=self.project,
+            branch=self.branch,
+            name='testTfModel',
             restoreWeightsPath=None
         )
 
@@ -74,29 +78,31 @@ class TestTensorflowModelManager(HypergolTestCase):
     def test_save_model(self):
         self.modelManager.initialize()
         self.modelManager.train(withLogging=True, withMetadata=True)
-        saveModelDirectory = self.modelManager.modelSaveDirectory
+        modelDirectory = Path(self.location, self.project, self.branch, 'models', self.modelManager.name, str(self.modelManager.globalStep))
         self.modelManager.save_model()
-        self.assertTrue(os.path.exists(saveModelDirectory))
-        self.assertTrue(os.path.exists(f'{saveModelDirectory}/assets'))
-        self.assertTrue(os.path.exists(f'{saveModelDirectory}/variables'))
-        self.assertTrue(os.path.exists(f'{saveModelDirectory}/{self.modelBlock.get_name()}.json'))
-        self.assertTrue(os.path.exists(f'{saveModelDirectory}/saved_model.pb'))
-        self.assertTrue(os.path.exists(f'{saveModelDirectory}/{self.model.get_name()}.h5'))
+        self.assertTrue(os.path.exists(modelDirectory))
+        self.assertTrue(os.path.exists(f'{modelDirectory}/assets'))
+        self.assertTrue(os.path.exists(f'{modelDirectory}/variables'))
+        self.assertTrue(os.path.exists(f'{modelDirectory}/{self.modelBlock.get_name()}.json'))
+        self.assertTrue(os.path.exists(f'{modelDirectory}/saved_model.pb'))
+        self.assertTrue(os.path.exists(f'{modelDirectory}/{self.model.get_name()}.h5'))
 
     def test_restore_model(self):
         self.modelManager.initialize()
         self.modelManager.train(withLogging=True, withMetadata=True)
         originalBlockWeights = self.modelManager.model.exampleBlock.weights[0].numpy()
-        savedModelDirectory = self.modelManager.modelSaveDirectory
+        modelDirectory = Path(self.location, self.project, self.branch, 'models', self.modelManager.name, str(self.modelManager.globalStep))
         self.modelManager.save_model()
         self.newModel = TensorflowModelExample(exampleBlock=ExampleTrainableBlock(requiredOutputSize=1))
         self.newModelManager = self.modelManager = TensorflowModelManager(
             model=self.model,
             optimizer=tf.keras.optimizers.Adam(lr=1),
             batchProcessor=self.batchReader,
-            saveDirectory=Path(self.location, 'new', 'save_dir'),
-            tensorboardPath=Path(self.location, 'new', 'tensorboard'),
-            restoreWeightsPath=savedModelDirectory
+            location=self.location,
+            project=self.project,
+            branch=self.branch,
+            name='newTestTfModel',
+            restoreWeightsPath=modelDirectory
         )
         self.newModelManager.restore_model_weights()
         newBlockWeights = self.newModelManager.model.exampleBlock.weights[0].numpy()
