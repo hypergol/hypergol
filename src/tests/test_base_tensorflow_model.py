@@ -1,9 +1,9 @@
 import numpy as np
 import tensorflow as tf
 from unittest import TestCase
-from tests.example_tensorflow_classes import ExampleNonTrainableBlock
-from tests.example_tensorflow_classes import ExampleTrainableBlock
-from tests.example_tensorflow_classes import TensorflowModelExample
+from tests.tensorflow_test_classes import ExampleNonTrainableBlock
+from tests.tensorflow_test_classes import ExampleTrainableBlock
+from tests.tensorflow_test_classes import TensorflowModelExample
 
 tf.config.experimental.set_visible_devices([], 'GPU')
 

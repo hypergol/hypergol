@@ -1,8 +1,8 @@
 import shutil
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import HypergolTestCase
-from tests.example_tensorflow_classes import ExampleBatchProcessor
-from tests.example_tensorflow_classes import ExampleOutputDataClass
+from tests.tensorflow_test_classes import ExampleBatchProcessor
+from tests.tensorflow_test_classes import ExampleOutputDataClass
 
 
 class TestBaseBatchReader(HypergolTestCase):
