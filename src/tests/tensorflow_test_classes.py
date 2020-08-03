@@ -1,7 +1,7 @@
-import numpy as np
 import tensorflow as tf
 from hypergol.base_batch_processor import BaseBatchProcessor
 from hypergol.base_data import BaseData
+from hypergol.base_tensorflow_tagger import BaseTensorflowTagger
 from hypergol.base_tensorflow_model_block import BaseTensorflowModelBlock
 from hypergol.base_tensorflow_model import BaseTensorflowModel
 
@@ -122,3 +122,12 @@ class TensorflowModelExample(BaseTensorflowModel):
     @tf.function(input_signature=[tf.TensorSpec(shape=[1, 3], dtype=tf.float32, name="tensorInput")])
     def get_outputs(self, tensorInput):
         return self.exampleBlock(tensorInput)
+
+
+class ExampleTensorflowTagger(BaseTensorflowTagger):
+
+    def __init__(self, modelDirectory, useGPU, threads=None):
+        super().__init__(modelDirectory=modelDirectory, useGPU=useGPU, threads=threads)
+
+    def get_prediction(self, testInput):
+        return self.model.get_outputs(tensorInput=tf.constant(testInput, dtype=tf.float32))
