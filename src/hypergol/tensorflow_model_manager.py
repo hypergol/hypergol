@@ -77,10 +77,10 @@ class TensorflowModelManager:
         withMetadata: bool
             log tensorflow graph metadata for step
         """
-        batch = next(self.batchProcessor)
+        inputs, targets = next(self.batchProcessor)
         if withMetadata and self.globalStep > 0:
             tf.summary.trace_on(graph=True, profiler=False)
-        loss = self.model.train(inputs=batch['inputs'], targets=batch['targets'], optimizer=self.optimizer)
+        loss = self.model.train(inputs=inputs, targets=targets, optimizer=self.optimizer)
         if withLogging:
             with self.trainingSummaryWriter.as_default():
                 tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
@@ -99,17 +99,17 @@ class TensorflowModelManager:
         withMetadata: bool
             log tensorflow graph metadata for step
         """
-        batch = next(self.batchProcessor)
+        inputs, targets = next(self.batchProcessor)
         if withMetadata and self.globalStep > 0:
             tf.summary.trace_on(graph=True, profiler=False)
-        outputs, loss, metrics = self.model.evaluate(inputs=batch['inputs'], targets=batch['targets'])
+        outputs, loss, metrics = self.model.evaluate(inputs=inputs, targets=targets)
         if withLogging:
             with self.evaluationSummaryWriter.as_default():
                 tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-                self.model.produce_metrics(inputs=batch['inputs'], outputs=outputs, targets=batch['targets'])
+                self.model.produce_metrics(inputs=inputs, outputs=outputs, targets=targets)
                 if withMetadata and self.globalStep > 0:
                     tf.summary.trace_export(name=f'{self.model.get_name()}{self.globalStep}', step=self.globalStep, profiler_outdir=f'{self.tensorboardPath}/evaluateGraph')
-        self.batchProcessor.save_batch(modelInputs=batch, modelOutputs=outputs)
+        self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
         return outputs, loss, metrics
 
     def run(self, stepCount, evaluationSteps, tensorboardSteps, metadataSteps, trainingSteps=None):
@@ -126,7 +126,7 @@ class TensorflowModelManager:
         metadataSteps: List[int]
             which steps to log metadata to tensorboard
         trainingSteps: List[int]
-            which steps to train model
+            which steps to train the model
         """
         if trainingSteps is None:
             trainingSteps = range(stepCount)

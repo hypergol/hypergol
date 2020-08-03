@@ -22,6 +22,6 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    install_requires=['fire', 'Jinja2', 'GitPython'],
+    install_requires=['fire', 'Jinja2', 'GitPython', 'tensorflow'],
     include_package_data=True
 )
