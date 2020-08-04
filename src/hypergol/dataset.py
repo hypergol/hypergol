@@ -430,7 +430,7 @@ class DatasetFactory(Repr):
     """Convenience class to create lots of datasets at once. Used in pipelines where multiple datasets are created into the same location, project, branch
     """
 
-    def __init__(self, location, project, branch, chunkCount, repoData):
+    def __init__(self, location, project, branch, chunkCount, repoData=None):
         """
         Parameters
         ----------
@@ -449,7 +449,7 @@ class DatasetFactory(Repr):
         self.project = project
         self.branch = branch
         self.chunkCount = chunkCount
-        self.repoData = repoData
+        self.repoData = repoData or RepoData.get_dummy()
 
     def get(self, dataType, name, chunkCount=None):
         """Creates a dataset with the parameters given and the factory's own parameters

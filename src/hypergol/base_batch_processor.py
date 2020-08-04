@@ -22,6 +22,10 @@ class BaseBatchProcessor:
         self.inputBatchSize = inputBatchSize
         self.outputDataset = outputDataset
         self.datasetIterator = iter(self.read_batch())
+        self.datasetWriter = None
+
+    def start(self):
+        self.datasetWriter = self.outputDataset.open('w')
 
     def __next__(self):
         return next(self.datasetIterator)
@@ -42,10 +46,12 @@ class BaseBatchProcessor:
 
     def save_batch(self, inputs, targets, outputs):
         """Saves batch of model inputs + outputs into Hypergol dataset"""
-        with self.outputDataset.open('w') as datasetWriter:
-            for value in self.process_output_batch(inputs=inputs, targets=targets, outputs=outputs):
-                datasetWriter.append(value)
+        for value in self.process_output_batch(inputs=inputs, targets=targets, outputs=outputs):
+            self.datasetWriter.append(value)
 
     def process_output_batch(self, inputs, targets, outputs):
         """Processing code for saving batches of model inputs + outputs into Hypergol dataset"""
         raise NotImplementedError(f'{self.__class__.__name__} must implement `process_output_batch`')
+
+    def finish(self):
+        self.datasetWriter.close()

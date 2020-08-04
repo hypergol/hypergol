@@ -57,16 +57,6 @@ class TensorflowModelManager:
         """ restores tensorflow model weights """
         self.model.load_weights(f'{self.restoreWeightsPath}/{self.model.get_name()}.h5')
 
-    def initialize(self):
-        """
-        initialization method, restores variables and creates summary writers
-        """
-        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
-        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
-        if self.restoreWeightsPath is not None:
-            self.evaluate(withLogging=False, withMetadata=False)  # model call needed to initialize layers/weights before reloading
-            self.model.restore_model_weights(path=self.restoreWeightsPath)
-
     def train(self, withLogging, withMetadata):
         """runs a training step for the model
 
@@ -130,11 +120,19 @@ class TensorflowModelManager:
         """
         if trainingSteps is None:
             trainingSteps = range(stepCount)
-        self.initialize()
-        for k in tqdm(range(stepCount)):
-            if k in trainingSteps:
-                self.train(withLogging=k in tensorboardSteps, withMetadata=k in metadataSteps)
-            if k in evaluationSteps:
-                self.save_model()
-                self.evaluate(withLogging=k in tensorboardSteps, withMetadata=k in metadataSteps)
-        self.save_model()
+        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
+        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
+        if self.restoreWeightsPath is not None:
+            self.evaluate(withLogging=False, withMetadata=False)  # model call needed to initialize layers/weights before reloading
+            self.model.restore_model_weights(path=self.restoreWeightsPath)
+        self.batchProcessor.start()
+        try:
+            for k in tqdm(range(stepCount)):
+                if k in trainingSteps:
+                    self.train(withLogging=k in tensorboardSteps, withMetadata=k in metadataSteps)
+                if k in evaluationSteps:
+                    self.save_model()
+                    self.evaluate(withLogging=k in tensorboardSteps, withMetadata=k in metadataSteps)
+            self.save_model()
+        finally:
+            self.batchProcessor.finish()
