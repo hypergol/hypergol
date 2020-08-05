@@ -48,7 +48,7 @@ class TensorflowModelManager:
         """ saves tensorflow model, block definitions, and weights """
         modelDirectory = Path(self.location, self.project, self.branch, 'models', self.name, str(self.globalStep))
         modelDirectory.mkdir(parents=True, exist_ok=True)
-        tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures=self.model.get_signatures())
+        tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures={'signature_default': self.model.get_outputs})
         for modelBlock in self.model.get_model_blocks():
             json.dump(modelBlock.get_config(), open(f'{modelDirectory}/{modelBlock.get_name()}.json', 'w'))
         self.model.save_weights(f'{modelDirectory}/{self.model.get_name()}.h5', save_format='h5')
@@ -77,7 +77,6 @@ class TensorflowModelManager:
                 if withMetadata and self.globalStep > 0:
                     tf.summary.trace_export(name=f'{self.model.get_name()}{self.globalStep}', step=self.globalStep, profiler_outdir=f'{self.tensorboardPath}/trainGraph')
         self.globalStep += 1
-        return loss
 
     def evaluate(self, withLogging, withMetadata):
         """runs an evaluation step for the model
@@ -92,15 +91,18 @@ class TensorflowModelManager:
         inputs, targets = next(self.batchProcessor)
         if withMetadata and self.globalStep > 0:
             tf.summary.trace_on(graph=True, profiler=False)
-        outputs, loss, metrics = self.model.evaluate(inputs=inputs, targets=targets)
+        loss, outputs = self.model.eval(inputs=inputs, targets=targets, globalStep=self.globalStep)
         if withLogging:
             with self.evaluationSummaryWriter.as_default():
                 tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-                self.model.produce_metrics(inputs=inputs, outputs=outputs, targets=targets)
+                self.model.produce_metrics(inputs=inputs, targets=targets)
                 if withMetadata and self.globalStep > 0:
-                    tf.summary.trace_export(name=f'{self.model.get_name()}{self.globalStep}', step=self.globalStep, profiler_outdir=f'{self.tensorboardPath}/evaluateGraph')
+                    tf.summary.trace_export(
+                        name=f'{self.model.get_name()}{self.globalStep}',
+                        step=self.globalStep,
+                        profiler_outdir=f'{self.tensorboardPath}/evaluateGraph'
+                    )
         self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
-        return outputs, loss, metrics
 
     def run(self, stepCount, evaluationSteps, tensorboardSteps, metadataSteps, trainingSteps=None):
         """runs a training schedule

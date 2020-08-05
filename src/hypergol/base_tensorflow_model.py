@@ -18,31 +18,26 @@ class BaseTensorflowModel(keras.Model):
     def get_name(self):
         return self.__class__.__name__
 
-    def call(self, inputs, **kwargs):
+    def call(self, inputs, training=None, mask=None):
         raise NotImplementedError(f'{self.__class__} model must implement `call` method')
 
     def train(self, inputs, targets, optimizer):
         with tf.GradientTape() as tape:
-            outputs = self.call(inputs=inputs, training=True)
-            loss = self.get_loss(outputs=outputs, targets=targets)
+            loss = self.get_loss(inputs=inputs, targets=targets, training=True)
         grads = tape.gradient(loss, self.trainable_variables)
         optimizer.apply_gradients(zip(grads, self.trainable_variables))
         return loss
 
-    def evaluate(self, inputs, targets):
-        outputs = self.call(inputs=inputs, training=False)
-        loss = self.get_loss(outputs=outputs, targets=targets)
-        metrics = self.produce_metrics(inputs=inputs, outputs=outputs, targets=targets)
-        return outputs, loss, metrics
+    def eval(self, inputs, targets, globalStep):
+        loss = self.get_loss(inputs=inputs, targets=targets, training=False)
+        outputs = self.produce_metrics(inputs=inputs, targets=targets, training=False, globalStep=globalStep)
+        return loss, outputs
 
-    def get_loss(self, outputs, targets):
+    def get_loss(self, inputs, targets, training):
         raise NotImplementedError('Must implement `get_loss` function')
 
-    def produce_metrics(self, inputs, outputs, targets):
+    def produce_metrics(self, inputs, targets, training, globalStep):
         raise NotImplementedError('Must implement `produce_metrics` function')
 
     def get_outputs(self, **kwargs):
         raise NotImplementedError('Must implement `get_outputs` function')
-
-    def get_signatures(self):
-        return {'signature_default': self.get_outputs}
