@@ -95,7 +95,7 @@ class TensorflowModelManager:
         if withLogging:
             with self.evaluationSummaryWriter.as_default():
                 tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-                self.model.produce_metrics(inputs=inputs, targets=targets)
+                self.model.produce_metrics(inputs=inputs, targets=targets, training=False, globalStep=self.globalStep)
                 if withMetadata and self.globalStep > 0:
                     tf.summary.trace_export(
                         name=f'{self.model.get_name()}{self.globalStep}',
