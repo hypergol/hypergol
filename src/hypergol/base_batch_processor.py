@@ -54,4 +54,6 @@ class BaseBatchProcessor:
         raise NotImplementedError(f'{self.__class__.__name__} must implement `process_output_batch`')
 
     def finish(self):
-        self.datasetWriter.close()
+        if self.datasetWriter is not None:
+            self.datasetWriter.close()
+        self.datasetWriter = None
