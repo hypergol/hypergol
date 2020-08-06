@@ -111,7 +111,7 @@ class TensorflowModelExample(BaseTensorflowModel):
         return input1
 
     @ tf.function(input_signature=[
-        tf.TensorSpec(shape=[None], dtype=tf.float32, name="batchIds"),
+        tf.TensorSpec(shape=[None], dtype=tf.int32, name="batchIds"),
         tf.TensorSpec(shape=[None, 3], dtype=tf.float32, name="input1")
     ])
     def get_outputs(self, batchIds, input1):
@@ -123,5 +123,8 @@ class ExampleTensorflowTagger(BaseTensorflowTagger):
     def __init__(self, modelDirectory, useGPU, threads=None):
         super().__init__(modelDirectory=modelDirectory, useGPU=useGPU, threads=threads)
 
-    def get_prediction(self, testInput):
-        return self.model.get_outputs(tensorInput=tf.constant(testInput, dtype=tf.float32))
+    def get_prediction(self, inputs):
+        return self.model.get_outputs(
+            batchIds=tf.constant(inputs['batchIds'], dtype=tf.int32),
+            input1=tf.constant(inputs['input1'], dtype=tf.float32)
+        )

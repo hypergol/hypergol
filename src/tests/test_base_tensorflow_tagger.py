@@ -27,7 +27,9 @@ class TestTensorflowBaseTagger(HypergolTestCase):
             chunkCount=16,
             methodName=methodName
         )
-        self.exampleInputs = {'input1': tf.constant([[2, 3, 4]], dtype=tf.float32)}
+        self.exampleInputs = {
+            'batchIds': [1, 2, 3],
+            'input1': tf.constant([[2, 3, 4]], dtype=tf.float32)}
         self.batchSize = 3
 
     def setUp(self):
@@ -57,15 +59,16 @@ class TestTensorflowBaseTagger(HypergolTestCase):
 
     def tearDown(self):
         super().tearDown()
+        self.modelManager.finish()
         shutil.rmtree(self.location)
 
     def test_tagger(self):
-        self.modelManager.initialize()
-        self.modelManager.train(withLogging=True, withMetadata=True)
+        self.modelManager.start()
+        self.modelManager.train(withTracing=True)
         modelDirectory = Path(self.location, self.project, self.branch, 'models', self.modelManager.name, str(self.modelManager.globalStep))
         self.modelManager.save_model()
         tagger = ExampleTensorflowTagger(modelDirectory=modelDirectory, useGPU=False)
-        prediction = tagger.get_prediction(testInput=self.exampleInputs['input1'])
+        prediction = tagger.get_prediction(self.exampleInputs)
         self.assertIsNotNone(prediction)
         self.assertEqual(len(prediction.shape), 2)
         self.assertNotEqual(prediction.numpy()[0], 0)
