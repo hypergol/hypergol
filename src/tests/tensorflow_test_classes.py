@@ -116,3 +116,12 @@ class TensorflowModelExample(BaseTensorflowModel):
     ])
     def get_outputs(self, batchIds, input1):
         return self.exampleBlock.get_output(input1)
+
+
+class ExampleTensorflowTagger(BaseTensorflowTagger):
+
+    def __init__(self, modelDirectory, useGPU, threads=None):
+        super().__init__(modelDirectory=modelDirectory, useGPU=useGPU, threads=threads)
+
+    def get_prediction(self, testInput):
+        return self.model.get_outputs(tensorInput=tf.constant(testInput, dtype=tf.float32))
