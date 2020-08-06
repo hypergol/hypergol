@@ -19,25 +19,16 @@ class BaseTensorflowModel(keras.Model):
         return self.__class__.__name__
 
     def call(self, inputs, training=None, mask=None):
-        raise NotImplementedError(f'{self.__class__} model must implement `call` method')
+        raise Exception(f'keras.Model.call() was called in Hypergol model {self.name}')
 
-    def train(self, inputs, targets, optimizer):
-        with tf.GradientTape() as tape:
-            loss = self.get_loss(inputs=inputs, targets=targets, training=True)
-        grads = tape.gradient(loss, self.trainable_variables)
-        optimizer.apply_gradients(zip(grads, self.trainable_variables))
-        return loss
-
-    def eval(self, inputs, targets, globalStep):
-        loss = self.get_loss(inputs=inputs, targets=targets, training=False)
-        outputs = self.produce_metrics(inputs=inputs, targets=targets, training=False, globalStep=globalStep)
-        return loss, outputs
-
-    def get_loss(self, inputs, targets, training):
+    def get_loss(self, targets, training, **kwargs):
         raise NotImplementedError('Must implement `get_loss` function')
 
-    def produce_metrics(self, inputs, targets, training, globalStep):
+    def produce_metrics(self, targets, training, globalStep, **kwargs):
         raise NotImplementedError('Must implement `produce_metrics` function')
 
     def get_outputs(self, **kwargs):
         raise NotImplementedError('Must implement `get_outputs` function')
+
+    def get_evaluation_outputs(self, **kwargs):
+        return self.get_outputs(**kwargs)
