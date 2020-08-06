@@ -100,16 +100,19 @@ class TensorflowModelExample(BaseTensorflowModel):
         super(TensorflowModelExample, self).__init__(**kwargs)
         self.exampleBlock = exampleBlock
 
-    # rename this to something, was call() before
-    def get_call(self, inputs, **kwargs):
-        return self.exampleBlock(inputs['input1'])
+    def get_call(self, input1):
+        return self.exampleBlock.get_output(inputs=input1)
 
-    def get_loss(self, outputs, targets):
+    def get_loss(self, targets, training, batchIds, input1):
+        outputs = self.get_call(input1)
         return tf.reduce_sum(outputs - targets)
 
-    def produce_metrics(self, inputs, outputs, targets):
-        return inputs['input1']
+    def produce_metrics(self, targets, training, globalStep, batchIds, input1):
+        return input1
 
-    @ tf.function(input_signature=[tf.TensorSpec(shape=[1, 3], dtype=tf.float32, name="tensorInput")])
-    def get_outputs(self, tensorInput):
-        return self.exampleBlock(tensorInput)
+    @ tf.function(input_signature=[
+        tf.TensorSpec(shape=[None], dtype=tf.float32, name="batchIds"),
+        tf.TensorSpec(shape=[None, None], dtype=tf.float32, name="input1")
+    ])
+    def get_outputs(self, batchIds, input1):
+        return self.exampleBlock.get_output(input1)

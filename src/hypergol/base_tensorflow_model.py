@@ -11,7 +11,7 @@ class BaseTensorflowModel(keras.Model):
         super(BaseTensorflowModel, self).__init__(**kwargs)
 
     def get_model_blocks(self):
-        constructorParameters = inspect.signature(self.__class__).parameters.keys()
+        constructorParameters = inspect.signature(self.__class__.__init__).parameters.keys()
         return [v for k, v in self.__dict__.items() if k in constructorParameters and isinstance(v, BaseTensorflowModelBlock)]
 
     def get_name(self):
