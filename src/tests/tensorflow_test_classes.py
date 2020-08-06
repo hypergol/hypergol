@@ -1,7 +1,7 @@
-import numpy as np
 import tensorflow as tf
 from hypergol.base_batch_processor import BaseBatchProcessor
 from hypergol.base_data import BaseData
+from hypergol.base_tensorflow_tagger import BaseTensorflowTagger
 from hypergol.base_tensorflow_model_block import BaseTensorflowModelBlock
 from hypergol.base_tensorflow_model import BaseTensorflowModel
 
