@@ -22,9 +22,7 @@ class BaseTensorflowModelBlock(layers.Layer):
         return self.__class__.__name__
 
     def build(self, inputs_shape):
-        """Contains the layer specification of a given block, attached to instance of the block"""
-        raise NotImplementedError(f'Model block {self.__class__} should implement `build` function')
+        raise Exception(f'keras.Layer.build() was called in Hypergol block {self.__class__.__name__}')
 
     def call(self, *args, **kwargs):
-        """Contains code for how inputs should be processed"""
-        raise NotImplementedError(f'Model block {self.__class__} should implement `call` function')
+        raise Exception(f'keras.Layer.call() was called in Hypergol block {self.__class__.__name__}')

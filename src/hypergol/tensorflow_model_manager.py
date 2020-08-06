@@ -108,7 +108,7 @@ class TensorflowModelManager:
                 )
         self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
 
-    def run(self, stepCount, evaluationSteps, metadataSteps, trainingSteps=None):
+    def run(self, stepCount, evaluationSteps, metadataSteps):
         """runs a training schedule
 
         Parameters
@@ -117,15 +117,9 @@ class TensorflowModelManager:
             num total steps in schedule
         evaluationSteps: List[int]
             which steps to produce metrics on an evaluation sample
-        tensorboardSteps: List[int]
-            which steps to log taining loss to tensorboard
         metadataSteps: List[int]
             which steps to log metadata to tensorboard
-        trainingSteps: List[int]
-            which steps to train the model
         """
-        if trainingSteps is None:
-            trainingSteps = range(stepCount)
         self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
         self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
         if self.restoreWeightsPath is not None:
@@ -134,8 +128,7 @@ class TensorflowModelManager:
         self.batchProcessor.start()
         try:
             for k in tqdm(range(stepCount)):
-                if k in trainingSteps:
-                    self.train(withMetadata=k in metadataSteps)
+                self.train(withMetadata=k in metadataSteps)
                 if k in evaluationSteps:
                     self.save_model()
                     self.evaluate(withMetadata=k in metadataSteps)
