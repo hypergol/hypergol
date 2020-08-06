@@ -61,14 +61,14 @@ class ExampleTensorflowBatchProcessor(BaseBatchProcessor):
         targets = tf.constant([v.value1 for v in batch], dtype=tf.float32)
         return inputs, targets
 
-    def process_output_batch(self, modelInputs, modelOutputs):
+    def process_output_batch(self, inputs, targets, outputs):
         outputData = []
-        for index, batchId in enumerate(modelInputs['batchIds']):
+        for k, batchId in enumerate(inputs['batchIds']):
             outputData.append(ExampleOutputDataClass(
                 id_=batchId,
-                value1=int(modelInputs['inputs']['input1'][index, 0].numpy()),
-                predictionTarget=int(modelInputs['targets'].numpy()[index]),
-                modelPrediction=int(modelOutputs.numpy()[index, 0])
+                value1=int(inputs['input1'][k, 0].numpy()),
+                predictionTarget=int(targets.numpy()[k]),
+                modelPrediction=int(outputs.numpy()[k, 0])
             ))
         return outputData
 
@@ -112,7 +112,7 @@ class TensorflowModelExample(BaseTensorflowModel):
 
     @ tf.function(input_signature=[
         tf.TensorSpec(shape=[None], dtype=tf.float32, name="batchIds"),
-        tf.TensorSpec(shape=[None, None], dtype=tf.float32, name="input1")
+        tf.TensorSpec(shape=[None, 3], dtype=tf.float32, name="input1")
     ])
     def get_outputs(self, batchIds, input1):
         return self.exampleBlock.get_output(input1)

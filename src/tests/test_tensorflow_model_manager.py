@@ -53,31 +53,30 @@ class TestTensorflowModelManager(HypergolTestCase):
             name='testTfModel',
             restoreWeightsPath=None
         )
+        self.modelManager.start()
 
     def tearDown(self):
         super().tearDown()
+        self.modelManager.finish()
         shutil.rmtree(self.location)
 
+    # TODO(Laszlo): needs better name
     def test_initialize_with_no_restore(self):
-        self.modelManager.initialize()
         self.assertNotEqual(self.modelManager.trainingSummaryWriter, None)
         self.assertNotEqual(self.modelManager.evaluationSummaryWriter, None)
 
     def test_train(self):
-        self.modelManager.initialize()
-        loss = self.modelManager.train(withLogging=True, withMetadata=True)
+        loss = self.modelManager.train(withTracing=True)
         self.assertIsNotNone(loss)
         self.assertNotEqual(loss.numpy(), 0)
 
     def test_evaluate(self):
-        self.modelManager.initialize()
-        outputs, loss, metrics = self.modelManager.evaluate(withLogging=True, withMetadata=True)
+        loss = self.modelManager.evaluate(withTracing=True)
         self.assertIsNotNone(loss)
         self.assertNotEqual(loss.numpy(), 0)
 
     def test_save_model(self):
-        self.modelManager.initialize()
-        self.modelManager.train(withLogging=True, withMetadata=True)
+        self.modelManager.train(withTracing=True)
         modelDirectory = Path(self.location, self.project, self.branch, 'models', self.modelManager.name, str(self.modelManager.globalStep))
         self.modelManager.save_model()
         self.assertTrue(os.path.exists(modelDirectory))
@@ -88,13 +87,12 @@ class TestTensorflowModelManager(HypergolTestCase):
         self.assertTrue(os.path.exists(f'{modelDirectory}/{self.model.get_name()}.h5'))
 
     def test_restore_model(self):
-        self.modelManager.initialize()
-        self.modelManager.train(withLogging=True, withMetadata=True)
+        self.modelManager.train(withTracing=True)
         originalBlockWeights = self.modelManager.model.exampleBlock.weights[0].numpy()
         modelDirectory = Path(self.location, self.project, self.branch, 'models', self.modelManager.name, str(self.modelManager.globalStep))
         self.modelManager.save_model()
-        self.newModel = TensorflowModelExample(exampleBlock=ExampleTrainableBlock(requiredOutputSize=1))
-        self.newModelManager = self.modelManager = TensorflowModelManager(
+        newModel = TensorflowModelExample(exampleBlock=ExampleTrainableBlock(requiredOutputSize=1))
+        newModelManager = TensorflowModelManager(
             model=self.model,
             optimizer=tf.keras.optimizers.Adam(lr=1),
             batchProcessor=self.batchReader,
@@ -104,6 +102,6 @@ class TestTensorflowModelManager(HypergolTestCase):
             name='newTestTfModel',
             restoreWeightsPath=modelDirectory
         )
-        self.newModelManager.restore_model_weights()
-        newBlockWeights = self.newModelManager.model.exampleBlock.weights[0].numpy()
+        newModelManager.restore_model_weights()
+        newBlockWeights = newModelManager.model.exampleBlock.weights[0].numpy()
         self.assertTrue((originalBlockWeights == newBlockWeights).all())

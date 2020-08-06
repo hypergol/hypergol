@@ -83,6 +83,7 @@ class TensorflowModelManager:
                     profiler_outdir=f'{self.tensorboardPath}/trainGraph'
                 )
         self.globalStep += 1
+        return loss
 
     def evaluate(self, withTracing):
         """runs an evaluation step for the model
@@ -107,6 +108,15 @@ class TensorflowModelManager:
                     profiler_outdir=f'{self.tensorboardPath}/evaluateGraph'
                 )
         self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
+        return loss
+
+    def start(self):
+        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
+        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
+        if self.restoreWeightsPath is not None:
+            self.evaluate(withTracing=False)  # model call needed to initialize layers/weights before reloading
+            self.model.restore_model_weights(path=self.restoreWeightsPath)
+        self.batchProcessor.start()
 
     def run(self, stepCount, evaluationSteps, tracingSteps):
         """runs a training schedule
@@ -120,12 +130,7 @@ class TensorflowModelManager:
         metadataSteps: List[int]
             which steps to log metadata to tensorboard
         """
-        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
-        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
-        if self.restoreWeightsPath is not None:
-            self.evaluate(withTracing=False)  # model call needed to initialize layers/weights before reloading
-            self.model.restore_model_weights(path=self.restoreWeightsPath)
-        self.batchProcessor.start()
+        self.start()
         try:
             for k in tqdm(range(stepCount)):
                 self.train(withTracing=k in tracingSteps)
@@ -134,4 +139,7 @@ class TensorflowModelManager:
                     self.evaluate(withTracing=k in tracingSteps)
             self.save_model()
         finally:
-            self.batchProcessor.finish()
+            self.finish()
+
+    def finish(self):
+        self.batchProcessor.finish()
