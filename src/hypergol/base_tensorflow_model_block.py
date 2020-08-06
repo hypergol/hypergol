@@ -7,11 +7,11 @@ from tensorflow.python.keras import layers
 class BaseTensorflowModelBlock(layers.Layer):
     """Subclasses tensorflow-keras layers to provide logical groupings of functionality/layers."""
 
-    def __init__(self, **kwargs):
-        super(BaseTensorflowModelBlock, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(BaseTensorflowModelBlock, self).__init__(*args, **kwargs)
 
     def get_config(self):
-        constructorParameters = inspect.signature(self.__class__).parameters.keys()
+        constructorParameters = inspect.signature(self.__class__.__init__).parameters.keys()
         config = super(BaseTensorflowModelBlock, self).get_config()
         for name, value in self.__dict__.items():
             if name in constructorParameters:
