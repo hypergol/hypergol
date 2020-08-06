@@ -57,7 +57,7 @@ class TensorflowModelManager:
         """ restores tensorflow model weights """
         self.model.load_weights(f'{self.restoreWeightsPath}/{self.model.get_name()}.h5')
 
-    def train(self, withMetadata):
+    def train(self, withTracing):
         """runs a training step for the model
 
         Parameters
@@ -66,7 +66,7 @@ class TensorflowModelManager:
             log tensorflow graph metadata for step
         """
         inputs, targets = next(self.batchProcessor)
-        if withMetadata:
+        if withTracing:
             tf.summary.trace_on(graph=True, profiler=False)
 
         with tf.GradientTape() as tape:
@@ -76,7 +76,7 @@ class TensorflowModelManager:
 
         with self.trainingSummaryWriter.as_default():
             tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-            if withMetadata:
+            if withTracing:
                 tf.summary.trace_export(
                     name=f'{self.model.get_name()}{self.globalStep}',
                     step=self.globalStep,
@@ -84,7 +84,7 @@ class TensorflowModelManager:
                 )
         self.globalStep += 1
 
-    def evaluate(self, withMetadata):
+    def evaluate(self, withTracing):
         """runs an evaluation step for the model
 
         Parameters
@@ -93,14 +93,14 @@ class TensorflowModelManager:
             log tensorflow graph metadata for step
         """
         inputs, targets = next(self.batchProcessor)
-        if withMetadata:
+        if withTracing:
             tf.summary.trace_on(graph=True, profiler=False)
         loss = self.model.get_loss(targets=targets, training=False, **inputs)
         outputs = self.model.get_evaluation_outputs(**inputs)
         with self.evaluationSummaryWriter.as_default():
             tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
             self.model.produce_metrics(targets=targets, training=False, globalStep=self.globalStep, **inputs)
-            if withMetadata:
+            if withTracing:
                 tf.summary.trace_export(
                     name=f'{self.model.get_name()}{self.globalStep}',
                     step=self.globalStep,
@@ -108,7 +108,7 @@ class TensorflowModelManager:
                 )
         self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
 
-    def run(self, stepCount, evaluationSteps, metadataSteps):
+    def run(self, stepCount, evaluationSteps, tracingSteps):
         """runs a training schedule
 
         Parameters
@@ -123,15 +123,15 @@ class TensorflowModelManager:
         self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
         self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
         if self.restoreWeightsPath is not None:
-            self.evaluate(withMetadata=False)  # model call needed to initialize layers/weights before reloading
+            self.evaluate(withTracing=False)  # model call needed to initialize layers/weights before reloading
             self.model.restore_model_weights(path=self.restoreWeightsPath)
         self.batchProcessor.start()
         try:
             for k in tqdm(range(stepCount)):
-                self.train(withMetadata=k in metadataSteps)
+                self.train(withTracing=k in tracingSteps)
                 if k in evaluationSteps:
                     self.save_model()
-                    self.evaluate(withMetadata=k in metadataSteps)
+                    self.evaluate(withTracing=k in tracingSteps)
             self.save_model()
         finally:
             self.batchProcessor.finish()

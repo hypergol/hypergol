@@ -21,7 +21,7 @@ class BaseTensorflowModelBlock(layers.Layer):
     def get_name(self):
         return self.__class__.__name__
 
-    def build(self, inputs_shape):
+    def build(self, input_shape):
         raise Exception(f'keras.Layer.build() was called in Hypergol block {self.__class__.__name__}')
 
     def call(self, *args, **kwargs):
