@@ -74,7 +74,8 @@ class TensorflowModelManager:
         grads = tape.gradient(loss, self.model.trainable_variables)
         self.optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
 
-        with self.trainingSummaryWriter.as_default():
+        # Watch this issue: https://github.com/PyCQA/pylint/issues/3596
+        with self.trainingSummaryWriter.as_default():                   #pylint: disable=not-context-manager
             tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
             if withTracing:
                 tf.summary.trace_export(
@@ -98,7 +99,7 @@ class TensorflowModelManager:
             tf.summary.trace_on(graph=True, profiler=False)
         loss = self.model.get_loss(targets=targets, training=False, **inputs)
         outputs = self.model.get_evaluation_outputs(**inputs)
-        with self.evaluationSummaryWriter.as_default():
+        with self.evaluationSummaryWriter.as_default():                     #pylint: disable=not-context-manager
             tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
             self.model.produce_metrics(targets=targets, training=False, globalStep=self.globalStep, **inputs)
             if withTracing:
