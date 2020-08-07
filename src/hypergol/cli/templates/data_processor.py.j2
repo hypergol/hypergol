@@ -1,8 +1,8 @@
 from hypergol import BaseBatchProcessor
-from data_models.{{ outputName.asSnake }} import {{ outputName }}
+from data_models.{{ outputClass.asSnake }} import {{ outputClass }}
 
 
-class {{ name }}(BaseBatchProcessor):
+class {{ name }}DataProcessor(BaseBatchProcessor):
 
     def __init__(self, inputDataset, inputBatchSize, outputDataset, exampleArgument):
         super({{ name }}, self).__init__(inputDataset, inputBatchSize, outputDataset)

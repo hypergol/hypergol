@@ -1,13 +1,10 @@
 from hypergol import BaseTensorflowModel
-{%- for name in blockDependencies %}
-from models.{{ name.asSnake }} import {{ name }}
-{%- endfor %}
 
 
-class {{ className }}(BaseTensorflowModel):
+class {{ name }}(BaseTensorflowModel):
 
     def __init__(self, block1, block2, **kwargs):
-        super({{ className }}, self).__init__(**kwargs)
+        super({{ name }}, self).__init__(**kwargs)
         self.block1 = block1
         self.block2 = block2
 

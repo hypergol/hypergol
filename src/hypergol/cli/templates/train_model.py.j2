@@ -10,10 +10,13 @@ from data_models.model_output import ModelOutput
 from hypergol import DatasetFactory
 from hypergol import RepoData
 from hypergol import TensorflowModelManager
-from models.{{ modelSnakeName }}_data_processor import {{ modelClassName }}DataProcessor
-from models.{{ modelSnakeName }} import {{ modelClassName }}
-from data_models.{{ inputSnakeName }} import {{ inputClassName }}
-from data_models.{{ inputSnakeName }} import {{ inputClassName }}
+from models.{{ modelName.asSnake }}_data_processor import {{ modelName }}DataProcessor
+from models.{{ modelName.asSnake }} import {{ modelName }}
+{%- for name in blockDependencies %}
+from models.{{ name.asSnake }} import {{ name }}
+{%- endfor %}
+from data_models.{{ inputClass.asSnake }} import {{ inputClass }}
+from data_models.{{ outputClass.asSnake }} import {{ outputClass }}
 
 
 LOCATION = '.'
@@ -21,7 +24,7 @@ PROJECT = 'example_project'
 BRANCH = 'example_branch'
 
 
-def {{ snakeName }}(force=False):
+def train_{{ modelName.asSnake }}(force=False):
     repo = Repo(path='.')
     if repo.is_dirty():
         if force:
@@ -46,36 +49,28 @@ def {{ snakeName }}(force=False):
         repoData=repoData
     )
 
-    batchProcessor = {{ modelClassName }}DataProcessor(
-        inputDataset=datasetFactory.get(dataType=Sentence, name='sentences'),
+    batchProcessor = {{ modelName }}DataProcessor(
+        inputDataset=datasetFactory.get(dataType={{ inputClass }}, name='inputs'),
         inputBatchSize=16,
-        maxTokenCount=100,
-        outputDataset=datasetFactory.get(dataType=ModelOutput, name='outputs')
+        outputDataset=datasetFactory.get(dataType={{ outputClass }}, name='outputs'),
+        exampleArgument=''
     )
-    embeddingDimension = 256
-    vocabulary = json.load(open(VOCABULARY_PATH, 'r'))
-    posVocabulary = json.load(open(POS_VOCABULARY_PATH, 'r'))
-    posModel = PosModel(
-        embeddingBlock=EmbeddingBlock(
-            vocabulary=vocabulary,
-            embeddingDimension=embeddingDimension
-        ),
-        lstmBlock=LstmBlock(
-            embeddingDimension=embeddingDimension,
-            layerCount=2,
-            posTypeCount=len(posVocabulary),
-            dropoutRate=0.1
-        ),
-        outputBlock=OutputBlock(
-            posTypes=posVocabulary
-        )
+    {{ modelName.asVariable }} = {{ modelName }}(
+        {%- for name in blockDependencies %}
+            {{ name.asVariable }} = {{ name }}(
+                blockArgument1='',
+                blockArgument2='',
+            )
+        {%- endfor %}
     )
     modelManager = TensorflowModelManager(
-        model=posModel,
+        model={{ modelName.asVariable }},
         optimizer=tf.keras.optimizers.Adam(lr=1),
         batchProcessor=batchProcessor,
-        location=LOCATION, project=PROJECT, branch=BRANCH,
-        name='testPosModel',
+        location=LOCATION,
+        project=PROJECT,
+        branch=BRANCH,
+        name='{{ modelName }}',
         restoreWeightsPath=None
     )
     modelManager.run(
@@ -87,4 +82,4 @@ def {{ snakeName }}(force=False):
 
 if __name__ == '__main__':
     tf.get_logger().setLevel('ERROR')
-    fire.Fire(train_{{ snakeName }})
+    fire.Fire(train_{{ modelName.asSnake }})

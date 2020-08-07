@@ -5,17 +5,18 @@ from hypergol.name_string import NameString
 from hypergol.hypergol_project import HypergolProject
 
 
-def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None):
+def create_model(modelName, inputClass, outputClass, *args, projectDirectory='.', dryrun=None, force=None):
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     modelName = NameString(modelName)
-    dependencies = [NameString(value) for value in args]
-    project.check_dependencies(dependencies)
+    inputClass = NameString(inputClass)
+    outputClass = NameString(outputClass)
+    blocks = [NameString(value) for value in args]
+    project.check_dependencies([inputClass, outputClass] + blocks)
 
     content = project.render(
         templateName='model.py.j2',
         templateData={
-            'snakeName': modelName.asSnake,
-            'modelBlockDependencies': [name for name in dependencies if project.is_model_block_class(name)],
+            'name': modelName,
         },
         filePath=Path(projectDirectory, 'models', modelName.asFileName)
     )
@@ -23,8 +24,8 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
     content = project.render(
         templateName='data_processor.py.j2',
         templateData={
-            'snakeName': modelName.asSnake,
-            'dataModelDependencies': [name for name in dependencies if project.is_data_model_class(name)]
+            'modelName': modelName,
+            'outputClass': outputClass
         },
         filePath=Path(projectDirectory, 'models', f'{modelName.asSnake}_data_processor.py')
     )
@@ -34,7 +35,7 @@ def create_model(modelName, *args, projectDirectory='.', dryrun=None, force=None
         templateData={
             'snakeName': modelName.asSnake,
             'className': modelName.asClass,
-            'modelBlockDependencies': [name for name in dependencies if project.is_model_block_class(name)],
+            'blockDependencies': [name for name in blocks if project.is_model_block_class(name)],
         },
         filePath=Path(projectDirectory, 'models', f'train_{modelName.asFileName}')
     )
