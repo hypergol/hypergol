@@ -9,7 +9,7 @@ from hypergol.dataset import DatasetReader
 from hypergol.dataset import DatasetDoesNotExistException
 from hypergol.dataset import DatasetAlreadyExistsException
 from hypergol.dataset_def_file import DatasetDefFileDoesNotMatchException
-from hypergol.dataset import DatasetTypeDoesNotMatchDataTypeException
+from hypergol.datachunk import DatasetTypeDoesNotMatchDataTypeException
 
 
 class TestDataset(HypergolTestCase):
