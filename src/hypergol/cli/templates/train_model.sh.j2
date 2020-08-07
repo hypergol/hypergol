@@ -1,0 +1,5 @@
+export PYTHONPATH="${PWD}/..:${PWD}/../..:"
+
+python3 \
+    ./pipelines/train_{{ snakeName }}.py \
+    $1
