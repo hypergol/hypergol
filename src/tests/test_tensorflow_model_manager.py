@@ -61,8 +61,8 @@ class TestTensorflowModelManager(HypergolTestCase):
         shutil.rmtree(self.location)
 
     def test_summary_writer_initialization(self):
-        self.assertNotEqual(self.modelManager.trainingSummaryWriter, None)
-        self.assertNotEqual(self.modelManager.evaluationSummaryWriter, None)
+        self.assertIsNotNone(self.modelManager.trainingSummaryWriter)
+        self.assertIsNotNone(self.modelManager.evaluationSummaryWriter)
 
     def test_train(self):
         loss = self.modelManager.train(withTracing=True)
