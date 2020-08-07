@@ -1,7 +1,7 @@
 import json
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import HypergolTestCase
-from hypergol.dataset import DatasetChecksumMismatchException
+from hypergol.dataset_chkfile import DatasetChecksumMismatchException
 
 
 class TestDatasetChkFile(HypergolTestCase):
