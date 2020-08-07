@@ -1,7 +1,6 @@
 import tensorflow as tf
 from hypergol.base_batch_processor import BaseBatchProcessor
 from hypergol.base_data import BaseData
-from hypergol.base_tensorflow_tagger import BaseTensorflowTagger
 from hypergol.base_tensorflow_model_block import BaseTensorflowModelBlock
 from hypergol.base_tensorflow_model import BaseTensorflowModel
 
@@ -100,11 +99,8 @@ class TensorflowModelExample(BaseTensorflowModel):
         super(TensorflowModelExample, self).__init__(**kwargs)
         self.exampleBlock = exampleBlock
 
-    def get_call(self, input1):
-        return self.exampleBlock.get_output(inputs=input1)
-
     def get_loss(self, targets, training, batchIds, input1):
-        outputs = self.get_call(input1)
+        outputs = self.get_outputs(batchIds=batchIds, input1=input1)
         return tf.reduce_sum(outputs - targets)
 
     def produce_metrics(self, targets, training, globalStep, batchIds, input1):
@@ -116,15 +112,3 @@ class TensorflowModelExample(BaseTensorflowModel):
     ])
     def get_outputs(self, batchIds, input1):
         return self.exampleBlock.get_output(input1)
-
-
-class ExampleTensorflowTagger(BaseTensorflowTagger):
-
-    def __init__(self, modelDirectory, useGPU, threads=None):
-        super().__init__(modelDirectory=modelDirectory, useGPU=useGPU, threads=threads)
-
-    def get_prediction(self, inputs):
-        return self.model.get_outputs(
-            batchIds=tf.constant(inputs['batchIds'], dtype=tf.int32),
-            input1=tf.constant(inputs['input1'], dtype=tf.float32)
-        )

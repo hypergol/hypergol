@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-class BaseTensorflowTagger:
+class TensorflowTagger:
 
     def __init__(self, modelDirectory, useGPU, threads=None):
         if not useGPU:
@@ -12,4 +12,4 @@ class BaseTensorflowTagger:
         self.model = tf.saved_model.load(export_dir=f'{modelDirectory}/')
 
     def get_prediction(self, **kwargs):
-        raise NotImplementedError(f'{self.__class__.__name__} must implement `get_prediction` function')
+        return self.model.get_outputs(**kwargs)

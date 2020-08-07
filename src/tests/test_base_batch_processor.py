@@ -5,13 +5,13 @@ from tests.tensorflow_test_classes import ExampleBatchProcessor
 from tests.tensorflow_test_classes import ExampleOutputDataClass
 
 
-class TestBaseBatchReader(HypergolTestCase):
+class TestBaseBatchProcessor(HypergolTestCase):
 
     def __init__(self, methodName='runTest'):
-        self.location = 'test_batch_reader_location'
-        super(TestBaseBatchReader, self).__init__(
+        self.location = 'test_batch_processor_location'
+        super(TestBaseBatchProcessor, self).__init__(
             location=self.location,
-            project='test_batch_reader',
+            project='test_batch_processor',
             branch='branch',
             chunkCount=16,
             methodName=methodName
@@ -31,40 +31,40 @@ class TestBaseBatchReader(HypergolTestCase):
         }
         self.expectedBatchTargets = list(range(1, self.sampleLength + 1))
         self.expectedOutputObjects = {ExampleOutputDataClass(id_=k, value1=k + 1, predictionTarget=k + 1, modelPrediction=k + 2) for k in range(self.sampleLength)}
-        self.batchReader = None
+        self.batchProcessor = None
 
     def tearDown(self):
         super().tearDown()
-        if self.batchReader is not None:
-            self.batchReader.finish()
+        if self.batchProcessor is not None:
+            self.batchProcessor.finish()
         shutil.rmtree(self.location)
 
     def test_read_batch(self):
-        self.batchReader = ExampleBatchProcessor(
+        self.batchProcessor = ExampleBatchProcessor(
             inputDataset=self.inputDataset,
             inputBatchSize=self.sampleLength,
             outputDataset=self.datasetFactory.get(dataType=ExampleOutputDataClass, name='exampleOutputDataset')
         )
-        self.batchReader.start()
-        inputs, targets = next(self.batchReader)
+        self.batchProcessor.start()
+        inputs, targets = next(self.batchProcessor)
         self.assertEqual(inputs, self.expectedBatchInputs)
         self.assertEqual(targets, self.expectedBatchTargets)
 
     def test_save_batch(self):
-        self.batchReader = ExampleBatchProcessor(
+        self.batchProcessor = ExampleBatchProcessor(
             inputDataset=self.inputDataset,
             inputBatchSize=self.sampleLength,
             outputDataset=self.datasetFactory.get(dataType=ExampleOutputDataClass, name='exampleOutputDataset')
         )
-        self.batchReader.start()
-        self.batchReader.save_batch(
+        self.batchProcessor.start()
+        self.batchProcessor.save_batch(
             inputs=self.expectedBatchInputs,
             targets=self.expectedBatchTargets,
             outputs=[k + 2 for k in range(self.sampleLength)]
         )
-        self.batchReader.finish()
+        self.batchProcessor.finish()
         savedObjects = set()
-        with self.batchReader.outputDataset.open('r') as datasetReader:
+        with self.batchProcessor.outputDataset.open('r') as datasetReader:
             for value in datasetReader:
                 savedObjects.add(value)
         self.assertSetEqual(savedObjects, self.expectedOutputObjects)
