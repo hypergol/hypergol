@@ -2,7 +2,7 @@
 
 class BaseBatchProcessor:
     """
-    Base class for batch readers.
+    Base class for batch processors.
 
     Converts Hypergol datasets to batches for training models.
     """

@@ -10,6 +10,7 @@ from .task import Task
 from .utils import Repr
 from .logger import Logger
 from .tensorflow_model_manager import TensorflowModelManager
+from .tensorflow_tagger import TensorflowTagger
 from .base_batch_processor import BaseBatchProcessor
 from .base_tensorflow_model_block import BaseTensorflowModelBlock
 from .base_tensorflow_model import BaseTensorflowModel

@@ -114,10 +114,10 @@ class TensorflowModelManager:
     def start(self):
         self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
         self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
+        self.batchProcessor.start()
         if self.restoreWeightsPath is not None:
             self.evaluate(withTracing=False)  # model call needed to initialize layers/weights before reloading
-            self.model.restore_model_weights(path=self.restoreWeightsPath)
-        self.batchProcessor.start()
+            self.restore_model_weights()
 
     def run(self, stepCount, evaluationSteps, tracingSteps):
         """runs a training schedule

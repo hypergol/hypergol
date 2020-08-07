@@ -36,7 +36,7 @@ class TestTensorflowModelManager(HypergolTestCase):
             content=[DataClass1(id_=k, value1=k + 1) for k in range(self.batchSize)]
         )
         self.outputDataset = self.datasetFactory.get(dataType=ExampleOutputDataClass, name='exampleOutputDataset')
-        self.batchReader = ExampleTensorflowBatchProcessor(
+        self.batchProcessor = ExampleTensorflowBatchProcessor(
             inputDataset=self.inputDataset,
             inputBatchSize=self.batchSize,
             outputDataset=self.outputDataset
@@ -46,7 +46,7 @@ class TestTensorflowModelManager(HypergolTestCase):
         self.modelManager = TensorflowModelManager(
             model=self.model,
             optimizer=tf.keras.optimizers.Adam(lr=1),
-            batchProcessor=self.batchReader,
+            batchProcessor=self.batchProcessor,
             location=self.location,
             project=self.project,
             branch=self.branch,
@@ -60,8 +60,7 @@ class TestTensorflowModelManager(HypergolTestCase):
         self.modelManager.finish()
         shutil.rmtree(self.location)
 
-    # TODO(Laszlo): needs better name
-    def test_initialize_with_no_restore(self):
+    def test_summary_writer_initialization(self):
         self.assertNotEqual(self.modelManager.trainingSummaryWriter, None)
         self.assertNotEqual(self.modelManager.evaluationSummaryWriter, None)
 
@@ -92,16 +91,23 @@ class TestTensorflowModelManager(HypergolTestCase):
         modelDirectory = Path(self.location, self.project, self.branch, 'models', self.modelManager.name, str(self.modelManager.globalStep))
         self.modelManager.save_model()
         newModel = TensorflowModelExample(exampleBlock=ExampleTrainableBlock(requiredOutputSize=1))
+        # new batch processor needed to avoid DataSet collision with previous processor
+        newOutputDataset = self.datasetFactory.get(dataType=ExampleOutputDataClass, name='newExampleOutputDataset')
+        newBatchProcessor = ExampleTensorflowBatchProcessor(
+            inputDataset=self.inputDataset,
+            inputBatchSize=self.batchSize,
+            outputDataset=newOutputDataset
+        )
         newModelManager = TensorflowModelManager(
-            model=self.model,
+            model=newModel,
             optimizer=tf.keras.optimizers.Adam(lr=1),
-            batchProcessor=self.batchReader,
+            batchProcessor=newBatchProcessor,
             location=self.location,
             project=self.project,
             branch=self.branch,
             name='newTestTfModel',
             restoreWeightsPath=modelDirectory
         )
-        newModelManager.restore_model_weights()
+        newModelManager.start()
         newBlockWeights = newModelManager.model.exampleBlock.weights[0].numpy()
         self.assertTrue((originalBlockWeights == newBlockWeights).all())
