@@ -11,7 +11,6 @@ from hypergol.dataset import DatasetDoesNotExistException
 from hypergol.dataset import DatasetAlreadyExistsException
 from hypergol.dataset import DatasetDefFileDoesNotMatchException
 from hypergol.dataset import DatasetTypeDoesNotMatchDataTypeException
-from hypergol.dataset import DatasetChecksumMismatchException
 
 
 class TestDataset(HypergolTestCase):
@@ -46,9 +45,6 @@ class TestDataset(HypergolTestCase):
     def test_dataset_correctly_locates_def_file(self):
         self.assertEqual(self.dataset.defFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.def')
 
-    def test_dataset_correctly_locates_chk_file(self):
-        self.assertEqual(self.dataset.chkFile.chkFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.chk')
-
     def test_dataset_exists_returns_true_if_exists(self):
         self.assertEqual(self.dataset.exists(), True)
 
@@ -57,16 +53,6 @@ class TestDataset(HypergolTestCase):
 
     def test_dataset_check_def_file_returns_true_if_correct(self):
         self.assertEqual(self.dataset.check_def_file(), True)
-
-    def test_dataset_check_chk_file_returns_true_if_correct(self):
-        self.assertEqual(self.dataset.chkFile.check_chk_file(), True)
-
-    def test_dataset_check_chk_file_raises_error_if_checksum_mismatch(self):
-        chkFileData = json.loads(open(self.dataset.chkFile.chkFilename, 'rt').read())
-        chkFileData[f'{self.dataset.name}_0.jsonl.gz'] = chkFileData[f'{self.dataset.name}_1.jsonl.gz']
-        open(self.dataset.chkFile.chkFilename, 'wt').write(json.dumps(chkFileData, sort_keys=True, indent=4))
-        with self.assertRaises(DatasetChecksumMismatchException):
-            self.dataset.chkFile.check_chk_file()
 
     def test_open_returns_datawriter_and_opened_chunks_if_w_mode(self):
         datasetWriter = self.datasetNew.open('w')
