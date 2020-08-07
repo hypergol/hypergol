@@ -28,7 +28,7 @@ class ExampleBatchProcessor(BaseBatchProcessor):
     def process_input_batch(self, batch):
         # sorting needs to happen for testing, because impossible to know ordering of items that come out of dataset
         inputs = {
-            'batchIds': sorted([v.id_ for v in batch]),
+            'ids': sorted([v.id_ for v in batch]),
             'input1': sorted([v.value1 for v in batch]),
             'input2': sorted([v.value1 + 1 for v in batch])
         }
@@ -37,7 +37,7 @@ class ExampleBatchProcessor(BaseBatchProcessor):
 
     def process_output_batch(self, inputs, targets, outputs):
         outputData = []
-        for k, batchId in enumerate(inputs['batchIds']):
+        for k, batchId in enumerate(inputs['ids']):
             outputData.append(ExampleOutputDataClass(
                 id_=batchId,
                 value1=inputs['input1'][k],
@@ -54,7 +54,7 @@ class ExampleTensorflowBatchProcessor(BaseBatchProcessor):
 
     def process_input_batch(self, batch):
         inputs = {
-            'batchIds': [v.id_ for v in batch],
+            'ids': [v.id_ for v in batch],
             'input1': tf.constant([[v.value1, v.value1 + 1, v.value1 + 2] for v in batch], dtype=tf.float32)
         }
         targets = tf.constant([v.value1 for v in batch], dtype=tf.float32)
@@ -62,7 +62,7 @@ class ExampleTensorflowBatchProcessor(BaseBatchProcessor):
 
     def process_output_batch(self, inputs, targets, outputs):
         outputData = []
-        for k, batchId in enumerate(inputs['batchIds']):
+        for k, batchId in enumerate(inputs['ids']):
             outputData.append(ExampleOutputDataClass(
                 id_=batchId,
                 value1=int(inputs['input1'][k, 0].numpy()),
@@ -99,16 +99,16 @@ class TensorflowModelExample(BaseTensorflowModel):
         super(TensorflowModelExample, self).__init__(**kwargs)
         self.exampleBlock = exampleBlock
 
-    def get_loss(self, targets, training, batchIds, input1):
-        outputs = self.get_outputs(batchIds=batchIds, input1=input1)
+    def get_loss(self, targets, training, ids, input1):
+        outputs = self.get_outputs(ids=ids, input1=input1)
         return tf.reduce_sum(outputs - targets)
 
-    def produce_metrics(self, targets, training, globalStep, batchIds, input1):
+    def produce_metrics(self, targets, training, globalStep, ids, input1):
         return input1
 
     @ tf.function(input_signature=[
-        tf.TensorSpec(shape=[None], dtype=tf.int32, name="batchIds"),
+        tf.TensorSpec(shape=[None], dtype=tf.int32, name="ids"),
         tf.TensorSpec(shape=[None, 3], dtype=tf.float32, name="input1")
     ])
-    def get_outputs(self, batchIds, input1):
+    def get_outputs(self, ids, input1):
         return self.exampleBlock.get_output(input1)

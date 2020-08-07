@@ -28,7 +28,7 @@ class TestTensorflowTagger(HypergolTestCase):
             methodName=methodName
         )
         self.exampleInputs = {
-            'batchIds': [1, 2, 3],
+            'ids': [1, 2, 3],
             'input1': tf.constant([[2, 3, 4]], dtype=tf.float32)
         }
         self.batchSize = 3

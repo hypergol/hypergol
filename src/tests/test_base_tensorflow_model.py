@@ -13,7 +13,7 @@ class TestBaseTensorflowModel(TestCase):
     def __init__(self, methodName='runTest'):
         super(TestBaseTensorflowModel, self).__init__(methodName=methodName)
         self.exampleInputs = {
-            'batchIds': [1, 2, 3],
+            'ids': [1, 2, 3],
             'input1': tf.constant([[2, 3, 4]], dtype=tf.float32)
         }
         self.nonTrainableExpectedOutput = np.array([[0.09003057, 0.24472848, 0.66524094]], dtype=np.float32)

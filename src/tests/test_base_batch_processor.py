@@ -25,7 +25,7 @@ class TestBaseBatchProcessor(HypergolTestCase):
             content=[DataClass1(id_=k, value1=k + 1) for k in range(self.sampleLength)]
         )
         self.expectedBatchInputs = {
-            'batchIds': list(range(0, self.sampleLength)),
+            'ids': list(range(0, self.sampleLength)),
             'input1': list(range(1, self.sampleLength + 1)),
             'input2': list(range(2, self.sampleLength + 2))
         }
