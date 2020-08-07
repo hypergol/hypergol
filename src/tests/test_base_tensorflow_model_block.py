@@ -20,7 +20,7 @@ class TestBaseTensorflowModelBlock(TestCase):
 
     def setUp(self):
         super().setUp()
-        Path(self.location).mkdir()
+        Path(self.location).mkdir(parents=True, exist_ok=True)
         self.blockWithConstructionParam = ExampleTrainableBlock(requiredOutputSize=self.exampleEmbeddingSize)
         self.nonTrainableBlock = ExampleNonTrainableBlock()
         self.blockSaveFile = f'{self.location}/{self.blockWithConstructionParam.get_name()}.json'
@@ -30,15 +30,12 @@ class TestBaseTensorflowModelBlock(TestCase):
         shutil.rmtree(self.location)
 
     def test_block_build(self):
-        self.blockWithConstructionParam.build(inputs_shape=0)
         self.assertNotEqual(self.blockWithConstructionParam.exampleDenseLayer, None)
 
     def test_block_call(self):
-        self.nonTrainableBlock.build(inputs_shape=0)
-        outputTensor = self.nonTrainableBlock(self.exampleLogits)
+        outputTensor = self.nonTrainableBlock.get_output(self.exampleLogits)
         self.assertTrue((outputTensor.numpy() == self.expectedOutput).all())
 
     def test_get_config(self):
-        self.blockWithConstructionParam.build(inputs_shape=0)
         config = self.blockWithConstructionParam.get_config()
         self.assertEqual(config['requiredOutputSize'], self.exampleEmbeddingSize)

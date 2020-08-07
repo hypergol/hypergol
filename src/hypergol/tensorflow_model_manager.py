@@ -48,7 +48,7 @@ class TensorflowModelManager:
         """ saves tensorflow model, block definitions, and weights """
         modelDirectory = Path(self.location, self.project, self.branch, 'models', self.name, str(self.globalStep))
         modelDirectory.mkdir(parents=True, exist_ok=True)
-        tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures=self.model.get_signatures())
+        tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures={'signature_default': self.model.get_outputs})
         for modelBlock in self.model.get_model_blocks():
             json.dump(modelBlock.get_config(), open(f'{modelDirectory}/{modelBlock.get_name()}.json', 'w'))
         self.model.save_weights(f'{modelDirectory}/{self.model.get_name()}.h5', save_format='h5')
@@ -57,62 +57,69 @@ class TensorflowModelManager:
         """ restores tensorflow model weights """
         self.model.load_weights(f'{self.restoreWeightsPath}/{self.model.get_name()}.h5')
 
-    def initialize(self):
-        """
-        initialization method, restores variables and creates summary writers
-        """
-        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
-        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
-        if self.restoreWeightsPath is not None:
-            self.evaluate(withLogging=False, withMetadata=False)  # model call needed to initialize layers/weights before reloading
-            self.model.restore_model_weights(path=self.restoreWeightsPath)
-
-    def train(self, withLogging, withMetadata):
+    def train(self, withTracing):
         """runs a training step for the model
 
         Parameters
         ----------
-        withLogging: bool
-            produce tensorflow logging for step
         withMetadata: bool
             log tensorflow graph metadata for step
         """
-        batch = next(self.batchProcessor)
-        if withMetadata and self.globalStep > 0:
+        inputs, targets = next(self.batchProcessor)
+        if withTracing:
             tf.summary.trace_on(graph=True, profiler=False)
-        loss = self.model.train(inputs=batch['inputs'], targets=batch['targets'], optimizer=self.optimizer)
-        if withLogging:
-            with self.trainingSummaryWriter.as_default():
-                tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-                if withMetadata and self.globalStep > 0:
-                    tf.summary.trace_export(name=f'{self.model.get_name()}{self.globalStep}', step=self.globalStep, profiler_outdir=f'{self.tensorboardPath}/trainGraph')
+
+        with tf.GradientTape() as tape:
+            loss = self.model.get_loss(targets=targets, training=True, **inputs)
+        grads = tape.gradient(loss, self.model.trainable_variables)
+        self.optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
+
+        # Watch this issue: https://github.com/PyCQA/pylint/issues/3596
+        with self.trainingSummaryWriter.as_default():                   #pylint: disable=not-context-manager
+            tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
+            if withTracing:
+                tf.summary.trace_export(
+                    name=f'{self.model.get_name()}{self.globalStep}',
+                    step=self.globalStep,
+                    profiler_outdir=f'{self.tensorboardPath}/trainGraph'
+                )
         self.globalStep += 1
         return loss
 
-    def evaluate(self, withLogging, withMetadata):
+    def evaluate(self, withTracing):
         """runs an evaluation step for the model
 
         Parameters
         ----------
-        withLogging: bool
-            produce tensorflow logging for step
         withMetadata: bool
             log tensorflow graph metadata for step
         """
-        batch = next(self.batchProcessor)
-        if withMetadata and self.globalStep > 0:
+        inputs, targets = next(self.batchProcessor)
+        if withTracing:
             tf.summary.trace_on(graph=True, profiler=False)
-        outputs, loss, metrics = self.model.evaluate(inputs=batch['inputs'], targets=batch['targets'])
-        if withLogging:
-            with self.evaluationSummaryWriter.as_default():
-                tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-                self.model.produce_metrics(inputs=batch['inputs'], outputs=outputs, targets=batch['targets'])
-                if withMetadata and self.globalStep > 0:
-                    tf.summary.trace_export(name=f'{self.model.get_name()}{self.globalStep}', step=self.globalStep, profiler_outdir=f'{self.tensorboardPath}/evaluateGraph')
-        self.batchProcessor.save_batch(modelInputs=batch, modelOutputs=outputs)
-        return outputs, loss, metrics
+        loss = self.model.get_loss(targets=targets, training=False, **inputs)
+        outputs = self.model.get_evaluation_outputs(**inputs)
+        with self.evaluationSummaryWriter.as_default():                     #pylint: disable=not-context-manager
+            tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
+            self.model.produce_metrics(targets=targets, training=False, globalStep=self.globalStep, **inputs)
+            if withTracing:
+                tf.summary.trace_export(
+                    name=f'{self.model.get_name()}{self.globalStep}',
+                    step=self.globalStep,
+                    profiler_outdir=f'{self.tensorboardPath}/evaluateGraph'
+                )
+        self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
+        return loss
 
-    def run(self, stepCount, evaluationSteps, tensorboardSteps, metadataSteps, trainingSteps=None):
+    def start(self):
+        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
+        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
+        if self.restoreWeightsPath is not None:
+            self.evaluate(withTracing=False)  # model call needed to initialize layers/weights before reloading
+            self.model.restore_model_weights(path=self.restoreWeightsPath)
+        self.batchProcessor.start()
+
+    def run(self, stepCount, evaluationSteps, tracingSteps):
         """runs a training schedule
 
         Parameters
@@ -121,20 +128,19 @@ class TensorflowModelManager:
             num total steps in schedule
         evaluationSteps: List[int]
             which steps to produce metrics on an evaluation sample
-        tensorboardSteps: List[int]
-            which steps to log taining loss to tensorboard
-        metadataSteps: List[int]
-            which steps to log metadata to tensorboard
-        trainingSteps: List[int]
-            which steps to train model
+        tracingSteps: List[int]
+            which steps to log graph metadata (components, memory consumption, etc) to tensorboard
         """
-        if trainingSteps is None:
-            trainingSteps = range(stepCount)
-        self.initialize()
-        for k in tqdm(range(stepCount)):
-            if k in trainingSteps:
-                self.train(withLogging=k in tensorboardSteps, withMetadata=k in metadataSteps)
-            if k in evaluationSteps:
-                self.save_model()
-                self.evaluate(withLogging=k in tensorboardSteps, withMetadata=k in metadataSteps)
-        self.save_model()
+        self.start()
+        try:
+            for step in tqdm(range(stepCount)):
+                self.train(withTracing=step in tracingSteps)
+                if step in evaluationSteps:
+                    self.save_model()
+                    self.evaluate(withTracing=step in tracingSteps)
+            self.save_model()
+        finally:
+            self.finish()
+
+    def finish(self):
+        self.batchProcessor.finish()
