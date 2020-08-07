@@ -1,5 +1,6 @@
 import os
 import shutil
+import numpy as np
 import tensorflow as tf
 from pathlib import Path
 
@@ -69,10 +70,24 @@ class TestTensorflowModelManager(HypergolTestCase):
         self.assertIsNotNone(loss)
         self.assertNotEqual(loss.numpy(), 0)
 
+    def test_gradients_applied_in_train(self):
+        self.modelManager.train(withTracing=False)
+        weights1 = self.modelManager.model.exampleBlock.exampleDenseLayer.weights[0].numpy()  # need numpy call here, otherwise pointed returned
+        self.modelManager.train(withTracing=False)
+        weights2 = self.modelManager.model.exampleBlock.exampleDenseLayer.weights[0].numpy()
+        self.assertFalse((weights1 == weights2).all())
+
     def test_evaluate(self):
         loss = self.modelManager.evaluate(withTracing=True)
         self.assertIsNotNone(loss)
         self.assertNotEqual(loss.numpy(), 0)
+
+    def test_gradients_not_applied_in_evaluation(self):
+        self.modelManager.evaluate(withTracing=False)
+        weights1 = self.modelManager.model.exampleBlock.exampleDenseLayer.weights[0].numpy()  # need numpy call here, otherwise pointed returned
+        self.modelManager.evaluate(withTracing=False)
+        weights2 = self.modelManager.model.exampleBlock.exampleDenseLayer.weights[0].numpy()
+        self.assertTrue((weights1 == weights2).all())
 
     def test_save_model(self):
         self.modelManager.train(withTracing=True)
