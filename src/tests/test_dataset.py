@@ -1,5 +1,4 @@
 import os
-import json
 from pathlib import PosixPath
 
 from tests.hypergol_test_case import HypergolTestCase
@@ -9,7 +8,7 @@ from hypergol.dataset import DatasetWriter
 from hypergol.dataset import DatasetReader
 from hypergol.dataset import DatasetDoesNotExistException
 from hypergol.dataset import DatasetAlreadyExistsException
-from hypergol.dataset_deffile import DatasetDefFileDoesNotMatchException
+from hypergol.dataset_def_file import DatasetDefFileDoesNotMatchException
 from hypergol.dataset import DatasetTypeDoesNotMatchDataTypeException
 
 
@@ -42,17 +41,11 @@ class TestDataset(HypergolTestCase):
     def test_dataset_directory_returns_correctly(self):
         self.assertEqual(self.dataset.directory, PosixPath(f'{self.location}/{self.project}/{self.branch}/data_class'))
 
-    def test_dataset_correctly_locates_def_file(self):
-        self.assertEqual(self.dataset.defFile.defFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.def')
-
     def test_dataset_exists_returns_true_if_exists(self):
         self.assertEqual(self.dataset.exists(), True)
 
     def test_dataset_exists_returns_false_if_does_not_exists(self):
         self.assertEqual(self.datasetNew.exists(), False)
-
-    def test_dataset_check_def_file_returns_true_if_correct(self):
-        self.assertEqual(self.dataset.defFile.check_def_file(), True)
 
     def test_open_returns_datawriter_and_opened_chunks_if_w_mode(self):
         datasetWriter = self.datasetNew.open('w')

@@ -1,7 +1,7 @@
 import json
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import HypergolTestCase
-from hypergol.dataset_chkfile import DatasetChecksumMismatchException
+from hypergol.dataset_chk_file import DatasetChecksumMismatchException
 
 
 class TestDatasetChkFile(HypergolTestCase):
@@ -22,12 +22,10 @@ class TestDatasetChkFile(HypergolTestCase):
             dataset=self.datasetFactory.get(dataType=DataClass1, name='data_class'),
             content=self.expectedObjects
         )
-        self.datasetNew = self.datasetFactory.get(dataType=DataClass1, name='data_class_new')
 
     def tearDown(self):
         super().tearDown()
         self.delete_if_exists(dataset=self.dataset)
-        self.delete_if_exists(dataset=self.datasetNew)
         self.clean_directories()
 
     def test_dataset_correctly_locates_chk_file(self):

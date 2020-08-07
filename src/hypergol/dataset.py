@@ -9,8 +9,8 @@ from pathlib import Path
 from hypergol.utils import Repr
 from hypergol.utils import _get_hash
 from hypergol.base_data import BaseData
-from hypergol.dataset_chkfile import DataSetChkFile
-from hypergol.dataset_deffile import DataSetDefFile
+from hypergol.dataset_chk_file import DataSetChkFile
+from hypergol.dataset_def_file import DataSetDefFile
 
 VALID_CHUNKS = {16: 1, 256: 2, 4096: 3}
 

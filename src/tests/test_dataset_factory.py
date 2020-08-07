@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from tests.hypergol_test_case import DataClass1
 from hypergol.dataset import Dataset
-from hypergol.dataset_chkfile import DataSetChkFile
+from hypergol.dataset_chk_file import DataSetChkFile
 from hypergol.dataset import DataSetDefFile
 from hypergol.dataset import RepoData
 from hypergol.dataset import DatasetFactory
