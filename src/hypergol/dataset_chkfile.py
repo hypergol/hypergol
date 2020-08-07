@@ -34,7 +34,7 @@ class DataSetChkFile:
             SHA1 hash of the content of each chunk file
         """
         chkData = {checksum.chunk.fileName: checksum.value for checksum in checksums}
-        chkData[f'{self.dataset.name}.def'] = _get_hash(open(self.dataset.defFilename, 'rt').read())
+        chkData[f'{self.dataset.name}.def'] = _get_hash(open(self.dataset.defFile.defFilename, 'rt').read())
         chkDataString = json.dumps(chkData, sort_keys=True, indent=4)
         with open(self.chkFilename, 'wt') as chkFile:
             chkFile.write(chkDataString)
@@ -46,7 +46,7 @@ class DataSetChkFile:
         mv = memoryview(bytearray(CHECKSUM_BUFFER_SIZE))
         for fileName, chkFileChecksum in chkFileData.items():
             if fileName.endswith('.def'):
-                data = open(self.dataset.defFilename, 'rt').read()
+                data = open(self.dataset.defFile.defFilename, 'rt').read()
                 actualChecksum = _get_hash(data)
             else:
                 hasher = hashlib.sha1(''.encode('utf-8'))

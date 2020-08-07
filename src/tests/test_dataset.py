@@ -43,7 +43,7 @@ class TestDataset(HypergolTestCase):
         self.assertEqual(self.dataset.directory, PosixPath(f'{self.location}/{self.project}/{self.branch}/data_class'))
 
     def test_dataset_correctly_locates_def_file(self):
-        self.assertEqual(self.dataset.defFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.def')
+        self.assertEqual(self.dataset.defFile.defFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.def')
 
     def test_dataset_exists_returns_true_if_exists(self):
         self.assertEqual(self.dataset.exists(), True)
@@ -52,7 +52,7 @@ class TestDataset(HypergolTestCase):
         self.assertEqual(self.datasetNew.exists(), False)
 
     def test_dataset_check_def_file_returns_true_if_correct(self):
-        self.assertEqual(self.dataset.check_def_file(), True)
+        self.assertEqual(self.dataset.defFile.check_def_file(), True)
 
     def test_open_returns_datawriter_and_opened_chunks_if_w_mode(self):
         datasetWriter = self.datasetNew.open('w')

@@ -70,6 +70,61 @@ class DataChunkChecksum(Repr):
         self.value = value
 
 
+class DataSetDefFile:
+
+    def __init__(self, dataset):
+        self.dataset = dataset
+        self.dependencies = []
+
+    def add_dependency(self, dataset):
+        self.dependencies.append(dataset)
+
+    @property
+    def defFilename(self):
+        """Full path of the definition file for this dataset"""
+        return f'{self.dataset.directory}/{self.dataset.name}.def'
+
+    def get_def_file_data(self):
+        """Loads the data from the ``.def`` file"""
+        return json.loads(open(self.defFilename, 'rt').read())
+
+    def make_def_file(self):
+        """Creates the ``.def`` file, adds the dependencies ``.def`` data with that dataset's own checksum (which is the SHA1 of the contend of that dataset's ``.chk`` file)
+        """
+        dependencyData = []
+        for dataset in self.dependencies:
+            data = dataset.defFile.get_def_file_data()
+            data['chkFileChecksum'] = dataset.chkFile.get_checksum()
+            dependencyData.append(data)
+        defData = {
+            'dataType': self.dataset.dataType.__name__,
+            'project': self.dataset.project,
+            'branch': self.dataset.branch,
+            'name': self.dataset.name,
+            'chunkCount': self.dataset.chunkCount,
+            'creationTime': datetime.now().isoformat(),
+            'dependencies': dependencyData,
+            'repo': self.dataset.repoData.to_data()
+        }
+        self.dataset.directory.mkdir(parents=True, exist_ok=True)
+        with open(self.defFilename, 'wt') as defFile:
+            defFile.write(json.dumps(defData, sort_keys=True, indent=4))
+
+    def check_def_file(self):
+        """Checks if a dataset already exists the definition of the object matches to that on disk"""
+        defFileData = self.get_def_file_data()
+        isDefValuesMatch = (
+            defFileData['dataType'] == self.dataset.dataType.__name__ and
+            defFileData['project'] == self.dataset.project and
+            defFileData['branch'] == self.dataset.branch and
+            defFileData['name'] == self.dataset.name and
+            defFileData['chunkCount'] == self.dataset.chunkCount
+        )
+        if not isDefValuesMatch:
+            raise DatasetDefFileDoesNotMatchException('The defintion of the dataset class does not match the def file')
+        return True
+
+
 class DataChunk(Repr):
     """This class represents the file that the data is actually stored in.
 
@@ -173,9 +228,10 @@ class Dataset(Repr):
         self.branch = branch
         self.name = name
         self.chunkCount = chunkCount
-        self.dependencies = []
+
         self.repoData = repoData or RepoData.get_dummy()
         self.chkFile = DataSetChkFile(dataset=self)
+        self.defFile = DataSetDefFile(dataset=self)
 
     def add_dependency(self, dataset):
         """Adds the ``.def`` file of a dataset to the ``.def`` file of this dataset so data lineage can be retraced
@@ -185,57 +241,12 @@ class Dataset(Repr):
         dataset : Dataset
             dataset that contributes to the generation of this dataset
         """
-        self.dependencies.append(dataset)
+        self.defFile.add_dependency(dataset)
 
     @property
     def directory(self):
         """Full path of the directory this dataset will be in"""
         return Path(self.location, self.project, self.branch, self.name)
-
-    @property
-    def defFilename(self):
-        """Full path of the definition file for this dataset"""
-        return f'{self.directory}/{self.name}.def'
-
-    def get_def_file_data(self):
-        """Loads the data from the ``.def`` file"""
-        return json.loads(open(self.defFilename, 'rt').read())
-
-    def make_def_file(self):
-        """Creates the ``.def`` file, adds the dependencies ``.def`` data with that dataset's own checksum (which is the SHA1 of the contend of that dataset's ``.chk`` file)
-        """
-        dependencyData = []
-        for dataset in self.dependencies:
-            data = dataset.get_def_file_data()
-            data['chkFileChecksum'] = dataset.chkFile.get_checksum()
-            dependencyData.append(data)
-        defData = {
-            'dataType': self.dataType.__name__,
-            'project': self.project,
-            'branch': self.branch,
-            'name': self.name,
-            'chunkCount': self.chunkCount,
-            'creationTime': datetime.now().isoformat(),
-            'dependencies': dependencyData,
-            'repo': self.repoData.to_data()
-        }
-        self.directory.mkdir(parents=True, exist_ok=True)
-        with open(self.defFilename, 'wt') as defFile:
-            defFile.write(json.dumps(defData, sort_keys=True, indent=4))
-
-    def check_def_file(self):
-        """Checks if a dataset already exists the definition of the object matches to that on disk"""
-        defFileData = self.get_def_file_data()
-        isDefValuesMatch = (
-            defFileData['dataType'] == self.dataType.__name__ and
-            defFileData['project'] == self.project and
-            defFileData['branch'] == self.branch and
-            defFileData['name'] == self.name and
-            defFileData['chunkCount'] == self.chunkCount
-        )
-        if not isDefValuesMatch:
-            raise DatasetDefFileDoesNotMatchException('The defintion of the dataset class does not match the def file')
-        return True
 
     def init(self, mode):
         """Checks the existence of the dataset
@@ -254,12 +265,12 @@ class Dataset(Repr):
         """
         if mode == 'w':
             if self.exists():
-                raise DatasetAlreadyExistsException(f"Dataset {self.defFilename} already exist, delete the dataset first with Dataset.delete()")
-            self.make_def_file()
+                raise DatasetAlreadyExistsException(f"Dataset {self.defFile.defFilename} already exist, delete the dataset first with Dataset.delete()")
+            self.defFile.make_def_file()
         elif mode == 'r':
             if not self.exists():
                 raise DatasetDoesNotExistException(f'Dataset {self.name} does not exist')
-            self.check_def_file()
+            self.defFile.check_def_file()
         else:
             raise ValueError(f'Invalid mode: {mode} in {self.name}')
 
@@ -306,7 +317,7 @@ class Dataset(Repr):
 
     def exists(self):
         """True if the dataset's ``.def`` file exists"""
-        return os.path.exists(self.defFilename)
+        return os.path.exists(self.defFile.defFilename)
 
 
 class DatasetReader(Repr):
