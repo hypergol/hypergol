@@ -69,6 +69,7 @@ class RepoData(BaseData):
     @classmethod
     def get_dummy(cls):
         """Creates an empty RepoData if the Dataset was created outside a git repository"""
+        print('Dummy repodata was used, data lineage disabled')
         return RepoData(
             branchName='dummy',
             commitHash='0000000000000000000000000000000000000000',
@@ -83,6 +84,12 @@ class DataChunkChecksum(Repr):
     def __init__(self, chunk, value):
         self.chunk = chunk
         self.value = value
+
+
+class DataSetChkFile:
+
+    def __init__(self):
+        pass
 
 
 class DataChunk(Repr):
@@ -113,7 +120,7 @@ class DataChunk(Repr):
     @property
     def fileName(self):
         """Name of the file the data will be stored"""
-        return f'{self.dataset.name}_{self.chunkId}.json.gz'
+        return f'{self.dataset.name}_{self.chunkId}.jsonl.gz'
 
     def open(self):
         """Opens the chunk according to the mode specified at creation"""
@@ -159,7 +166,7 @@ class Dataset(Repr):
     """
     Dataset class to store BaseData objects that is readable/writable in a parallel manner.
 
-    Files will be stored in: ``location/project/branch/name/name_???.json.gz``
+    Files will be stored in: ``location/project/branch/name/name_???.jsonl.gz``
 
     """
 

@@ -63,14 +63,14 @@ class TestDataset(HypergolTestCase):
 
     def test_dataset_check_chk_file_raises_error_if_checksum_mismatch(self):
         chkFileData = json.loads(open(self.dataset.chkFilename, 'rt').read())
-        chkFileData[f'{self.dataset.name}_0.json.gz'] = chkFileData[f'{self.dataset.name}_1.json.gz']
+        chkFileData[f'{self.dataset.name}_0.jsonl.gz'] = chkFileData[f'{self.dataset.name}_1.jsonl.gz']
         open(self.dataset.chkFilename, 'wt').write(json.dumps(chkFileData, sort_keys=True, indent=4))
         with self.assertRaises(DatasetChecksumMismatchException):
             self.dataset.check_chk_file()
 
     def test_open_returns_datawriter_and_opened_chunks_if_w_mode(self):
         datasetWriter = self.datasetNew.open('w')
-        expectedFilenames = {f'{k:0x}': f'{self.datasetNew.directory}/data_class_new_{k:0x}.json.gz' for k in range(16)}
+        expectedFilenames = {f'{k:0x}': f'{self.datasetNew.directory}/data_class_new_{k:0x}.jsonl.gz' for k in range(16)}
         filenames = {dataChunkId: dataChunk.file.name for dataChunkId, dataChunk in datasetWriter.dataChunks.items()}
         self.assertEqual(type(datasetWriter), DatasetWriter)
         self.assertEqual(datasetWriter.dataset, self.datasetNew)

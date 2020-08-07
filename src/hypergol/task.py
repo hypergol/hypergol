@@ -99,7 +99,7 @@ def _merge_function(args):
     chunk.open()
     pattern = str(Path(
         chunk.dataset.location, chunk.dataset.project, f'{chunk.dataset.name}_temp',
-        f'{chunk.dataset.name}_*', f'*_{chunk.chunkId}.json.gz'
+        f'{chunk.dataset.name}_*', f'*_{chunk.chunkId}.jsonl.gz'
     ))
     for filePath in sorted(glob.glob(pattern)):
         with gzip.open(filePath, 'rt') as inputFile:

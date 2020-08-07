@@ -141,3 +141,5 @@ class HypergolProject:
 
     def render_simple(self, templateName, filePath):
         return self.render(templateName=templateName, templateData={'name': self.projectName}, filePath=filePath)
+
+    
