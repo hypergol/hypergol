@@ -128,16 +128,16 @@ class TensorflowModelManager:
             num total steps in schedule
         evaluationSteps: List[int]
             which steps to produce metrics on an evaluation sample
-        metadataSteps: List[int]
-            which steps to log metadata to tensorboard
+        tracingSteps: List[int]
+            which steps to log graph metadata (components, memory consumption, etc) to tensorboard
         """
         self.start()
         try:
-            for k in tqdm(range(stepCount)):
-                self.train(withTracing=k in tracingSteps)
-                if k in evaluationSteps:
+            for step in tqdm(range(stepCount)):
+                self.train(withTracing=step in tracingSteps)
+                if step in evaluationSteps:
                     self.save_model()
-                    self.evaluate(withTracing=k in tracingSteps)
+                    self.evaluate(withTracing=step in tracingSteps)
             self.save_model()
         finally:
             self.finish()
