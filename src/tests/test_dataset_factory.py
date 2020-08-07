@@ -37,4 +37,7 @@ class TestDatasetFactory(TestCase):
             repoData=self.repoData)
         dataset = datasetFactory.get(dataType=DataClass1, name='data_class')
         self.assertEqual(type(dataset), Dataset)
-        self.assertDictContainsSubset(self.expectedDataset.__dict__, dataset.__dict__)
+        expectedParameters = {k: v for k, v in self.expectedDataset.__dict__.items() if k != 'chkFile'}
+        actualParameters = {k: v for k, v in dataset.__dict__.items() if k != 'chkFile'}
+        self.assertDictContainsSubset(expectedParameters, actualParameters)
+        self.assertEqual(dataset.chkFile.dataset, dataset)

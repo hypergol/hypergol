@@ -12,6 +12,7 @@ from hypergol.dataset import DatasetFactory
 class Task(BaseTask):
     """Class to create other datasets, created domain objects in :func:`run()` must be appended to the output with ``self.output.append(object)`` (any number of the same type)
     """
+
     def __init__(self, outputDataset, *args, **kwargs):
         """
         Also creates dataset factory for temporary datasets
@@ -85,7 +86,7 @@ class Task(BaseTask):
                 os.rmdir(temporayBranchDirectory)
         except OSError as ex:
             self.log(f'temporary directory cannot be deleted {ex}')
-        self.outputDataset.make_chk_file(checksums=checksums)
+        self.outputDataset.chkFile.make_chk_file(checksums=checksums)
         self.finish(jobReports, threads)
 
 
