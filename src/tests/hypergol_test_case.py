@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from hypergol.base_data import BaseData
 from hypergol.dataset import RepoData
-from hypergol.dataset import DatasetFactory
+from hypergol.dataset_factory import DatasetFactory
 
 
 class DataClass1(BaseData):

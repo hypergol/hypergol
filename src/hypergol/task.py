@@ -6,7 +6,7 @@ from multiprocessing import Pool
 from hypergol.base_task import BaseTask
 from hypergol.base_task import Job
 from hypergol.base_task import JobReport
-from hypergol.dataset import DatasetFactory
+from hypergol.dataset_factory import DatasetFactory
 
 
 class Task(BaseTask):

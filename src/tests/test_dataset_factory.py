@@ -5,7 +5,7 @@ from hypergol.dataset import Dataset
 from hypergol.dataset_chk_file import DataSetChkFile
 from hypergol.dataset import DataSetDefFile
 from hypergol.dataset import RepoData
-from hypergol.dataset import DatasetFactory
+from hypergol.dataset_factory import DatasetFactory
 
 
 class TestDatasetFactory(TestCase):
