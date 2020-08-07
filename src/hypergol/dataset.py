@@ -5,7 +5,7 @@ from pathlib import Path
 
 from hypergol.datachunk import DataChunk
 from hypergol.utils import Repr
-from hypergol.utils import _get_hash
+from hypergol.utils import get_hash
 from hypergol.repo_data import RepoData
 from hypergol.dataset_chk_file import DataSetChkFile
 from hypergol.dataset_def_file import DataSetDefFile
@@ -131,7 +131,7 @@ class Dataset(Repr):
 
     def get_object_chunk_id(self, objectHashId):
         """Finds out which chunk the object belongs based on the :term:`hash id` """
-        return _get_hash(objectHashId)[:VALID_CHUNKS[self.chunkCount]]
+        return get_hash(objectHashId)[:VALID_CHUNKS[self.chunkCount]]
 
     def delete(self):
         """Deletes the files and the directory of the dataset"""

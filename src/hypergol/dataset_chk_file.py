@@ -2,7 +2,7 @@ import json
 import gzip
 import hashlib
 
-from hypergol.utils import _get_hash
+from hypergol.utils import get_hash
 
 
 CHECKSUM_BUFFER_SIZE = 128*1024
@@ -24,7 +24,7 @@ class DataSetChkFile:
 
     def get_checksum(self):
         """Hashes the content of the be stored in the dependent dataset's ``.def`` file"""
-        return _get_hash(data=open(self.chkFilename, 'rt').read())
+        return get_hash(data=open(self.chkFilename, 'rt').read())
 
     def make_chk_file(self, checksums):
         """Creates the ``.chk`` file
@@ -34,7 +34,7 @@ class DataSetChkFile:
             SHA1 hash of the content of each chunk file
         """
         chkData = {checksum.chunk.fileName: checksum.value for checksum in checksums}
-        chkData[f'{self.dataset.name}.def'] = _get_hash(open(self.dataset.defFile.defFilename, 'rt').read())
+        chkData[f'{self.dataset.name}.def'] = get_hash(open(self.dataset.defFile.defFilename, 'rt').read())
         chkDataString = json.dumps(chkData, sort_keys=True, indent=4)
         with open(self.chkFilename, 'wt') as chkFile:
             chkFile.write(chkDataString)
@@ -47,7 +47,7 @@ class DataSetChkFile:
         for fileName, chkFileChecksum in chkFileData.items():
             if fileName.endswith('.def'):
                 data = open(self.dataset.defFile.defFilename, 'rt').read()
-                actualChecksum = _get_hash(data)
+                actualChecksum = get_hash(data)
             else:
                 hasher = hashlib.sha1(''.encode('utf-8'))
                 with gzip.open(f'{self.dataset.directory}/{fileName}', 'rb') as f:

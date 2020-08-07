@@ -40,12 +40,14 @@ class DatasetFactory(Repr):
         chunkCount : int=None
             Number of chunks, if None, the factory's own value will be used
         """
+        if chunkCount is None:
+            chunkCount = self.chunkCount
         return Dataset(
             dataType=dataType,
             location=self.location,
             project=self.project,
             branch=self.branch,
             name=name,
-            chunkCount=chunkCount or self.chunkCount,
+            chunkCount=chunkCount,
             repoData=self.repoData
         )
