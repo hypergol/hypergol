@@ -74,6 +74,29 @@ class HypergolProject:
             return ''
         return f' - Mode: {self.mode}'
 
+    def cli_final_message(self, creationType, name, content):
+        creationPath = None
+        if creationType == 'Model':
+            creationPath = self.modelsPath
+        elif creationType == 'Class':
+            creationPath = self.dataModelsPath
+        elif creationType == 'ModelBlock':
+            creationPath = self.modelsPath
+        elif creationType == 'PipeLine':
+            creationPath = self.pipelinesPath
+        elif creationType == 'Project':
+            creationPath = self.projectDirectory
+        elif str(creationType) in ['Source', 'SimpleTask', 'Task']:
+            creationPath = self.tasksPath
+        if creationPath is None:
+            raise ValueError(f'{creationType} is an unknown type')
+        print('')
+        print(f'{creationType} {name} was created in directory {creationPath}.{self.modeMessage}')
+        print('')
+        if self.isDryRun:
+            return content
+        return None
+
     def create_project_directory(self):
         create_directory(self.projectDirectory, self.mode)
 

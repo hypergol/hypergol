@@ -151,14 +151,7 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
         },
         filePath=Path(project.testsPath, f'test_{dataModel.className.asFileName}')
     )
-
-    print('')
-    print(f'Class {dataModel.className} was created.{project.modeMessage}')
-    print('')
-
-    if project.isDryRun:
-        return content
-    return None
+    return project.cli_final_message(creationType='Class', name=dataModel, content=(content, ))
 
 
 if __name__ == "__main__":

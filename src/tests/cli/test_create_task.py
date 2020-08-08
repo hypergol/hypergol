@@ -72,8 +72,8 @@ class TestCreateTask(HypergolCreateTestCase):
 
     def test_create_task_creates_content(self):
         content = create_task(className='TestTask', projectDirectory=self.projectDirectory, simple=True, dryrun=True)
-        self.assertEqual(content, TEST_TASK)
+        self.assertEqual(content[0], TEST_TASK)
 
     def test_create_task_creates_content_source(self):
         content = create_task(className='TestSource', source=True, simple=False, projectDirectory=self.projectDirectory, dryrun=True)
-        self.assertEqual(content, TEST_SOURCE)
+        self.assertEqual(content[0], TEST_SOURCE)

@@ -15,12 +15,7 @@ def create_model_block(className, projectDirectory='.', dryrun=None, force=None,
         filePath=Path(projectDirectory, 'models', className.asFileName)
     )
 
-    print('')
-    print(f'ModelBlock {className} was created.{project.modeMessage}')
-    print('')
-    if project.isDryRun:
-        return content
-    return None
+    return project.cli_final_message(creationType='ModelBlock', name=className, content=(content, ))
 
 
 if __name__ == "__main__":

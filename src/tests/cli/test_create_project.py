@@ -16,6 +16,8 @@ class TestCreateProject(HypergolCreateTestCase):
             Path(self.projectDirectory, 'data_models'),
             Path(self.projectDirectory, 'tasks', '__init__.py'),
             Path(self.projectDirectory, 'tasks'),
+            Path(self.projectDirectory, 'models', '__init__.py'),
+            Path(self.projectDirectory, 'models'),
             Path(self.projectDirectory, 'pipelines', '__init__.py'),
             Path(self.projectDirectory, 'pipelines'),
             Path(self.projectDirectory, 'README.md'),

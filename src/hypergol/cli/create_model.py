@@ -45,13 +45,7 @@ def create_model(modelName, inputClass, outputClass, *args, projectDirectory='.'
         templateData={'snakeName': modelName.asSnake},
         filePath=Path(projectDirectory, f'train_{modelName.asSnake}.sh')
     )
-
-    print('')
-    print(f'Model {modelName.asSnake} was created in directory {project.modelsPath}.{project.modeMessage}')
-    print('')
-    if project.isDryRun:
-        return content, scriptContent
-    return None
+    return project.cli_final_message(creationType='Model', name=modelName, content=(content, scriptContent))
 
 
 if __name__ == "__main__":

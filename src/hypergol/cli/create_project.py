@@ -56,9 +56,7 @@ def create_project(projectName, dryrun=None, force=None):
     project.render_simple(templateName='README.md.j2', filePath=Path(project.projectDirectory, 'README.md'))
     project.render_simple(templateName='pylintrc.j2', filePath=Path(project.projectDirectory, 'pylintrc'))
 
-    print('')
-    print(f'Project {projectName} was created in directory {projectName.asSnake}.{project.modeMessage}')
-    print('')
+    return project.cli_final_message(creationType='Project', name=projectName, content=('', ))
 
 
 if __name__ == "__main__":

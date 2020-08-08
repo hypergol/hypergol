@@ -55,12 +55,7 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', dryrun=None, forc
         filePath=Path(projectDirectory, f'{pipeLineName.asSnake}.sh')
     )
 
-    print('')
-    print(f'PipeLine {pipeLineName.asSnake} was created in directory {project.pipelinesPath}.{project.modeMessage}')
-    print('')
-    if project.isDryRun:
-        return content, scriptContent
-    return None
+    return project.cli_final_message(creationType='PipeLine', name=pipeLineName, content=(content, scriptContent))
 
 
 if __name__ == "__main__":
