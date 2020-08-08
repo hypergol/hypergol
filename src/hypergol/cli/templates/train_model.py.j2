@@ -1,12 +1,6 @@
-import json
 import fire
+from git import Repo
 import tensorflow as tf
-from tensorflow.keras import layers
-from hypergol import DatasetFactory
-from hypergol import TensorflowModelManager
-from data_models.sentence import Sentence
-from data_models.model_output import ModelOutput
-
 from hypergol import DatasetFactory
 from hypergol import RepoData
 from hypergol import TensorflowModelManager
@@ -41,7 +35,7 @@ def train_{{ modelName.asSnake }}(force=False):
         comitterEmail=commit.committer.email
     )
 
-    dsf = DatasetFactory(
+    datasetFactory = DatasetFactory(
         location=LOCATION,
         project=PROJECT,
         branch=BRANCH,
@@ -57,10 +51,10 @@ def train_{{ modelName.asSnake }}(force=False):
     )
     {{ modelName.asVariable }} = {{ modelName }}(
         {%- for name in blockDependencies %}
-            {{ name.asVariable }} = {{ name }}(
-                blockArgument1='',
-                blockArgument2='',
-            )
+        {{ name.asVariable }}={{ name }}(
+            blockArgument1='',
+            blockArgument2='',
+        ),
         {%- endfor %}
     )
     modelManager = TensorflowModelManager(

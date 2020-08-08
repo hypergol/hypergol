@@ -1,10 +1,10 @@
 from hypergol import BaseTensorflowModel
 
 
-class (BaseTensorflowModel):
+class MyTestModel(BaseTensorflowModel):
 
     def __init__(self, block1, block2, **kwargs):
-        super(, self).__init__(**kwargs)
+        super(MyTestModel, self).__init__(**kwargs)
         self.block1 = block1
         self.block2 = block2
 

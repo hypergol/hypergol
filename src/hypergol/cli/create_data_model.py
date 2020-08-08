@@ -151,7 +151,7 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
         },
         filePath=Path(project.testsPath, f'test_{dataModel.className.asFileName}')
     )
-    return project.cli_final_message(creationType='Class', name=dataModel, content=(content, ))
+    return project.cli_final_message(creationType='Class', name=dataModel.className, content=(content, ))
 
 
 if __name__ == "__main__":

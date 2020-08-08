@@ -1,19 +1,16 @@
-import json
 import fire
+from git import Repo
 import tensorflow as tf
-from tensorflow.keras import layers
-from hypergol import DatasetFactory
-from hypergol import TensorflowModelManager
-from data_models.sentence import Sentence
-from data_models.model_output import ModelOutput
-
 from hypergol import DatasetFactory
 from hypergol import RepoData
 from hypergol import TensorflowModelManager
-from models._data_processor import DataProcessor
-from models. import 
-from data_models. import 
-from data_models. import 
+from models.my_test_model_data_processor import MyTestModelDataProcessor
+from models.my_test_model import MyTestModel
+from models.embedding_block import EmbeddingBlock
+from models.lstm_block import LstmBlock
+from models.output_block import OutputBlock
+from data_models.sentence import Sentence
+from data_models.model_output import ModelOutput
 
 
 LOCATION = '.'
@@ -21,7 +18,7 @@ PROJECT = 'example_project'
 BRANCH = 'example_branch'
 
 
-def my_test_model(force=False):
+def train_my_test_model(force=False):
     repo = Repo(path='.')
     if repo.is_dirty():
         if force:
@@ -38,7 +35,7 @@ def my_test_model(force=False):
         comitterEmail=commit.committer.email
     )
 
-    dsf = DatasetFactory(
+    datasetFactory = DatasetFactory(
         location=LOCATION,
         project=PROJECT,
         branch=BRANCH,
@@ -46,36 +43,34 @@ def my_test_model(force=False):
         repoData=repoData
     )
 
-    batchProcessor = DataProcessor(
-        inputDataset=datasetFactory.get(dataType=Sentence, name='sentences'),
+    batchProcessor = MyTestModelDataProcessor(
+        inputDataset=datasetFactory.get(dataType=Sentence, name='inputs'),
         inputBatchSize=16,
-        maxTokenCount=100,
-        outputDataset=datasetFactory.get(dataType=ModelOutput, name='outputs')
+        outputDataset=datasetFactory.get(dataType=ModelOutput, name='outputs'),
+        exampleArgument=''
     )
-    embeddingDimension = 256
-    vocabulary = json.load(open(VOCABULARY_PATH, 'r'))
-    posVocabulary = json.load(open(POS_VOCABULARY_PATH, 'r'))
-    posModel = PosModel(
+    myTestModel = MyTestModel(
         embeddingBlock=EmbeddingBlock(
-            vocabulary=vocabulary,
-            embeddingDimension=embeddingDimension
+            blockArgument1='',
+            blockArgument2='',
         ),
         lstmBlock=LstmBlock(
-            embeddingDimension=embeddingDimension,
-            layerCount=2,
-            posTypeCount=len(posVocabulary),
-            dropoutRate=0.1
+            blockArgument1='',
+            blockArgument2='',
         ),
         outputBlock=OutputBlock(
-            posTypes=posVocabulary
-        )
+            blockArgument1='',
+            blockArgument2='',
+        ),
     )
     modelManager = TensorflowModelManager(
-        model=posModel,
+        model=myTestModel,
         optimizer=tf.keras.optimizers.Adam(lr=1),
         batchProcessor=batchProcessor,
-        location=LOCATION, project=PROJECT, branch=BRANCH,
-        name='testPosModel',
+        location=LOCATION,
+        project=PROJECT,
+        branch=BRANCH,
+        name='MyTestModel',
         restoreWeightsPath=None
     )
     modelManager.run(

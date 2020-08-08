@@ -24,7 +24,7 @@ def create_model(modelName, inputClass, outputClass, *args, projectDirectory='.'
     content = project.render(
         templateName='data_processor.py.j2',
         templateData={
-            'modelName': modelName,
+            'name': modelName,
             'outputClass': outputClass
         },
         filePath=Path(projectDirectory, 'models', f'{modelName.asSnake}_data_processor.py')
@@ -33,8 +33,9 @@ def create_model(modelName, inputClass, outputClass, *args, projectDirectory='.'
     content = project.render(
         templateName='train_model.py.j2',
         templateData={
-            'snakeName': modelName.asSnake,
-            'className': modelName.asClass,
+            'modelName': modelName,
+            'inputClass': inputClass,
+            'outputClass': outputClass,
             'blockDependencies': [name for name in blocks if project.is_model_block_class(name)],
         },
         filePath=Path(projectDirectory, 'models', f'train_{modelName.asFileName}')

@@ -5,7 +5,7 @@ from data_models.{{ outputClass.asSnake }} import {{ outputClass }}
 class {{ name }}DataProcessor(BaseBatchProcessor):
 
     def __init__(self, inputDataset, inputBatchSize, outputDataset, exampleArgument):
-        super({{ name }}, self).__init__(inputDataset, inputBatchSize, outputDataset)
+        super({{ name }}DataProcessor, self).__init__(inputDataset, inputBatchSize, outputDataset)
         self.exampleArgument = exampleArgument
 
     def process_input_batch(self, batch):
