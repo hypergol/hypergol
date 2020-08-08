@@ -1,5 +1,4 @@
 import os
-import json
 from pathlib import PosixPath
 
 from tests.hypergol_test_case import HypergolTestCase
@@ -9,9 +8,8 @@ from hypergol.dataset import DatasetWriter
 from hypergol.dataset import DatasetReader
 from hypergol.dataset import DatasetDoesNotExistException
 from hypergol.dataset import DatasetAlreadyExistsException
-from hypergol.dataset import DatasetDefFileDoesNotMatchException
-from hypergol.dataset import DatasetTypeDoesNotMatchDataTypeException
-from hypergol.dataset import DatasetChecksumMismatchException
+from hypergol.dataset_def_file import DatasetDefFileDoesNotMatchException
+from hypergol.datachunk import DatasetTypeDoesNotMatchDataTypeException
 
 
 class TestDataset(HypergolTestCase):
@@ -43,34 +41,15 @@ class TestDataset(HypergolTestCase):
     def test_dataset_directory_returns_correctly(self):
         self.assertEqual(self.dataset.directory, PosixPath(f'{self.location}/{self.project}/{self.branch}/data_class'))
 
-    def test_dataset_correctly_locates_def_file(self):
-        self.assertEqual(self.dataset.defFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.def')
-
-    def test_dataset_correctly_locates_chk_file(self):
-        self.assertEqual(self.dataset.chkFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.chk')
-
     def test_dataset_exists_returns_true_if_exists(self):
         self.assertEqual(self.dataset.exists(), True)
 
     def test_dataset_exists_returns_false_if_does_not_exists(self):
         self.assertEqual(self.datasetNew.exists(), False)
 
-    def test_dataset_check_def_file_returns_true_if_correct(self):
-        self.assertEqual(self.dataset.check_def_file(), True)
-
-    def test_dataset_check_chk_file_returns_true_if_correct(self):
-        self.assertEqual(self.dataset.check_chk_file(), True)
-
-    def test_dataset_check_chk_file_raises_error_if_checksum_mismatch(self):
-        chkFileData = json.loads(open(self.dataset.chkFilename, 'rt').read())
-        chkFileData[f'{self.dataset.name}_0.json.gz'] = chkFileData[f'{self.dataset.name}_1.json.gz']
-        open(self.dataset.chkFilename, 'wt').write(json.dumps(chkFileData, sort_keys=True, indent=4))
-        with self.assertRaises(DatasetChecksumMismatchException):
-            self.dataset.check_chk_file()
-
     def test_open_returns_datawriter_and_opened_chunks_if_w_mode(self):
         datasetWriter = self.datasetNew.open('w')
-        expectedFilenames = {f'{k:0x}': f'{self.datasetNew.directory}/data_class_new_{k:0x}.json.gz' for k in range(16)}
+        expectedFilenames = {f'{k:0x}': f'{self.datasetNew.directory}/data_class_new_{k:0x}.jsonl.gz' for k in range(16)}
         filenames = {dataChunkId: dataChunk.file.name for dataChunkId, dataChunk in datasetWriter.dataChunks.items()}
         self.assertEqual(type(datasetWriter), DatasetWriter)
         self.assertEqual(datasetWriter.dataset, self.datasetNew)

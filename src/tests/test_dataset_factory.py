@@ -1,10 +1,11 @@
 from unittest import TestCase
 
 from tests.hypergol_test_case import DataClass1
-from hypergol.base_data import BaseData
 from hypergol.dataset import Dataset
+from hypergol.dataset_chk_file import DataSetChkFile
+from hypergol.dataset import DataSetDefFile
 from hypergol.dataset import RepoData
-from hypergol.dataset import DatasetFactory
+from hypergol.dataset_factory import DatasetFactory
 
 
 class TestDatasetFactory(TestCase):
@@ -37,4 +38,10 @@ class TestDatasetFactory(TestCase):
             repoData=self.repoData)
         dataset = datasetFactory.get(dataType=DataClass1, name='data_class')
         self.assertEqual(type(dataset), Dataset)
-        self.assertDictContainsSubset(self.expectedDataset.__dict__, dataset.__dict__)
+        expectedParameters = {k: v for k, v in self.expectedDataset.__dict__.items() if k not in ['chkFile', 'defFile']}
+        actualParameters = {k: v for k, v in dataset.__dict__.items() if k not in ['chkFile', 'defFile']}
+        self.assertDictContainsSubset(expectedParameters, actualParameters)
+        self.assertEqual(type(dataset.chkFile), DataSetChkFile)
+        self.assertEqual(dataset.chkFile.dataset, dataset)
+        self.assertEqual(type(dataset.defFile), DataSetDefFile)
+        self.assertEqual(dataset.defFile.dataset, dataset)

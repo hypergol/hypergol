@@ -6,12 +6,13 @@ from multiprocessing import Pool
 from hypergol.base_task import BaseTask
 from hypergol.base_task import Job
 from hypergol.base_task import JobReport
-from hypergol.dataset import DatasetFactory
+from hypergol.dataset_factory import DatasetFactory
 
 
 class Task(BaseTask):
     """Class to create other datasets, created domain objects in :func:`run()` must be appended to the output with ``self.output.append(object)`` (any number of the same type)
     """
+
     def __init__(self, outputDataset, *args, **kwargs):
         """
         Also creates dataset factory for temporary datasets
@@ -85,7 +86,7 @@ class Task(BaseTask):
                 os.rmdir(temporayBranchDirectory)
         except OSError as ex:
             self.log(f'temporary directory cannot be deleted {ex}')
-        self.outputDataset.make_chk_file(checksums=checksums)
+        self.outputDataset.chkFile.make_chk_file(checksums=checksums)
         self.finish(jobReports, threads)
 
 
@@ -99,7 +100,7 @@ def _merge_function(args):
     chunk.open()
     pattern = str(Path(
         chunk.dataset.location, chunk.dataset.project, f'{chunk.dataset.name}_temp',
-        f'{chunk.dataset.name}_*', f'*_{chunk.chunkId}.json.gz'
+        f'{chunk.dataset.name}_*', f'*_{chunk.chunkId}.jsonl.gz'
     ))
     for filePath in sorted(glob.glob(pattern)):
         with gzip.open(filePath, 'rt') as inputFile:
