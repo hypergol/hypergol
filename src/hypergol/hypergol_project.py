@@ -43,7 +43,7 @@ class HypergolProject:
         """
         if projectDirectory is None:
             projectDirectory = os.getcwd()
-        self.projectName = NameString(os.path.basename(projectDirectory)).asSnake
+        self.projectName = NameString(os.path.basename(projectDirectory))
         self.projectDirectory = projectDirectory
         self.dataDirectory = dataDirectory
         self.dataModelsPath = Path(projectDirectory, 'data_models')
@@ -102,13 +102,13 @@ class HypergolProject:
         )
         self.datasetFactory = DatasetFactory(
             location=self.dataDirectory,
-            project=self.projectName,
+            project=self.projectName.asSnake,
             branch=repo.active_branch.name,
             chunkCount=chunkCount,
             repoData=repoData
         )
-        self.tensorboardPath = Path(dataDirectory, self.projectName, 'tensorboard', repo.active_branch.name)
-        self.modelDataPath = Path(dataDirectory, self.projectName, repo.active_branch.name, 'models')
+        self.tensorboardPath = Path(dataDirectory, self.projectName.asSnake, 'tensorboard', repo.active_branch.name)
+        self.modelDataPath = Path(dataDirectory, self.projectName.asSnake, repo.active_branch.name, 'models')
 
     @property
     def isDryRun(self):
@@ -221,4 +221,4 @@ class HypergolProject:
         return content
 
     def render_simple(self, templateName, filePath):
-        return self.render(templateName=templateName, templateData={'name': self.projectName}, filePath=filePath)
+        return self.render(templateName=templateName, templateData={'name': self.projectName.asClass}, filePath=filePath)
