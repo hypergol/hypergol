@@ -51,18 +51,7 @@ class HypergolProject:
         self.pipelinesPath = Path(projectDirectory, 'pipelines')
         self.modelsPath = Path(projectDirectory, 'models')
         self.testsPath = Path(projectDirectory, 'tests')
-        self._dataModelClasses = []
-        self._taskClasses = []
-        self._modelBlockClasses = []
-        if os.path.exists(self.dataModelsPath):
-            dataModelFiles = glob.glob(str(Path(self.dataModelsPath, '*.py')))
-            self._dataModelClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in dataModelFiles]
-        if os.path.exists(self.tasksPath):
-            taskFiles = glob.glob(str(Path(projectDirectory, 'tasks', '*.py')))
-            self._taskClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in taskFiles]
-        if os.path.exists(self.modelsPath):
-            blockFiles = glob.glob(str(Path(projectDirectory, 'models', '*.py')))
-            self._modelBlockClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in blockFiles]
+        self._init_classes()
         self.templateEnvironment = jinja2.Environment(
             loader=jinja2.FileSystemLoader(
                 searchpath=Path(hypergol.__path__[0], 'cli', 'templates')
@@ -111,6 +100,20 @@ class HypergolProject:
         )
         self.tensorboardPath = Path(dataDirectory, self.projectName.asSnake, 'tensorboard', branchName)
         self.modelDataPath = Path(dataDirectory, self.projectName.asSnake, branchName, 'models')
+
+    def _init_classes(self):
+        self._dataModelClasses = []
+        self._taskClasses = []
+        self._modelBlockClasses = []
+        if os.path.exists(self.dataModelsPath):
+            dataModelFiles = glob.glob(str(Path(self.dataModelsPath, '*.py')))
+            self._dataModelClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in dataModelFiles]
+        if os.path.exists(self.tasksPath):
+            taskFiles = glob.glob(str(Path(self.projectDirectory, 'tasks', '*.py')))
+            self._taskClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in taskFiles]
+        if os.path.exists(self.modelsPath):
+            blockFiles = glob.glob(str(Path(self.projectDirectory, 'models', '*.py')))
+            self._modelBlockClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in blockFiles]
 
     @property
     def isDryRun(self):
