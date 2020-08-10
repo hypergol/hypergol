@@ -183,7 +183,6 @@ class TestCreateModel(HypergolCreateTestCase):
             Path(self.projectDirectory)
         ]
         self.project = None
-        self.maxDiff = 30000
 
     def setUp(self):
         super().setUp()
