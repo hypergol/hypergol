@@ -82,33 +82,31 @@ class HypergolProject:
         except InvalidGitRepositoryError:
             print(f'No git repository in {self.projectDirectory}')
             return
-        except TypeError as ex:
-            if 'detached symbolic reference' in str(ex):
-                print(str(ex))
-                return
-            raise ex
         if repo.is_dirty():
             if force or dryrun:
                 print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
             else:
                 raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
         commit = repo.commit()
-        repoData = RepoData(
-            branchName=repo.active_branch.name,
-            commitHash=commit.hexsha,
-            commitMessage=commit.message,
-            comitterName=commit.committer.name,
-            comitterEmail=commit.committer.email
-        )
+        try:
+            branchName = repo.active_branch.name
+        except TypeError:
+            branchName = 'DETACHED'
         self.datasetFactory = DatasetFactory(
             location=self.dataDirectory,
             project=self.projectName.asSnake,
-            branch=repo.active_branch.name,
+            branch=branchName,
             chunkCount=chunkCount,
-            repoData=repoData
+            repoData=RepoData(
+                branchName=branchName,
+                commitHash=commit.hexsha,
+                commitMessage=commit.message,
+                comitterName=commit.committer.name,
+                comitterEmail=commit.committer.email
+            )
         )
-        self.tensorboardPath = Path(dataDirectory, self.projectName.asSnake, 'tensorboard', repo.active_branch.name)
-        self.modelDataPath = Path(dataDirectory, self.projectName.asSnake, repo.active_branch.name, 'models')
+        self.tensorboardPath = Path(dataDirectory, self.projectName.asSnake, 'tensorboard', branchName)
+        self.modelDataPath = Path(dataDirectory, self.projectName.asSnake, branchName, 'models')
 
     @property
     def isDryRun(self):
