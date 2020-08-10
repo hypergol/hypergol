@@ -9,7 +9,7 @@ class TensorflowModelManager:
     Class for managing tensorflow model training.
     """
 
-    def __init__(self, model, optimizer, batchProcessor, location, project, branch, name=None, restoreWeightsPath=None):
+    def __init__(self, model, optimizer, batchProcessor, project, modelName, restoreWeightsPath=None):
         """
         Parameters
         ----------
@@ -19,34 +19,24 @@ class TensorflowModelManager:
             optimizer from tensorflow package to use for training
         batchProcessor: Dataset
             Hypergol dataset to use for training
-        saveDirectory: path
-            filepath to save model checkpoints and outputs
-        tensorboardPath: path
-            tensorboard path for metrics logging
+        project: HypergolProject
+            Hypergol project to handle directories
         restoreWeightsPath: path
             path to restore variables from previously trained model
         """
         self.model = model
         self.optimizer = optimizer
         self.batchProcessor = batchProcessor
-        self.location = location
         self.project = project
-        self.branch = branch
-        self.name = name or self.model.get_name()
+        self.modelName = modelName or self.model.get_name()
         self.restoreWeightsPath = restoreWeightsPath
         self.globalStep = 0
         self.trainingSummaryWriter = None
         self.evaluationSummaryWriter = None
 
-    @property
-    def tensorboardPath(self):
-        tensorboardPath = Path(self.location, self.project, 'tensorboard', self.branch, self.name)
-        tensorboardPath.mkdir(parents=True, exist_ok=True)
-        return str(tensorboardPath)
-
     def save_model(self):
         """ saves tensorflow model, block definitions, and weights """
-        modelDirectory = Path(self.location, self.project, self.branch, 'models', self.name, str(self.globalStep))
+        modelDirectory = Path(self.project.modelDataPath, self.modelName, str(self.globalStep))
         modelDirectory.mkdir(parents=True, exist_ok=True)
         tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures={'signature_default': self.model.get_outputs})
         for modelBlock in self.model.get_model_blocks():
@@ -75,13 +65,13 @@ class TensorflowModelManager:
         self.optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
 
         # Watch this issue: https://github.com/PyCQA/pylint/issues/3596
-        with self.trainingSummaryWriter.as_default():                   #pylint: disable=not-context-manager
+        with self.trainingSummaryWriter.as_default():  # pylint: disable=not-context-manager
             tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
             if withTracing:
                 tf.summary.trace_export(
                     name=f'{self.model.get_name()}{self.globalStep}',
                     step=self.globalStep,
-                    profiler_outdir=f'{self.tensorboardPath}/trainGraph'
+                    profiler_outdir=str(Path(self.project.tensorboardPath, self.modelName, 'trainGraph'))
                 )
         self.globalStep += 1
         return loss
@@ -99,21 +89,22 @@ class TensorflowModelManager:
             tf.summary.trace_on(graph=True, profiler=False)
         loss = self.model.get_loss(targets=targets, training=False, **inputs)
         outputs = self.model.get_evaluation_outputs(**inputs)
-        with self.evaluationSummaryWriter.as_default():                     #pylint: disable=not-context-manager
+        with self.evaluationSummaryWriter.as_default():  # pylint: disable=not-context-manager
             tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
             self.model.produce_metrics(targets=targets, training=False, globalStep=self.globalStep, **inputs)
             if withTracing:
                 tf.summary.trace_export(
                     name=f'{self.model.get_name()}{self.globalStep}',
                     step=self.globalStep,
-                    profiler_outdir=f'{self.tensorboardPath}/evaluateGraph'
+                    profiler_outdir=str(Path(self.project.tensorboardPath, self.modelName, 'evaluateGraph'))
                 )
         self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
         return loss
 
     def start(self):
-        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/train')
-        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=f'{self.tensorboardPath}/evaluate')
+        Path(self.project.tensorboardPath, self.modelName).mkdir(parents=True, exist_ok=True)
+        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=str(Path(self.project.tensorboardPath, self.modelName, 'train')))
+        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=str(Path(self.project.tensorboardPath, self.modelName, 'evaluate')))
         self.batchProcessor.start()
         if self.restoreWeightsPath is not None:
             self.evaluate(withTracing=False)  # model call needed to initialize layers/weights before reloading

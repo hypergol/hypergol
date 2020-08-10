@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 from pathlib import Path
 
+from hypergol.hypergol_project import HypergolProject
 from hypergol.tensorflow_model_manager import TensorflowModelManager
 from tests.tensorflow_test_classes import ExampleOutputDataClass
 from tests.tensorflow_test_classes import ExampleTensorflowBatchProcessor
@@ -19,11 +20,11 @@ class TestTensorflowModelManager(HypergolTestCase):
 
     def __init__(self, methodName='runTest'):
         self.location = 'test_tensorflow_model_manager_location'
-        self.project = 'test_tensorflow_model_manager'
+        self.projectName = 'test_tensorflow_model_manager'
         self.branch = 'branch'
         super(TestTensorflowModelManager, self).__init__(
             location=self.location,
-            project=self.project,
+            projectName=self.projectName,
             branch=self.branch,
             chunkCount=16,
             methodName=methodName
@@ -44,16 +45,21 @@ class TestTensorflowModelManager(HypergolTestCase):
         )
         self.modelBlock = ExampleTrainableBlock(requiredOutputSize=1)
         self.model = TensorflowModelExample(exampleBlock=self.modelBlock)
+        self.project = HypergolProject(
+            projectDirectory='DOESNOTEXIST',
+            dataDirectory=self.location
+        )
         self.modelManager = TensorflowModelManager(
             model=self.model,
             optimizer=tf.keras.optimizers.Adam(lr=1),
             batchProcessor=self.batchProcessor,
-            location=self.location,
             project=self.project,
-            branch=self.branch,
-            name='testTfModel',
+            modelName='testTfModel',
             restoreWeightsPath=None
         )
+
+        self.modelManager.project.tensorboardPath = Path(self.location, self.projectName, 'tensorboard', self.branch)
+        self.modelManager.project.modelDataPath = Path(self.location, self.projectName, self.branch, 'models')
         self.modelManager.start()
 
     def tearDown(self):
@@ -91,7 +97,7 @@ class TestTensorflowModelManager(HypergolTestCase):
 
     def test_save_model(self):
         self.modelManager.train(withTracing=True)
-        modelDirectory = Path(self.location, self.project, self.branch, 'models', self.modelManager.name, str(self.modelManager.globalStep))
+        modelDirectory = Path(self.modelManager.project.modelDataPath, self.modelManager.modelName, str(self.modelManager.globalStep))
         self.modelManager.save_model()
         self.assertTrue(os.path.exists(modelDirectory))
         self.assertTrue(os.path.exists(f'{modelDirectory}/assets'))
@@ -103,7 +109,7 @@ class TestTensorflowModelManager(HypergolTestCase):
     def test_restore_model(self):
         self.modelManager.train(withTracing=True)
         originalBlockWeights = self.modelManager.model.exampleBlock.weights[0].numpy()
-        modelDirectory = Path(self.location, self.project, self.branch, 'models', self.modelManager.name, str(self.modelManager.globalStep))
+        modelDirectory = Path(self.modelManager.project.modelDataPath, self.modelManager.modelName, str(self.modelManager.globalStep))
         self.modelManager.save_model()
         newModel = TensorflowModelExample(exampleBlock=ExampleTrainableBlock(requiredOutputSize=1))
         # new batch processor needed to avoid DataSet collision with previous processor
@@ -117,10 +123,8 @@ class TestTensorflowModelManager(HypergolTestCase):
             model=newModel,
             optimizer=tf.keras.optimizers.Adam(lr=1),
             batchProcessor=newBatchProcessor,
-            location=self.location,
             project=self.project,
-            branch=self.branch,
-            name='newTestTfModel',
+            modelName='newTestTfModel',
             restoreWeightsPath=modelDirectory
         )
         newModelManager.start()

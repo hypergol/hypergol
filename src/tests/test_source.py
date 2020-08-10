@@ -41,7 +41,7 @@ class TestSource(HypergolTestCase):
     def __init__(self, methodName='runTest'):
         super(TestSource, self).__init__(
             location='test_source_location',
-            project='test_source',
+            projectName='test_source',
             branch='branch',
             chunkCount=16,
             methodName=methodName

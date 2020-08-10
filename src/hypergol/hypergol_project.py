@@ -71,15 +71,16 @@ class HypergolProject:
         if force and dryrun:
             raise ValueError('Both force and dryrun are set')
         self.mode = Mode.DRY_RUN if dryrun else Mode.FORCE if force else Mode.NORMAL
+        self.datasetFactory = None
+        self.tensorboardPath = None
+        self.modelDataPath = None
         try:
             repo = Repo(path=self.projectDirectory)
         except NoSuchPathError:
             print(f'Directory {self.projectDirectory} does not exist')
-            self.datasetFactory = None
             return
         except InvalidGitRepositoryError:
             print(f'No git repository in {self.projectDirectory}')
-            self.datasetFactory = None
             return
         if repo.is_dirty():
             if force or dryrun:
@@ -101,6 +102,8 @@ class HypergolProject:
             chunkCount=chunkCount,
             repoData=repoData
         )
+        self.tensorboardPath = Path(dataDirectory, self.projectName, 'tensorboard', repo.active_branch.name)
+        self.modelDataPath = Path(dataDirectory, self.projectName, repo.active_branch.name, 'models')
 
     @property
     def isDryRun(self):
