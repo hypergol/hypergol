@@ -4,7 +4,7 @@ import tensorflow as tf
 from hypergol import DatasetFactory
 from hypergol import RepoData
 from hypergol import TensorflowModelManager
-from models.my_test_model_data_processor import MyTestModelDataProcessor
+from models.my_test_model_batch_processor import MyTestModelBatchProcessor
 from models.my_test_model import MyTestModel
 from models.embedding_block import EmbeddingBlock
 from models.lstm_block import LstmBlock
@@ -43,7 +43,7 @@ def train_my_test_model(force=False):
         repoData=repoData
     )
 
-    batchProcessor = MyTestModelDataProcessor(
+    batchProcessor = MyTestModelBatchProcessor(
         inputDataset=datasetFactory.get(dataType=Sentence, name='inputs'),
         inputBatchSize=16,
         outputDataset=datasetFactory.get(dataType=ModelOutput, name='outputs'),

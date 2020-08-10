@@ -4,7 +4,7 @@ import tensorflow as tf
 from hypergol import DatasetFactory
 from hypergol import RepoData
 from hypergol import TensorflowModelManager
-from models.{{ modelName.asSnake }}_data_processor import {{ modelName }}DataProcessor
+from models.{{ modelName.asSnake }}_batch_processor import {{ modelName }}BatchProcessor
 from models.{{ modelName.asSnake }} import {{ modelName }}
 {%- for name in blockDependencies %}
 from models.{{ name.asSnake }} import {{ name }}
@@ -43,7 +43,7 @@ def train_{{ modelName.asSnake }}(force=False):
         repoData=repoData
     )
 
-    batchProcessor = {{ modelName }}DataProcessor(
+    batchProcessor = {{ modelName }}BatchProcessor(
         inputDataset=datasetFactory.get(dataType={{ inputClass }}, name='inputs'),
         inputBatchSize=16,
         outputDataset=datasetFactory.get(dataType={{ outputClass }}, name='outputs'),

@@ -21,13 +21,13 @@ def create_model(modelName, inputClass, outputClass, *args, projectDirectory='.'
         filePath=Path(projectDirectory, 'models', modelName.asFileName)
     )
 
-    dataProcessorContent = project.render(
-        templateName='data_processor.py.j2',
+    batchProcessorContent = project.render(
+        templateName='batch_processor.py.j2',
         templateData={
             'name': modelName,
             'outputClass': outputClass
         },
-        filePath=Path(projectDirectory, 'models', f'{modelName.asSnake}_data_processor.py')
+        filePath=Path(projectDirectory, 'models', f'{modelName.asSnake}_batch_processor.py')
     )
 
     trainModelContent = project.render(
@@ -46,7 +46,7 @@ def create_model(modelName, inputClass, outputClass, *args, projectDirectory='.'
         templateData={'snakeName': modelName.asSnake},
         filePath=Path(projectDirectory, f'train_{modelName.asSnake}.sh')
     )
-    return project.cli_final_message(creationType='Model', name=modelName, content=(content, dataProcessorContent, trainModelContent, scriptContent))
+    return project.cli_final_message(creationType='Model', name=modelName, content=(content, batchProcessorContent, trainModelContent, scriptContent))
 
 
 if __name__ == "__main__":
