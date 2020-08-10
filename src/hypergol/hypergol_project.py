@@ -43,7 +43,7 @@ class HypergolProject:
         """
         if projectDirectory is None:
             projectDirectory = os.getcwd()
-        self.projectName = NameString(os.path.basename(projectDirectory)).asClass
+        self.projectName = NameString(os.path.basename(projectDirectory)).asSnake
         self.projectDirectory = projectDirectory
         self.dataDirectory = dataDirectory
         self.dataModelsPath = Path(projectDirectory, 'data_models')
