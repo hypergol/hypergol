@@ -3,11 +3,16 @@ import stat
 import glob
 from pathlib import Path
 import jinja2
+from git import Repo
+from git.exc import NoSuchPathError
+from git.exc import InvalidGitRepositoryError
 import hypergol
+from hypergol import DatasetFactory
+from hypergol import RepoData
 from hypergol.utils import Mode
-from hypergol.name_string import NameString
 from hypergol.utils import create_text_file
 from hypergol.utils import create_directory
+from hypergol.name_string import NameString
 
 
 def locate(fname):
@@ -23,21 +28,24 @@ class HypergolProject:
 
     """
 
-    def __init__(self, projectDirectory, projectName=None, dryrun=None, force=None):
+    def __init__(self, projectDirectory=None, dataDirectory='.', chunkCount=16, dryrun=None, force=None):
         """
         Parameters
         ----------
         projectDirectory : string
-            location of the project
-        projectName: string
-            name of the project, file and directories will be created under ``projectDirectory/project_name``
+            location of the project: e.g.: ``~/repo_name``, models will be in ``~/repo_name/models``
+        projectDirectory : string
+            location of the data for the project project: e.g.: ``~/data``, files will be stored in ``~/data/repo_name``
         dryrun : bool (default=None)
             If set to ``True`` it returns the generated code as a string
         force : bool (default=None)
             If set to ``True`` it overwrites the target file
         """
-        self.projectName = projectName
+        if projectDirectory is None:
+            projectDirectory = os.getcwd()
+        self.projectName = NameString(os.path.basename(projectDirectory)).asClass
         self.projectDirectory = projectDirectory
+        self.dataDirectory = dataDirectory
         self.dataModelsPath = Path(projectDirectory, 'data_models')
         self.tasksPath = Path(projectDirectory, 'tasks')
         self.pipelinesPath = Path(projectDirectory, 'pipelines')
@@ -63,6 +71,36 @@ class HypergolProject:
         if force and dryrun:
             raise ValueError('Both force and dryrun are set')
         self.mode = Mode.DRY_RUN if dryrun else Mode.FORCE if force else Mode.NORMAL
+        try:
+            repo = Repo(path=self.projectDirectory)
+        except NoSuchPathError:
+            print(f'Directory {self.projectDirectory} does not exist')
+            self.datasetFactory = None
+            return
+        except InvalidGitRepositoryError:
+            print(f'No git repository in {self.projectDirectory}')
+            self.datasetFactory = None
+            return
+        if repo.is_dirty():
+            if force or dryrun:
+                print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
+            else:
+                raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
+        commit = repo.commit()
+        repoData = RepoData(
+            branchName=repo.active_branch.name,
+            commitHash=commit.hexsha,
+            commitMessage=commit.message,
+            comitterName=commit.committer.name,
+            comitterEmail=commit.committer.email
+        )
+        self.datasetFactory = DatasetFactory(
+            location=self.dataDirectory,
+            project=self.projectName,
+            branch=repo.active_branch.name,
+            chunkCount=chunkCount,
+            repoData=repoData
+        )
 
     @property
     def isDryRun(self):

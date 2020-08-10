@@ -37,7 +37,7 @@ def create_project(projectName, dryrun=None, force=None):
     """
 
     projectName = NameString(projectName)
-    project = HypergolProject(projectName=projectName, projectDirectory=projectName.asSnake, dryrun=dryrun, force=force)
+    project = HypergolProject(projectDirectory=projectName.asSnake, dryrun=dryrun, force=force)
     project.create_project_directory()
     project.create_data_models_directory()
     project.render_simple(templateName='__init__.py.j2', filePath=Path(project.dataModelsPath, '__init__.py'))
