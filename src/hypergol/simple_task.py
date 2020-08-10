@@ -46,5 +46,5 @@ class SimpleTask(BaseTask):
         threads : unused
         """
         checksums = [jobReport.outputChecksum for jobReport in jobReports]
-        self.outputDataset.make_chk_file(checksums=checksums)
+        self.outputDataset.chkFile.make_chk_file(checksums=checksums)
         self.finish(jobReports, threads)

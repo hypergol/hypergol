@@ -38,10 +38,8 @@ def train_my_test_model(force=False):
         model=myTestModel,
         optimizer=tf.keras.optimizers.Adam(lr=1),
         batchProcessor=batchProcessor,
-        location=LOCATION,
-        project=PROJECT,
-        branch=BRANCH,
-        name='MyTestModel',
+        project=project,
+        modelName='MyTestModel',
         restoreWeightsPath=None
     )
     modelManager.run(

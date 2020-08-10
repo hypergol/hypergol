@@ -32,10 +32,8 @@ def train_{{ modelName.asSnake }}(force=False):
         model={{ modelName.asVariable }},
         optimizer=tf.keras.optimizers.Adam(lr=1),
         batchProcessor=batchProcessor,
-        location=LOCATION,
-        project=PROJECT,
-        branch=BRANCH,
-        name='{{ modelName }}',
+        project=project,
+        modelName='{{ modelName }}',
         restoreWeightsPath=None
     )
     modelManager.run(
