@@ -82,6 +82,11 @@ class HypergolProject:
         except InvalidGitRepositoryError:
             print(f'No git repository in {self.projectDirectory}')
             return
+        except TypeError as ex:
+            if 'detached symbolic reference' in str(ex):
+                print(str(ex))
+                return
+            raise ex
         if repo.is_dirty():
             if force or dryrun:
                 print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
