@@ -13,7 +13,6 @@ from data_models.sentence import Sentence
 
 def process_blogposts(threads=1, force=False):
     project = HypergolProject(dataDirectory='.', force=force)
-    
     articles = project.datasetFactory.get(dataType=Article, name='articles')
     articleTexts = project.datasetFactory.get(dataType=ArticleText, name='article_texts')
     articlePages = project.datasetFactory.get(dataType=ArticlePage, name='article_pages')

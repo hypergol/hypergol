@@ -1,9 +1,5 @@
-import os
 import fire
-from git import Repo
-
-from hypergol import DatasetFactory
-from hypergol import RepoData
+from hypergol import HypergolProject
 from hypergol import Pipeline
 {%- for name in taskDependencies %}
 from tasks.{{ name.asSnake }} import {{ name }}

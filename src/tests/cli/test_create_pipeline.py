@@ -7,12 +7,8 @@ from hypergol.hypergol_project import HypergolProject
 from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 
 TEST_CONTENT = """
-import os
 import fire
-from git import Repo
-
-from hypergol import DatasetFactory
-from hypergol import RepoData
+from hypergol import HypergolProject
 from hypergol import Pipeline
 from tasks.example_source import ExampleSource
 from tasks.other_task import OtherTask
