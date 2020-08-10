@@ -115,7 +115,7 @@ class TestCreatePipeline(HypergolCreateTestCase):
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.check_dependencies')
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_data_model_class', side_effect=lambda x: x.asClass in ['DataModelTestClass'])
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_task_class', side_effect=lambda x: x.asClass in ['OtherTask', 'ExampleSource'])
-    def test_create_pipeline_creates_content(self, mock_is_task_class, mock_is_data_model_class, check_dependencies):
+    def test_create_pipeline_creates_content(self, mock_is_task_class, mock_is_data_model_class, mock_check_dependencies):
         content, scriptContent = create_pipeline('TestPipeline', 'DataModelTestClass', 'ExampleSource', 'OtherTask', dryrun=True)
         self.assertEqual(content, TEST_CONTENT)
         self.assertEqual(scriptContent, TEST_SHELL)

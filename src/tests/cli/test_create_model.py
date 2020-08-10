@@ -191,14 +191,14 @@ class TestCreateModel(HypergolCreateTestCase):
         self.project.create_models_directory()
 
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.check_dependencies')
-    def test_create_model_creates_files(self, check_dependencies):
+    def test_create_model_creates_files(self, mock_check_dependencies):
         create_model(modelName='TestModel', inputClass='TestInput', outputClass='TestOutput', projectDirectory=self.projectDirectory)
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
 
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.check_dependencies')
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_model_block_class', side_effect=lambda x: x.asClass in ['TestBlock1', 'TestBlock2'])
-    def test_create_model_creates_content(self, mock_is_model_block_class, check_dependencies):
+    def test_create_model_creates_content(self, mock_is_model_block_class, mock_check_dependencies):
         content, dataProcessorContent, trainModelContent, scriptContent = create_model(
             'TestModel', 'TestInput', 'TestOutput', 'TestBlock1', 'TestBlock2', projectDirectory=self.projectDirectory, dryrun=True)
         self.assertEqual(content, TEST_CONTENT)
