@@ -1,4 +1,6 @@
 import json
+import base64
+import pickle
 
 
 from hypergol.utils import Repr
@@ -43,6 +45,14 @@ class BaseData(Repr):
     def to_data(self):
         """converts class to dictionary, usually overriden"""
         return self.__dict__.copy()
+
+    @staticmethod
+    def to_string(data):
+        return base64.b64encode(pickle.dumps(data)).decode('utf-8')
+
+    @staticmethod
+    def from_string(data):
+        return pickle.loads(base64.b64decode(data['inputs'].encode('utf-8')))
 
     @classmethod
     def from_data(cls, data):

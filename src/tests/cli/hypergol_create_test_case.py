@@ -28,7 +28,7 @@ class HypergolCreateTestCase(TestCase):
                 delete_if_exists(filePath)
             except OSError:
                 for unexpectedFilePath in glob.glob(str(Path(filePath, '*'))):
-                    print(f'deleting unexpected filed {unexpectedFilePath}')
+                    print(f'deleting unexpected files {unexpectedFilePath}')
                     delete_if_exists(unexpectedFilePath)
                 delete_if_exists(filePath)
 

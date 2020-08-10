@@ -7,6 +7,7 @@ from hypergol.hypergol_project import HypergolProject
 
 TEMPORAL = ['datetime', 'date', 'time']
 DEFAULT_INITIALISATIONS = {
+    'object': '{"sample": "sample"}',
     'datetime': 'datetime.now()',
     'date': 'date.today()',
     'time': 'time.min()',
@@ -24,12 +25,14 @@ DEFAULT_INITIALISATIONS = {
 
 class Member:
 
-    def __init__(self, name=None, type_=None, from_=None, to_=None, isList=False):
+    def __init__(self, name=None, type_=None, from_=None, to_=None, isTemporal=False, isList=False, isObject=False):
         self.name = name
         self.type_ = type_
         self.from_ = from_
         self.to_ = to_
+        self.isTemporal = isTemporal
         self.isList = isList
+        self.isObject = isObject
 
 
 class DataModel:
@@ -59,9 +62,15 @@ class DataModel:
             m.type_ = m.type_[5:-1]
             m.isList = True
 
-        if m.type_ in TEMPORAL:
+        if m.type_ == 'object':
+            if m.isList:
+                raise ValueError('List[object] is an invalid type')
+            m.isObject = True
+            self.conversions.append(m)
+        elif m.type_ in TEMPORAL:
             m.to_ = 'isoformat'
             m.from_ = 'fromisoformat'
+            m.isTemporal = True
             self.conversions.append(m)
         elif self.project.is_data_model_class(NameString(m.type_)):
             m.to_ = 'to_data'
@@ -105,9 +114,9 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
     content = (
         DataModelRenderer()
         .add('from typing import List               ', dataModel.isListDependent)
-        .add('from datetime import {0}              ', sorted(list({m.type_ for m in dataModel.conversions if str(m.type_) in TEMPORAL})))
+        .add('from datetime import {0}              ', sorted(list({m.type_ for m in dataModel.conversions if m.isTemporal})))
         .add('from hypergol import BaseData         ')
-        .add('from data_models.{snake} import {name}', [{'snake': m.type_.asSnake, 'name': m.type_} for m in dataModel.conversions if str(m.type_) not in TEMPORAL])
+        .add('from data_models.{snake} import {name}', [{'snake': m.type_.asSnake, 'name': m.type_} for m in dataModel.conversions if not m.isTemporal and not m.isObject])
         .add('                                      ')
         .add('                                      ')
         .add('class {className}(BaseData):          ', className=dataModel.className)
@@ -120,13 +129,15 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
         .add('                                      ', len(dataModel.conversions) > 0)
         .add('    def to_data(self):                ', len(dataModel.conversions) > 0)
         .add('        data = self.__dict__.copy()   ', len(dataModel.conversions) > 0)
-        .add("        data['{name}'] = data['{name}'].{conv}()              ", [{'name': m.name, 'conv': m.to_} for m in dataModel.conversions if not m.isList])
+        .add("        data['{name}'] = BaseData.to_string(data['{name}'])   ", [{'name': m.name} for m in dataModel.conversions if m.isObject])
+        .add("        data['{name}'] = data['{name}'].{conv}()              ", [{'name': m.name, 'conv': m.to_} for m in dataModel.conversions if not m.isList and not m.isObject])
         .add("        data['{name}'] = [v.{conv}() for v in data['{name}']] ", [{'name': m.name, 'conv': m.to_} for m in dataModel.conversions if m.isList])
         .add('        return data                                           ', len(dataModel.conversions) > 0)
         .add('                                                              ', len(dataModel.conversions) > 0)
         .add('    @classmethod                                              ', len(dataModel.conversions) > 0)
         .add('    def from_data(cls, data):                                 ', len(dataModel.conversions) > 0)
-        .add("        data['{name}'] = {type_}.{conv}(data['{name}'])                ", [{'name': m.name, 'type_': str(m.type_), 'conv': m.from_} for m in dataModel.conversions if not m.isList])
+        .add("        data['{name}'] = BaseData.from_string(data['{name}'])          ", [{'name': m.name} for m in dataModel.conversions if m.isObject])
+        .add("        data['{name}'] = {type_}.{conv}(data['{name}'])                ", [{'name': m.name, 'type_': str(m.type_), 'conv': m.from_} for m in dataModel.conversions if not m.isList and not m.isObject])
         .add("        data['{name}'] = [{type_}.{conv}(v) for v in data['{name}']]   ", [{'name': m.name, 'type_': str(m.type_), 'conv': m.from_} for m in dataModel.conversions if m.isList])
         .add('        return cls(**data)                                    ', len(dataModel.conversions) > 0)
     ).get()
@@ -140,14 +151,7 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
         },
         filePath=Path(project.testsPath, f'test_{dataModel.className.asFileName}')
     )
-
-    print('')
-    print(f'Class {dataModel.className} was created.{project.modeMessage}')
-    print('')
-
-    if project.isDryRun:
-        return content
-    return None
+    return project.cli_final_message(creationType='Class', name=dataModel.className, content=(content, ))
 
 
 if __name__ == "__main__":

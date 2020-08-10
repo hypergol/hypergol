@@ -57,12 +57,7 @@ def create_task(className, *args, projectDirectory='.', dryrun=None, force=None,
         filePath=Path(projectDirectory, 'tasks', className.asFileName)
     )
 
-    print('')
-    print(f'{taskType} {className} was created.{project.modeMessage}')
-    print('')
-    if project.isDryRun:
-        return content
-    return None
+    return project.cli_final_message(creationType=taskType, name=className, content=(content, ))
 
 
 if __name__ == "__main__":

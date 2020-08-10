@@ -41,15 +41,20 @@ class HypergolProject:
         self.dataModelsPath = Path(projectDirectory, 'data_models')
         self.tasksPath = Path(projectDirectory, 'tasks')
         self.pipelinesPath = Path(projectDirectory, 'pipelines')
+        self.modelsPath = Path(projectDirectory, 'models')
         self.testsPath = Path(projectDirectory, 'tests')
         self._dataModelClasses = []
         self._taskClasses = []
+        self._modelBlockClasses = []
         if os.path.exists(self.dataModelsPath):
             dataModelFiles = glob.glob(str(Path(self.dataModelsPath, '*.py')))
             self._dataModelClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in dataModelFiles]
         if os.path.exists(self.tasksPath):
             taskFiles = glob.glob(str(Path(projectDirectory, 'tasks', '*.py')))
             self._taskClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in taskFiles]
+        if os.path.exists(self.modelsPath):
+            blockFiles = glob.glob(str(Path(projectDirectory, 'models', '*.py')))
+            self._modelBlockClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in blockFiles]
         self.templateEnvironment = jinja2.Environment(
             loader=jinja2.FileSystemLoader(
                 searchpath=Path(hypergol.__path__[0], 'cli', 'templates')
@@ -69,6 +74,29 @@ class HypergolProject:
             return ''
         return f' - Mode: {self.mode}'
 
+    def cli_final_message(self, creationType, name, content):
+        creationPath = None
+        if creationType == 'Model':
+            creationPath = self.modelsPath
+        elif creationType == 'Class':
+            creationPath = self.dataModelsPath
+        elif creationType == 'ModelBlock':
+            creationPath = self.modelsPath
+        elif creationType == 'PipeLine':
+            creationPath = self.pipelinesPath
+        elif creationType == 'Project':
+            creationPath = self.projectDirectory
+        elif str(creationType) in ['Source', 'SimpleTask', 'Task']:
+            creationPath = self.tasksPath
+        if creationPath is None:
+            raise ValueError(f'{creationType} is an unknown type')
+        print('')
+        print(f'{creationType} {name} was created in directory {creationPath}.{self.modeMessage}')
+        print('')
+        if self.isDryRun:
+            return content
+        return None
+
     def create_project_directory(self):
         create_directory(self.projectDirectory, self.mode)
 
@@ -81,6 +109,9 @@ class HypergolProject:
     def create_pipelines_directory(self):
         create_directory(self.pipelinesPath, self.mode)
 
+    def create_models_directory(self):
+        create_directory(self.modelsPath, self.mode)
+
     def create_tests_directory(self):
         create_directory(self.testsPath, self.mode)
 
@@ -92,10 +123,14 @@ class HypergolProject:
         """Checks if a name is in tasks class (based on if the snakecase .py file exists)"""
         return value in self._taskClasses
 
+    def is_model_block_class(self, value: NameString):
+        """Checks if a name is in blocks class (based on if the snakecase .py file exists)"""
+        return value in self._modelBlockClasses
+
     def check_dependencies(self, dependencies):
         """Raises error if any dependency is unknown"""
         for dependency in dependencies:
-            if dependency not in self._dataModelClasses + self._taskClasses:
+            if dependency not in self._dataModelClasses + self._taskClasses + self._modelBlockClasses:
                 raise ValueError(f'Unknown dependency {dependency}')
 
     def create_text_file(self, filePath, content):
