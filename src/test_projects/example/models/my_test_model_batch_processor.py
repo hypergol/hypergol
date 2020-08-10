@@ -1,12 +1,12 @@
 import tensorflow as tf
 from hypergol import BaseBatchProcessor
-from data_models.{{ outputClass.asSnake }} import {{ outputClass }}
+from data_models.model_output import ModelOutput
 
 
-class {{ name }}DataProcessor(BaseBatchProcessor):
+class MyTestModelBatchProcessor(BaseBatchProcessor):
 
     def __init__(self, inputDataset, inputBatchSize, outputDataset, exampleArgument):
-        super({{ name }}DataProcessor, self).__init__(inputDataset, inputBatchSize, outputDataset)
+        super(MyTestModelBatchProcessor, self).__init__(inputDataset, inputBatchSize, outputDataset)
         self.exampleArgument = exampleArgument
 
     def process_input_batch(self, batch):

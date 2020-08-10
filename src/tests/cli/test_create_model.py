@@ -23,7 +23,7 @@ class TestModel(BaseTensorflowModel):
         raise NotImplementedError('BaseTensorflowModel must implement get_loss()')
         # calculate loss here and return it
         # input arguments must be the same in all three functions
-        # and match with the keys of the return value of DataProcessor.process_input_batch()
+        # and match with the keys of the return value of BatchProcessor.process_input_batch()
 
     @tf.function(input_signature=[
         tf.TensorSpec(shape=[None, None], dtype=tf.int32, name='exampleInput1'),
@@ -39,16 +39,16 @@ class TestModel(BaseTensorflowModel):
         pass
 """.lstrip()
 
-TEST_DATA_PROCESSOR = """
+TEST_BATCH_PROCESSOR = """
 import tensorflow as tf
 from hypergol import BaseBatchProcessor
 from data_models.test_output import TestOutput
 
 
-class TestModelDataProcessor(BaseBatchProcessor):
+class TestModelBatchProcessor(BaseBatchProcessor):
 
     def __init__(self, inputDataset, inputBatchSize, outputDataset, exampleArgument):
-        super(TestModelDataProcessor, self).__init__(inputDataset, inputBatchSize, outputDataset)
+        super(TestModelBatchProcessor, self).__init__(inputDataset, inputBatchSize, outputDataset)
         self.exampleArgument = exampleArgument
 
     def process_input_batch(self, batch):
@@ -85,7 +85,7 @@ import tensorflow as tf
 from hypergol import DatasetFactory
 from hypergol import RepoData
 from hypergol import TensorflowModelManager
-from models.test_model_data_processor import TestModelDataProcessor
+from models.test_model_batch_processor import TestModelBatchProcessor
 from models.test_model import TestModel
 from models.test_block1 import TestBlock1
 from models.test_block2 import TestBlock2
@@ -123,7 +123,7 @@ def train_test_model(force=False):
         repoData=repoData
     )
 
-    batchProcessor = TestModelDataProcessor(
+    batchProcessor = TestModelBatchProcessor(
         inputDataset=datasetFactory.get(dataType=TestInput, name='inputs'),
         inputBatchSize=16,
         outputDataset=datasetFactory.get(dataType=TestOutput, name='outputs'),
@@ -176,7 +176,7 @@ class TestCreateModel(HypergolCreateTestCase):
         super(TestCreateModel, self).__init__(projectName='TestProject', methodName=methodName)
         self.allPaths = [
             Path(self.projectDirectory, 'models', 'test_model.py'),
-            Path(self.projectDirectory, 'models', 'test_model_data_processor.py'),
+            Path(self.projectDirectory, 'models', 'test_model_batch_processor.py'),
             Path(self.projectDirectory, 'models', 'train_test_model.py'),
             Path(self.projectDirectory, 'models'),
             Path(self.projectDirectory, 'train_test_model.sh'),
@@ -192,18 +192,18 @@ class TestCreateModel(HypergolCreateTestCase):
         self.project.create_models_directory()
 
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.check_dependencies')
-    def test_create_model_creates_files(self, check_dependencies):
+    def test_create_model_creates_files(self, mock_check_dependencies):
         create_model(modelName='TestModel', inputClass='TestInput', outputClass='TestOutput', projectDirectory=self.projectDirectory)
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
 
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.check_dependencies')
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_model_block_class', side_effect=lambda x: x.asClass in ['TestBlock1', 'TestBlock2'])
-    def test_create_model_creates_content(self, mock_is_model_block_class, check_dependencies):
-        content, dataProcessorContent, trainModelContent, scriptContent = create_model(
+    def test_create_model_creates_content(self, mock_is_model_block_class, mock_check_dependencies):
+        content, batchProcessorContent, trainModelContent, scriptContent = create_model(
             'TestModel', 'TestInput', 'TestOutput', 'TestBlock1', 'TestBlock2', projectDirectory=self.projectDirectory, dryrun=True)
         self.assertEqual(content, TEST_CONTENT)
-        self.assertEqual(dataProcessorContent, TEST_DATA_PROCESSOR)
+        self.assertEqual(batchProcessorContent, TEST_BATCH_PROCESSOR)
         self.assertEqual(trainModelContent, TEST_TRAIN_MODEL)
         self.assertEqual(scriptContent, TEST_SCRIPT)
 
