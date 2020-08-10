@@ -87,7 +87,11 @@ class HypergolProject:
                 print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
             else:
                 raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
-        commit = repo.commit()
+        try:
+            commit = repo.commit()
+        except ValueError as ex:
+            print('No commits in this repo, please crete and initial commit')
+            raise ex
         try:
             branchName = repo.active_branch.name
         except TypeError:
