@@ -66,7 +66,7 @@ class TestTask(HypergolTestCase):
     def __init__(self, methodName='runTest'):
         super(TestTask, self).__init__(
             location='test_task_location',
-            project='test_task',
+            projectName='test_task',
             branch='branch',
             chunkCount=16,
             methodName=methodName

@@ -47,10 +47,10 @@ class DataClass3(BaseData):
 
 class HypergolTestCase(TestCase):
 
-    def __init__(self, location, project, branch, chunkCount, methodName):
+    def __init__(self, location, projectName, branch, chunkCount, methodName):
         super(HypergolTestCase, self).__init__(methodName=methodName)
         self.location = location
-        self.project = project
+        self.projectName = projectName
         self.branch = branch
         self.chunkCount = chunkCount
         self.repoData = RepoData(
@@ -65,7 +65,7 @@ class HypergolTestCase(TestCase):
         super().setUp()
         self.datasetFactory = DatasetFactory(
             location=self.location,
-            project=self.project,
+            project=self.projectName,
             branch=self.branch,
             chunkCount=self.chunkCount,
             repoData=self.repoData

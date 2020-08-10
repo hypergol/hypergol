@@ -1,9 +1,5 @@
-import os
 import fire
-from git import Repo
-
-from hypergol import DatasetFactory
-from hypergol import RepoData
+from hypergol import HypergolProject
 from hypergol import Pipeline
 from tasks.load_html_pages_task import LoadHtmlPagesTask
 from tasks.create_article_texts_task import CreateArticleTextsTask
@@ -15,39 +11,12 @@ from data_models.article_page import ArticlePage
 from data_models.sentence import Sentence
 
 
-LOCATION = '.'
-PROJECT = 'example_project'
-BRANCH = 'example_branch'
-
-
 def process_blogposts(threads=1, force=False):
-    repo = Repo(path='.')
-    if repo.is_dirty():
-        if force:
-            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
-        else:
-            raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
-
-    commit = repo.commit()
-    repoData = RepoData(
-        branchName=repo.active_branch.name,
-        commitHash=commit.hexsha,
-        commitMessage=commit.message,
-        comitterName=commit.committer.name,
-        comitterEmail=commit.committer.email
-    )
-
-    dsf = DatasetFactory(
-        location=LOCATION,
-        project=PROJECT,
-        branch=BRANCH,
-        chunkCount=16,
-        repoData=repoData
-    )
-    articles = dsf.get(dataType=Article, name='articles')
-    articleTexts = dsf.get(dataType=ArticleText, name='article_texts')
-    articlePages = dsf.get(dataType=ArticlePage, name='article_pages')
-    sentences = dsf.get(dataType=Sentence, name='sentences')
+    project = HypergolProject(dataDirectory='.', force=force)
+    articles = project.datasetFactory.get(dataType=Article, name='articles')
+    articleTexts = project.datasetFactory.get(dataType=ArticleText, name='article_texts')
+    articlePages = project.datasetFactory.get(dataType=ArticlePage, name='article_pages')
+    sentences = project.datasetFactory.get(dataType=Sentence, name='sentences')
     loadHtmlPagesTask = LoadHtmlPagesTask(
         inputDatasets=[exampleInputDataset1,  exampleInputDataset2],
         outputDataset=exampleOutputDataset,

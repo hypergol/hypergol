@@ -7,7 +7,7 @@ class TestDatasetDefFile(HypergolTestCase):
     def __init__(self, methodName='runTest'):
         super(TestDatasetDefFile, self).__init__(
             location='test_dataset_def_file_location',
-            project='test_dataset_def_file',
+            projectName='test_dataset_def_file',
             branch='branch',
             chunkCount=16,
             methodName=methodName
@@ -29,7 +29,7 @@ class TestDatasetDefFile(HypergolTestCase):
         self.clean_directories()
 
     def test_dataset_correctly_locates_def_file(self):
-        self.assertEqual(self.dataset.defFile.defFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.def')
+        self.assertEqual(self.dataset.defFile.defFilename, f'{self.location}/{self.projectName}/{self.branch}/data_class/data_class.def')
 
     def test_dataset_check_def_file_returns_true_if_correct(self):
         self.assertEqual(self.dataset.defFile.check_def_file(), True)

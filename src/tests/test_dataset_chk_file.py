@@ -9,7 +9,7 @@ class TestDatasetChkFile(HypergolTestCase):
     def __init__(self, methodName='runTest'):
         super(TestDatasetChkFile, self).__init__(
             location='test_dataset_chk_file_location',
-            project='test_dataset_chk_file',
+            projectName='test_dataset_chk_file',
             branch='branch',
             chunkCount=16,
             methodName=methodName
@@ -29,7 +29,7 @@ class TestDatasetChkFile(HypergolTestCase):
         self.clean_directories()
 
     def test_dataset_correctly_locates_chk_file(self):
-        self.assertEqual(self.dataset.chkFile.chkFilename, f'{self.location}/{self.project}/{self.branch}/data_class/data_class.chk')
+        self.assertEqual(self.dataset.chkFile.chkFilename, f'{self.location}/{self.projectName}/{self.branch}/data_class/data_class.chk')
 
     def test_dataset_check_chk_file_returns_true_if_correct(self):
         self.assertEqual(self.dataset.chkFile.check_chk_file(), True)

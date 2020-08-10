@@ -17,7 +17,7 @@ class TestDataset(HypergolTestCase):
     def __init__(self, methodName='runTest'):
         super(TestDataset, self).__init__(
             location='test_dataset_location',
-            project='test_dataset',
+            projectName='test_dataset',
             branch='branch',
             chunkCount=16,
             methodName=methodName
@@ -39,7 +39,7 @@ class TestDataset(HypergolTestCase):
         self.clean_directories()
 
     def test_dataset_directory_returns_correctly(self):
-        self.assertEqual(self.dataset.directory, PosixPath(f'{self.location}/{self.project}/{self.branch}/data_class'))
+        self.assertEqual(self.dataset.directory, PosixPath(f'{self.location}/{self.projectName}/{self.branch}/data_class'))
 
     def test_dataset_exists_returns_true_if_exists(self):
         self.assertEqual(self.dataset.exists(), True)

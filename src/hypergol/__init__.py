@@ -10,6 +10,7 @@ from .source import Source
 from .task import Task
 from .utils import Repr
 from .logger import Logger
+from .hypergol_project import HypergolProject
 # This spicy hack allows not to load TF each time we run CLI command which of course doesn't use TF - Laszlo
 if '-m' not in sys.argv:
     from .tensorflow_model_manager import TensorflowModelManager

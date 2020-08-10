@@ -7,48 +7,17 @@ from hypergol.hypergol_project import HypergolProject
 from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 
 TEST_CONTENT = """
-import os
 import fire
-from git import Repo
-
-from hypergol import DatasetFactory
-from hypergol import RepoData
+from hypergol import HypergolProject
 from hypergol import Pipeline
 from tasks.example_source import ExampleSource
 from tasks.other_task import OtherTask
 from data_models.data_model_test_class import DataModelTestClass
 
 
-LOCATION = '.'
-PROJECT = 'example_project'
-BRANCH = 'example_branch'
-
-
 def test_pipeline(threads=1, force=False):
-    repo = Repo(path='.')
-    if repo.is_dirty():
-        if force:
-            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
-        else:
-            raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
-
-    commit = repo.commit()
-    repoData = RepoData(
-        branchName=repo.active_branch.name,
-        commitHash=commit.hexsha,
-        commitMessage=commit.message,
-        comitterName=commit.committer.name,
-        comitterEmail=commit.committer.email
-    )
-
-    dsf = DatasetFactory(
-        location=LOCATION,
-        project=PROJECT,
-        branch=BRANCH,
-        chunkCount=16,
-        repoData=repoData
-    )
-    dataModelTestClasses = dsf.get(dataType=DataModelTestClass, name='data_model_test_classes')
+    project = HypergolProject(dataDirectory='.', force=force)
+    dataModelTestClasses = project.datasetFactory.get(dataType=DataModelTestClass, name='data_model_test_classes')
     exampleSource = ExampleSource(
         inputDatasets=[exampleInputDataset1,  exampleInputDataset2],
         outputDataset=exampleOutputDataset,

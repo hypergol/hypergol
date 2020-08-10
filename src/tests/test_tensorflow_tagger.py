@@ -2,6 +2,7 @@ import shutil
 import tensorflow as tf
 from pathlib import Path
 
+from hypergol.hypergol_project import HypergolProject
 from hypergol.tensorflow_model_manager import TensorflowModelManager
 from hypergol.tensorflow_tagger import TensorflowTagger
 from tests.tensorflow_test_classes import ExampleOutputDataClass
@@ -18,11 +19,11 @@ class TestTensorflowTagger(HypergolTestCase):
 
     def __init__(self, methodName='runTest'):
         self.location = 'test_tensorflow_tagger_location'
-        self.project = 'test_tensorflow_tagger'
+        self.projectName = 'test_tensorflow_tagger'
         self.branch = 'branch'
         super(TestTensorflowTagger, self).__init__(
             location=self.location,
-            project=self.project,
+            projectName=self.projectName,
             branch=self.branch,
             chunkCount=16,
             methodName=methodName
@@ -32,6 +33,10 @@ class TestTensorflowTagger(HypergolTestCase):
             'input1': tf.constant([[2, 3, 4]], dtype=tf.float32)
         }
         self.batchSize = 3
+        self.project = HypergolProject(
+            projectDirectory='DOESNOTEXIST',
+            dataDirectory=self.location
+        )
 
     def setUp(self):
         super().setUp()
@@ -51,12 +56,12 @@ class TestTensorflowTagger(HypergolTestCase):
             model=self.model,
             optimizer=tf.keras.optimizers.Adam(lr=1),
             batchProcessor=self.batchProcessor,
-            location=self.location,
             project=self.project,
-            branch=self.branch,
-            name='testTfTagger',
+            modelName='testTfTagger',
             restoreWeightsPath=None
         )
+        self.modelManager.project.tensorboardPath = Path(self.location, self.projectName, 'tensorboard', self.branch)
+        self.modelManager.project.modelDataPath = Path(self.location, self.projectName, self.branch, 'models')
 
     def tearDown(self):
         super().tearDown()
@@ -66,7 +71,7 @@ class TestTensorflowTagger(HypergolTestCase):
     def test_tagger(self):
         self.modelManager.start()
         self.modelManager.train(withTracing=True)
-        modelDirectory = Path(self.location, self.project, self.branch, 'models', self.modelManager.name, str(self.modelManager.globalStep))
+        modelDirectory = Path(self.location, self.projectName, self.branch, 'models', self.modelManager.modelName, str(self.modelManager.globalStep))
         self.modelManager.save_model()
         tagger = TensorflowTagger(modelDirectory=modelDirectory, useGPU=False)
         prediction = tagger.get_prediction(**self.exampleInputs)

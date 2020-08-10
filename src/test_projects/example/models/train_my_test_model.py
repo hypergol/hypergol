@@ -1,8 +1,6 @@
 import fire
-from git import Repo
 import tensorflow as tf
-from hypergol import DatasetFactory
-from hypergol import RepoData
+from hypergol import HypergolProject
 from hypergol import TensorflowModelManager
 from models.my_test_model_batch_processor import MyTestModelBatchProcessor
 from models.my_test_model import MyTestModel
@@ -13,40 +11,13 @@ from data_models.sentence import Sentence
 from data_models.model_output import ModelOutput
 
 
-LOCATION = '.'
-PROJECT = 'example_project'
-BRANCH = 'example_branch'
-
-
 def train_my_test_model(force=False):
-    repo = Repo(path='.')
-    if repo.is_dirty():
-        if force:
-            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
-        else:
-            raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
-
-    commit = repo.commit()
-    repoData = RepoData(
-        branchName=repo.active_branch.name,
-        commitHash=commit.hexsha,
-        commitMessage=commit.message,
-        comitterName=commit.committer.name,
-        comitterEmail=commit.committer.email
-    )
-
-    datasetFactory = DatasetFactory(
-        location=LOCATION,
-        project=PROJECT,
-        branch=BRANCH,
-        chunkCount=16,
-        repoData=repoData
-    )
+    project = HypergolProject(dataDirectory='.', force=force)
 
     batchProcessor = MyTestModelBatchProcessor(
-        inputDataset=datasetFactory.get(dataType=Sentence, name='inputs'),
+        inputDataset=project.datasetFactory.get(dataType=Sentence, name='inputs'),
         inputBatchSize=16,
-        outputDataset=datasetFactory.get(dataType=ModelOutput, name='outputs'),
+        outputDataset=project.datasetFactory.get(dataType=ModelOutput, name='outputs'),
         exampleArgument=''
     )
     myTestModel = MyTestModel(
@@ -67,10 +38,8 @@ def train_my_test_model(force=False):
         model=myTestModel,
         optimizer=tf.keras.optimizers.Adam(lr=1),
         batchProcessor=batchProcessor,
-        location=LOCATION,
-        project=PROJECT,
-        branch=BRANCH,
-        name='MyTestModel',
+        project=project,
+        modelName='MyTestModel',
         restoreWeightsPath=None
     )
     modelManager.run(

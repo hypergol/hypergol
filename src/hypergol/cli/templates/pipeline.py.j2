@@ -1,9 +1,5 @@
-import os
 import fire
-from git import Repo
-
-from hypergol import DatasetFactory
-from hypergol import RepoData
+from hypergol import HypergolProject
 from hypergol import Pipeline
 {%- for name in taskDependencies %}
 from tasks.{{ name.asSnake }} import {{ name }}
@@ -13,38 +9,11 @@ from data_models.{{ name.asSnake }} import {{ name }}
 {%- endfor %}
 
 
-LOCATION = '.'
-PROJECT = 'example_project'
-BRANCH = 'example_branch'
-
-
 def {{ snakeName }}(threads=1, force=False):
-    repo = Repo(path='.')
-    if repo.is_dirty():
-        if force:
-            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
-        else:
-            raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
-
-    commit = repo.commit()
-    repoData = RepoData(
-        branchName=repo.active_branch.name,
-        commitHash=commit.hexsha,
-        commitMessage=commit.message,
-        comitterName=commit.committer.name,
-        comitterEmail=commit.committer.email
-    )
-
-    dsf = DatasetFactory(
-        location=LOCATION,
-        project=PROJECT,
-        branch=BRANCH,
-        chunkCount=16,
-        repoData=repoData
-    )
+    project = HypergolProject(dataDirectory='.', force=force)
 
 {%- for name in dataModelDependencies %}
-    {{ name.asPluralVariable }} = dsf.get(dataType={{ name }}, name='{{ name.asPluralSnake }}')
+    {{ name.asPluralVariable }} = project.datasetFactory.get(dataType={{ name }}, name='{{ name.asPluralSnake }}')
 {%- endfor %}
 
 {%- for name in taskDependencies %}

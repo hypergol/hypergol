@@ -11,7 +11,7 @@ class TestBaseBatchProcessor(HypergolTestCase):
         self.location = 'test_batch_processor_location'
         super(TestBaseBatchProcessor, self).__init__(
             location=self.location,
-            project='test_batch_processor',
+            projectName='test_batch_processor',
             branch='branch',
             chunkCount=16,
             methodName=methodName
