@@ -80,10 +80,8 @@ class TestModelBatchProcessor(BaseBatchProcessor):
 
 TEST_TRAIN_MODEL = """
 import fire
-from git import Repo
 import tensorflow as tf
-from hypergol import DatasetFactory
-from hypergol import RepoData
+from hypergol import HypergolProject
 from hypergol import TensorflowModelManager
 from models.test_model_batch_processor import TestModelBatchProcessor
 from models.test_model import TestModel
@@ -93,40 +91,13 @@ from data_models.test_input import TestInput
 from data_models.test_output import TestOutput
 
 
-LOCATION = '.'
-PROJECT = 'example_project'
-BRANCH = 'example_branch'
-
-
 def train_test_model(force=False):
-    repo = Repo(path='.')
-    if repo.is_dirty():
-        if force:
-            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
-        else:
-            raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
-
-    commit = repo.commit()
-    repoData = RepoData(
-        branchName=repo.active_branch.name,
-        commitHash=commit.hexsha,
-        commitMessage=commit.message,
-        comitterName=commit.committer.name,
-        comitterEmail=commit.committer.email
-    )
-
-    datasetFactory = DatasetFactory(
-        location=LOCATION,
-        project=PROJECT,
-        branch=BRANCH,
-        chunkCount=16,
-        repoData=repoData
-    )
+    project = HypergolProject(dataDirectory='.', force=force)
 
     batchProcessor = TestModelBatchProcessor(
-        inputDataset=datasetFactory.get(dataType=TestInput, name='inputs'),
+        inputDataset=project.datasetFactory.get(dataType=TestInput, name='inputs'),
         inputBatchSize=16,
-        outputDataset=datasetFactory.get(dataType=TestOutput, name='outputs'),
+        outputDataset=project.datasetFactory.get(dataType=TestOutput, name='outputs'),
         exampleArgument=''
     )
     testModel = TestModel(
@@ -206,7 +177,3 @@ class TestCreateModel(HypergolCreateTestCase):
         self.assertEqual(batchProcessorContent, TEST_BATCH_PROCESSOR)
         self.assertEqual(trainModelContent, TEST_TRAIN_MODEL)
         self.assertEqual(scriptContent, TEST_SCRIPT)
-
-    # def test_create_model_block_creates_content(self):
-    #     content = create_model_block(className='TestModelBlock', projectDirectory=self.projectDirectory, dryrun=True)
-    #     self.assertEqual(content[0], TEST_MODEL_BLOCK)

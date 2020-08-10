@@ -1,8 +1,6 @@
 import fire
-from git import Repo
 import tensorflow as tf
-from hypergol import DatasetFactory
-from hypergol import RepoData
+from hypergol import HypergolProject
 from hypergol import TensorflowModelManager
 from models.{{ modelName.asSnake }}_batch_processor import {{ modelName }}BatchProcessor
 from models.{{ modelName.asSnake }} import {{ modelName }}
@@ -13,40 +11,13 @@ from data_models.{{ inputClass.asSnake }} import {{ inputClass }}
 from data_models.{{ outputClass.asSnake }} import {{ outputClass }}
 
 
-LOCATION = '.'
-PROJECT = 'example_project'
-BRANCH = 'example_branch'
-
-
 def train_{{ modelName.asSnake }}(force=False):
-    repo = Repo(path='.')
-    if repo.is_dirty():
-        if force:
-            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
-        else:
-            raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
-
-    commit = repo.commit()
-    repoData = RepoData(
-        branchName=repo.active_branch.name,
-        commitHash=commit.hexsha,
-        commitMessage=commit.message,
-        comitterName=commit.committer.name,
-        comitterEmail=commit.committer.email
-    )
-
-    datasetFactory = DatasetFactory(
-        location=LOCATION,
-        project=PROJECT,
-        branch=BRANCH,
-        chunkCount=16,
-        repoData=repoData
-    )
+    project = HypergolProject(dataDirectory='.', force=force)
 
     batchProcessor = {{ modelName }}BatchProcessor(
-        inputDataset=datasetFactory.get(dataType={{ inputClass }}, name='inputs'),
+        inputDataset=project.datasetFactory.get(dataType={{ inputClass }}, name='inputs'),
         inputBatchSize=16,
-        outputDataset=datasetFactory.get(dataType={{ outputClass }}, name='outputs'),
+        outputDataset=project.datasetFactory.get(dataType={{ outputClass }}, name='outputs'),
         exampleArgument=''
     )
     {{ modelName.asVariable }} = {{ modelName }}(
