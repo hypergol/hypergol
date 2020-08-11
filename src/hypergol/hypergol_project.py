@@ -19,6 +19,39 @@ def locate(fname):
     return Path(hypergol.__path__[0], 'cli', 'templates', fname)
 
 
+class RepoManager:
+
+    def __init__(self, repoDirectory=None, raiseIfDirty=False):
+        self.repoDirectory = repoDirectory
+        self.repoExists = False
+        try:
+            repo = Repo(path=self.repoDirectory)
+            self.repoExists = True
+        except NoSuchPathError:
+            print(f'Directory {self.repoDirectory} does not exist')
+            return
+        except InvalidGitRepositoryError:
+            print(f'No git repository in {self.repoDirectory}')
+            return
+        if repo.is_dirty():
+            if raiseIfDirty:
+                raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
+            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
+        try:
+            commit = repo.commit()
+        except ValueError as ex:
+            print('No commits in this repo, please crete an initial commit')
+            raise ex
+        self.commitHash = commit.hexsha
+        self.commitMessage = commit.message
+        self.comitterName = commit.committer.name
+        self.comitterEmail = commit.committer.email
+        try:
+            self.branchName = repo.active_branch.name
+        except TypeError:
+            self.branchName = 'DETACHED'
+
+
 class HypergolProject:
     """Owner of all information about the project
 
@@ -28,7 +61,7 @@ class HypergolProject:
 
     """
 
-    def __init__(self, projectDirectory=None, dataDirectory='.', chunkCount=16, dryrun=None, force=None):
+    def __init__(self, projectDirectory=None, dataDirectory='.', chunkCount=16, dryrun=None, force=None, repoManager=None):
         """
         Parameters
         ----------
@@ -41,8 +74,13 @@ class HypergolProject:
         force : bool (default=None)
             If set to ``True`` it overwrites the target file
         """
+        if force and dryrun:
+            raise ValueError('Both force and dryrun are set')
         if projectDirectory is None:
             projectDirectory = os.getcwd()
+        if repoManager is None:
+            repoManager = RepoManager(repoDirectory=projectDirectory)
+        self.repoManager = repoManager
         self.projectName = NameString(os.path.basename(projectDirectory))
         self.projectDirectory = projectDirectory
         self.dataDirectory = dataDirectory
@@ -51,57 +89,37 @@ class HypergolProject:
         self.pipelinesPath = Path(projectDirectory, 'pipelines')
         self.modelsPath = Path(projectDirectory, 'models')
         self.testsPath = Path(projectDirectory, 'tests')
-        self._init_classes()
+        self._init_known_class_lists()
         self.templateEnvironment = jinja2.Environment(
             loader=jinja2.FileSystemLoader(
                 searchpath=Path(hypergol.__path__[0], 'cli', 'templates')
             )
         )
-        if force and dryrun:
-            raise ValueError('Both force and dryrun are set')
         self.mode = Mode.DRY_RUN if dryrun else Mode.FORCE if force else Mode.NORMAL
-        self.datasetFactory = None
-        self.tensorboardPath = None
-        self.modelDataPath = None
-        try:
-            repo = Repo(path=self.projectDirectory)
-        except NoSuchPathError:
-            print(f'Directory {self.projectDirectory} does not exist')
+
+        if not self.repoManager.repoExists:
+            self.datasetFactory = None
+            self.tensorboardPath = None
+            self.modelDataPath = None
             return
-        except InvalidGitRepositoryError:
-            print(f'No git repository in {self.projectDirectory}')
-            return
-        if repo.is_dirty():
-            if force or dryrun:
-                print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
-            else:
-                raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
-        try:
-            commit = repo.commit()
-        except ValueError as ex:
-            print('No commits in this repo, please crete and initial commit')
-            raise ex
-        try:
-            branchName = repo.active_branch.name
-        except TypeError:
-            branchName = 'DETACHED'
+
         self.datasetFactory = DatasetFactory(
             location=self.dataDirectory,
             project=self.projectName.asSnake,
-            branch=branchName,
+            branch=self.repoManager.branchName,
             chunkCount=chunkCount,
             repoData=RepoData(
-                branchName=branchName,
-                commitHash=commit.hexsha,
-                commitMessage=commit.message,
-                comitterName=commit.committer.name,
-                comitterEmail=commit.committer.email
+                branchName=self.repoManager.branchName,
+                commitHash=self.repoManager.commitHash,
+                commitMessage=self.repoManager.commitMessage,
+                comitterName=self.repoManager.comitterName,
+                comitterEmail=self.repoManager.comitterEmail
             )
         )
-        self.tensorboardPath = Path(dataDirectory, self.projectName.asSnake, 'tensorboard', branchName)
-        self.modelDataPath = Path(dataDirectory, self.projectName.asSnake, branchName, 'models')
+        self.tensorboardPath = Path(dataDirectory, self.projectName.asSnake, 'tensorboard', self.repoManager.branchName)
+        self.modelDataPath = Path(dataDirectory, self.projectName.asSnake, self.repoManager.branchName, 'models')
 
-    def _init_classes(self):
+    def _init_known_class_lists(self):
         self._dataModelClasses = []
         self._taskClasses = []
         self._modelBlockClasses = []

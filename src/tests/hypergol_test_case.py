@@ -45,6 +45,17 @@ class DataClass3(BaseData):
         return hash((self.id_, self.value3))
 
 
+class TestRepoManager:
+
+    def __init__(self, repoExists=None, commitHash=None, commitMessage=None, comitterName=None, comitterEmail=None, branchName=None):
+        self.repoExists = repoExists or True
+        self.commitHash = commitHash or '0000000000000000000000000000000000000001'
+        self.commitMessage = commitMessage or 'Test commit message.'
+        self.comitterName = comitterName or 'Test Test'
+        self.comitterEmail = comitterEmail or 'test@test.com'
+        self.branchName = branchName or 'test_branch'
+
+
 class HypergolTestCase(TestCase):
 
     def __init__(self, location, projectName, branch, chunkCount, methodName):

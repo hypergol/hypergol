@@ -1,8 +1,7 @@
 import os
 import shutil
-import numpy as np
-import tensorflow as tf
 from pathlib import Path
+import tensorflow as tf
 
 from hypergol.hypergol_project import HypergolProject
 from hypergol.tensorflow_model_manager import TensorflowModelManager
@@ -12,6 +11,7 @@ from tests.tensorflow_test_classes import ExampleTrainableBlock
 from tests.tensorflow_test_classes import TensorflowModelExample
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import HypergolTestCase
+from tests.hypergol_test_case import TestRepoManager
 
 tf.config.experimental.set_visible_devices([], 'GPU')
 
@@ -47,7 +47,8 @@ class TestTensorflowModelManager(HypergolTestCase):
         self.model = TensorflowModelExample(exampleBlock=self.modelBlock)
         self.project = HypergolProject(
             projectDirectory='DOESNOTEXIST',
-            dataDirectory=self.location
+            dataDirectory=self.location,
+            repoManager=TestRepoManager()
         )
         self.modelManager = TensorflowModelManager(
             model=self.model,

@@ -11,6 +11,7 @@ from tests.tensorflow_test_classes import ExampleTrainableBlock
 from tests.tensorflow_test_classes import TensorflowModelExample
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import HypergolTestCase
+from tests.hypergol_test_case import TestRepoManager
 
 tf.config.experimental.set_visible_devices([], 'GPU')
 
@@ -35,7 +36,8 @@ class TestTensorflowTagger(HypergolTestCase):
         self.batchSize = 3
         self.project = HypergolProject(
             projectDirectory='DOESNOTEXIST',
-            dataDirectory=self.location
+            dataDirectory=self.location,
+            repoManager=TestRepoManager()
         )
 
     def setUp(self):
