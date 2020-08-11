@@ -4,6 +4,7 @@ import mock
 
 from hypergol.cli.create_model import create_model
 from hypergol.hypergol_project import HypergolProject
+from tests.hypergol_test_case import TestRepoManager
 from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 
 
@@ -156,7 +157,10 @@ class TestCreateModel(HypergolCreateTestCase):
 
     def setUp(self):
         super().setUp()
-        self.project = HypergolProject(projectDirectory=self.projectDirectory)
+        self.project = HypergolProject(
+            projectDirectory=self.projectDirectory,
+            repoManager=TestRepoManager()
+        )
         self.project.create_project_directory()
         self.project.create_models_directory()
 
