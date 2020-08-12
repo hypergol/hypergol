@@ -25,11 +25,19 @@ There are three types of tasks: :class:`Source`, :class:`SimpleTask`, :class:`Ta
 Pipeline
 --------
 
-Pipelines are used to combine tasks and datasets. It manages the parallel execution and the handling of the data. It executes each task alone, so no inter-task concurency problems can happen. It also handles data versioning through git and shell execution.
+Pipelines are used to combine tasks and datasets. It manages the parallel execution and the handling of the data. It executes each task alone, so no inter-task concurency problems can happen. It also handles data versioning through git and shell execution. Logically a Pipeline is a list of Tasks that are executed sequentially and the code that handles the threads that enable execution. It is deliberately simple as opposed to other frameworks that describe computational tasks as DAGs (Airflow, Prefect.io, dask). That's because most tasks required in ML is IO/memory/CPU heavy but relatively sequential and the benefit is achieved by paralellising the slowest step in a linear pipeline. At any one time there is only one task is running and only that task's resource limits needed and can be optimised.
 
 Testing
 -------
 
-Hypegol creates example unittests for the project so it is easy to verify assumptions about the code and extend the coverage based on the examples. Adds pylint as well, so the linting can be performed as well.
+Hypegol creates example unittests for the project so it is easy to verify assumptions about the code and extend the coverage based on the examples. Adds pylint as well, so the linting can be performed as well. The tests fail at generation time in certain cases because it is too cumbersome to autogenerate tests for some data model types. The intention here is to enable writing tests without setup and only focus on the "Given-When-Then" triple style test writing.
 
+Modelling
+---------
 
+Hypergol provides stubs for Tensorflow models and :class:`BaseBatchProcessor` abstraction to connect the model at training and deployment to the datamodel (and datasets). To enable iterative developement and `SOLID <https://en.wikipedia.org/wiki/SOLID>`_ style developement an opinionated abstraction is provided through :class:`BaseTensorflowModel` derived from `keras.Model` and :class:`BaseTensorflowModelBlock` derived from `keras.layers.Layer`. By following the proposed structure Hypergol provides :class:`TensorflowModelManager` that handles training and evaluation, saving the model and any metrics for tensorboard. The model is packaged with the correct signature derived from the `get_outputs` function that enables deployment as well.
+
+Deployment
+----------
+
+This is not done yet.

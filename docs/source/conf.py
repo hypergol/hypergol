@@ -23,8 +23,8 @@ copyright = '2020, Laszlo Sragner'
 author = 'Laszlo Sragner'
 
 # The full version, including alpha/beta/rc tags
-version = '0.0.1'
-release = '0.0.1'
+version = open('../../version', 'rt').read().strip()
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -72,4 +72,3 @@ pygments_style = 'sphinx'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
-
