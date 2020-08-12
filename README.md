@@ -1,4 +1,5 @@
-# Hypergol
+Hypergol
+========
 
 Hypergol is a Data Science productivity toolkit to accelerate small team projects into production at the shortest possible time while still maintaining high standard code. This is achieved by autogenerating structure and code in a form that is easy to extend so only the project specific code need to be filled.
 
@@ -14,7 +15,8 @@ See documentation for further details at: [https://hypergol.readthedocs.io/en/la
 
 Join our community at: [Hypergol Slack Community](https://join.slack.com/t/hypergol/shared_invite/zt-g4fiy8wz-VInECQlxeYk4cxFjXyVbcA)
 
-## Quick Start
+Quick Start
+-----------
 
 Install it with:
 
@@ -31,7 +33,8 @@ cd my_first_project
 
 And follow instructions in the projects `README.md` or the tutorial at: [https://hypergol.readthedocs.io/en/latest/tutorial.html](https://hypergol.readthedocs.io/en/latest/tutorial.html)
 
-## Good Luck using Hypergol!
+Good Luck using Hypergol!
+-------------------------
 
 The authors wish that Hypergol frees you from tedious tasks so you can focus more on the core part of Machine Learning and generate everything else.
 
