@@ -12,7 +12,7 @@ Tensorflow model stubs can be generated that enable standardised model developme
 
 See documentation for further details at: [https://hypergol.readthedocs.io/en/latest/](https://hypergol.readthedocs.io/en/latest/)
 
-# # Quick Start
+##Quick Start
 
 Install it with:
 
