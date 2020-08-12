@@ -1,4 +1,5 @@
-# Hypergol
+Hypergol
+--------
 
 Hypergol is a Data Science productivity toolkit to accelerate small team projects into production at the shortest possible time while still maintaining high standard code. This is achieved by autogenerating structure and code in a form that is easy to extend so only the project specific code need to be filled.
 
@@ -12,7 +13,8 @@ Tensorflow model stubs can be generated that enable standardised model developme
 
 See documentation for further details at: [https://hypergol.readthedocs.io/en/latest/](https://hypergol.readthedocs.io/en/latest/)
 
-##Quick Start
+Quick Start
+===========
 
 Install it with:
 
