@@ -12,5 +12,6 @@ It is recommended to start it in a screen session so you can close the terminal 
 
 ```
 screen -S tensorboard
+source .venv/bin/activate
 tensorboard --logdir=<data_directory>/alpha/tensorboard/
 ```
