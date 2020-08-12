@@ -2,7 +2,7 @@
 
 This project was generated with the Hypergol framework
 
-Please see documentation for instructions: <add link here>
+Please see documentation for instructions: [https://hypergol.readthedocs.io/en/latest/](https://hypergol.readthedocs.io/en/latest/)
 
 <maybe this can serve as a quickstart guide>
 
