@@ -14,7 +14,7 @@ Tensorflow model stubs can be generated that enable standardised model developme
 See documentation for further details at: [https://hypergol.readthedocs.io/en/latest/](https://hypergol.readthedocs.io/en/latest/)
 
 Quick Start
-~~~~~~~~~~~
+-----------
 
 Install it with:
 
@@ -32,7 +32,7 @@ cd my_first_project
 And follow instructions in the projects `README.md` or the tutorial at: [https://hypergol.readthedocs.io/en/latest/tutorial.html](https://hypergol.readthedocs.io/en/latest/tutorial.html)
 
 Good Luck using Hypergol
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 The authors hope wish that Hypergol frees you from tedious tasks and you can focus more on the core part of Machine Learning and generate everything else.
 
