@@ -133,12 +133,19 @@ NameString - Convert string between cases
 .. currentmodule:: hypergol.name_string
 .. autoclass:: NameString
 
-====================================================
-HypergolProject - Helper class for the CLI functions
-====================================================
+===============================================================
+HypergolProject - Class to manage information about the project
+===============================================================
 
 .. currentmodule:: hypergol.hypergol_project
 .. autoclass:: HypergolProject
+
+=============================================================
+RepoManager - Helper class for storing Repository information
+=============================================================
+
+.. currentmodule:: hypergol.hypergol_project
+.. autoclass:: RepoManager
 
 =========================================================
 RepoData - Data class for storing Repository informations
