@@ -371,3 +371,75 @@ Sometimes a class must be passed onto a task that cannot be pickled (e.g. loggin
     )
 
 This will result in delaying the creation of ``CannotPickle`` object until the task object is recreated inside the thread. This happen exactly between the ``loadedInputs`` loading and the ``init()`` function, can be used in the latter.
+
+Creating a Tensorflow model
+---------------------------
+
+Before creating a project plan the architecture of it. Decompose the modelling task into smaller components and describe their responsibilitiyes and their relationship to each other. Both input and output datamodel class must exist before the ``create_model`` command is called.
+
+Create a block
+~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    $ python -m hypergol.cli.create_model_block ExampleBlock
+
+This will create ``models/example_block.py``, it doesn't contain too much useful code as blocks are primarily used to organise Tensorflow code.
+
+Create the model
+~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    $ python -m hypergol.cli.create_model ExampleModel InputClass OutputClass Block1 Block2
+
+This will create three main components: :class:`ExampleModel` in ``example_model.py`` that is the model itself, it also imports the blocks specified, :class:`ExampleModelBatchProcessor` in ``example_model_batch_processor.py`` and also imports the input/output datamodel classes and `train_example_model` that is a ``fire`` script that manages the training process through the :class:`TensorflowModelManager` class and imports and instantiate all the necessary components. The training can be started with ``train_example_model.sh`` in the main project directory.
+
+Each of the abstract functions the model implement (``get_loss``, ``produce_metrics`` and ``get_outputs``) must accept input the same way. :class:`TensorflowModelManager` gets an ``(input, target)`` and passes on the the above functions with double asterisk (`**`) operator. This means that the `(key, value)` items in the dictionary will turn into keyword arguments in the the model's respective functions:
+
+.. code-block:: python
+
+    # in ExampleModelBatchProcessor.process_input_batch()
+    inputs = {
+        'exampleInput1': tf.constant(value1, dtype=tf.int32),
+        'exampleInput2': tf.ragged.constant(values, dtype=tf.string).to_tensor()
+    }
+
+    # in TensorflowModelManager
+    loss = self.model.get_loss(targets=targets, training=True, **inputs)
+
+    # in ExampleModel
+    def get_loss(self, targets, training, exampleInput1, exampleInput2):
+        ...
+
+This ensures that if either one of the four (``process_input_batch``, ``get_loss``, ``produce_metrics`` and ``get_outputs``) is changed, the rest must follow suit to be consistent.
+
+For the batch processor two functions must be implemented. ``process_input_batch`` is responsible for feeding the correct data to the model during training and evaluation. it returns an ``(inputs, targets)`` tuple where ``inputs`` is a dictionary of tensors and ``targets`` is a single tensor.
+
+The ``produce_metrics`` function is running in a context of a ``tf.summary.SummaryWriter`` so the implementation just need to call ``tf.summary.scalar`` or any other summary functions to record data to TensorBoard. See `https://www.tensorflow.org/api_docs/python/tf/summary <https://www.tensorflow.org/api_docs/python/tf/summary>`__ for further documentation on this.
+
+The ``get_outputs`` function must specify the signiture with the ``@tf.function`` decorator because this enables the model to be packaged and to be deployed as a standalone model. Again this signature must match the ``inputs`` dictionary. Following from the previous mock example:
+
+.. code-block:: python
+
+    @tf.function(input_signature=[
+        tf.TensorSpec(shape=[None], dtype=tf.int32, name='exampleInput1'),
+        tf.TensorSpec(shape=[None, None], dtype=tf.string, name='exampleInput2')
+    ])
+    def get_outputs(self, exampleInput1, exampleInput2):
+        ...
+
+This further ties batch management and the various model related functionalities to deployment as all of these must stay in sync if end to end deployment must be continuously maintained.
+
+The training script uses :class:`.HypergolProject` to find and maintain ``Datasets`` and also checks the state of the git repository. To ensure data lineage (linking data to one particular code) it is required that all relevant code to be commited before training start. After this it instantiates the ``BatchProcessor`` and the required input and output datasets (through :class:`.HypergolProject` ``DatasetFactory``. Instantiates the Model and all of its Blocks. Then creates a :class:`TensorflowModelManager` to ties these together and specify the optimiser. Then executes the ``run()`` function to perform the actual training.
+
+Training can be started with the provided shell script and as with other Hypergol functionalities, parameters can be passed from the command line or the script to the python code through the ``fire`` package's functionalities.
+
+One important issue: Datasets must be closed properly to generate their `.chk` file to be openable again. Therefore the entire `train/evaluation` loop runs in a `try/finally` block and the :class:`TensorflowModelManager`'s ``finish()`` function is guaranteed to be called, this in turn calls the :class:`BaseBatchProcessor`'s ``finish()`` function and that closes the OutputDataset so it can be opened at a later stage for evaluation.
+
+The evaluation part is to debug the model at early stages of the training, large scale evalutation should happen parallelized through a dedicated ``Hypergol`` pipeline.
+
+Deploy the model
+~~~~~~~~~~~~~~~~
+
+This is not done yet.

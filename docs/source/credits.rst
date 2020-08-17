@@ -11,7 +11,7 @@ Original Authors
 
 | Laszlo Sragner
 | Rhys Patten
-|
+| Mike Doran
 
 
 Contributors
@@ -22,4 +22,4 @@ is partially historical, and now, mostly arbitrary.
 
 - Laszlo Sragner `xLaszlo <https://github.com/xLaszlo>`_
 - Rhys Patten
--
+- Mike Doran

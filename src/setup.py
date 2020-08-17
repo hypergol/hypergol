@@ -8,7 +8,7 @@ setupDirectory = os.path.dirname(os.path.realpath(__file__))
 
 setup(
     name="hypergol",
-    version="0.0.3",
+    version=open('../version', 'rt').read().strip(),
     author="Laszlo Sragner",
     author_email="hypergol.developer@gmail.com",
     description="An opinionated multithreaded Data Science framework",

@@ -2,6 +2,47 @@
 
 This project was generated with the Hypergol framework
 
-Please see documentation for instructions: <add link here>
+Please see documentation for instructions: [https://hypergol.readthedocs.io/en/latest/](https://hypergol.readthedocs.io/en/latest/)
 
-<maybe this can serve as a quickstart guide>
+### Initialise git
+
+Hypergol is heavily integrated with git, all projects must be in a git repository to ensure code and data lineage (to record which data was created by which version of the code).
+
+Initialise git with:
+
+```git init```
+
+Create the first commit (datasets record the last commit when they are created and without this there is nothing to record):
+
+```git commit -m "First Commit!"```
+
+The project now (and any time a file is changed but the change is not committed to the repo) is in a "dirty" stage. If you run a pipeline or train a model, the last commit will be recorded but that commit will not represent the code that is running! Add changes and commit:
+
+```
+git add .
+git commit -m "All the files!"
+```
+
+If there are files that shouldn't be checked in ever to git they should be to the `.gitignore` file before `git add .`
+
+Alternatively individual files can be added to git with `git add <filename>`.
+
+### Make the virtual environment
+
+Having dedicated virtual environment fully described by the projects `requirements.txt` is the recommended practice. Don't forget to `deactivate` the current virtual environment! Files from the environment are included in the projects `.gitignore` file and will ignored by git.
+
+```
+deactivate
+./make_venv.sh
+source .venv/bin/activate
+```
+
+### How to start Tensorboard
+
+It is recommended to start it in a screen session so you can close the terminal window or if you disconnect from a remote Linux machine. In the project directory:
+
+```
+screen -S tensorboard
+source .venv/bin/activate
+tensorboard --logdir=<data_directory>/example/tensorboard/
+```
