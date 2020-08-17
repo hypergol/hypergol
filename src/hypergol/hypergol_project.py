@@ -309,3 +309,35 @@ class HypergolProject:
                         values['projectDirectory'] = self.projectDirectory
                         print(DATASET_TEMPLATE.format(**values))
         return result
+
+    def diff_datamodel(self, oldCommit, newCommit, name=None, names=None):
+        if names is None:
+            names = []
+        if name is not None:
+            names.append(name)
+        repo = Repo(self.projectDirectory)
+        for name_ in names:
+            content = repo.git.diff(oldCommit, newCommit, f'data_models/{name_}.py')
+            print(content)
+
+    def get_old_datamodel(self, commit, name=None, names=None):
+        if names is None:
+            names = []
+        if name is not None:
+            names.append(name)
+        result = []
+        for name_ in names:
+            repo = Repo(self.projectDirectory)
+            name_ = NameString(name_)
+            content = repo.git.show(f'{commit}:data_models/{name_.asSnake}.py')
+            for oldName_ in names:
+                oldName_ = NameString(oldName_)
+                content.replace(oldName_, f'{oldName_}{commit[:7].upper()}')
+                content.replace(oldName_.asSnake, f'{oldName_.asSnake}{commit[:7]}')
+            if self.isDryRun:
+                result.append(content)
+            else:
+                with open(Path(self.dataModelsPath, f'{name.asSnake}{commit[:7]}.py', 'wt')) as outFile:
+                    outFile.write(content)
+        self._init_known_class_lists()
+        return result
