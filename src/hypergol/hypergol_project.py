@@ -1,4 +1,6 @@
 import os
+import re
+import json
 import stat
 import glob
 from pathlib import Path
@@ -13,6 +15,27 @@ from hypergol.utils import Mode
 from hypergol.utils import create_text_file
 from hypergol.utils import create_directory
 from hypergol.name_string import NameString
+
+
+DATASET_TEMPLATE = """sys.path.insert(0, '{projectDirectory}')
+from data_models.{dataTypeFile} import {dataType}
+from hypergol import Dataset
+from hypergol import RepoData
+ds=Dataset(
+    dataType={dataType},
+    location='{location}',
+    project='{project}',
+    branch='{branch}',
+    name='{name}',
+    chunkCount={chunkCount},
+    repoData=RepoData(
+        branchName='{branchName}',
+        commitHash='{commitHash}',
+        commitMessage='{commitMessage}',
+        comitterName='{comitterName}',
+        comitterEmail='{comitterEmail}'
+    )
+)"""
 
 
 def locate(fname):
@@ -256,3 +279,22 @@ class HypergolProject:
 
     def render_simple(self, templateName, filePath):
         return self.render(templateName=templateName, templateData={'name': self.projectName}, filePath=filePath)
+
+    def list_datasets(self, pattern=None, asCode=False):
+        if pattern is None:
+            pattern = '.*'
+        dataPath = Path(self.dataDirectory, self.projectName.asSnake)
+        result = []
+        for pathName, _, fileNames in os.walk(dataPath):
+            for fileName in fileNames:
+                if fileName.endswith('.def') and re.match(pattern, fileName[:-4]) is not None:
+                    data = json.load(open(Path(pathName, fileName), 'rt'))
+                    result.append(data)
+                    if asCode:
+                        values = {**data, **data['repo']}
+                        values['location'] = self.dataDirectory
+                        values['commitMessage'] = values['commitMessage'].replace('\n', '\\n')
+                        values['dataTypeFile'] = NameString(values['dataType']).asSnake
+                        values['projectDirectory'] = self.projectDirectory
+                        print(DATASET_TEMPLATE.format(**values))
+        return result
