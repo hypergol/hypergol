@@ -115,6 +115,39 @@ Delayed - Helper class to allow passing any class to threads
 .. autoclass:: Delayed
     :private-members:
 
+
+******************************
+Model Creation Related Classes
+******************************
+
+==================================================================
+BaseBatchProcessor - Class for handling input/output for the model
+==================================================================
+
+.. currentmodule:: hypergol
+.. autoclass:: BaseBatchProcessor
+
+===============================================================
+BaseTensorflowModelBlock - Class for organising Tensorflow code
+===============================================================
+
+.. currentmodule:: hypergol
+.. autoclass:: BaseTensorflowModelBlock
+
+==========================================================
+BaseTensorflowModel - Class for organising Tensorflow code
+==========================================================
+
+.. currentmodule:: hypergol
+.. autoclass:: BaseTensorflowModel
+
+=========================================================================
+TensorflowModelManager - Class for managing model training and evaluation
+=========================================================================
+
+.. currentmodule:: hypergol
+.. autoclass:: TensorflowModelManager
+
 *********************
 Miscellaneous Classes
 *********************
