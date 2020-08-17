@@ -281,6 +281,17 @@ class HypergolProject:
         return self.render(templateName=templateName, templateData={'name': self.projectName}, filePath=filePath)
 
     def list_datasets(self, pattern=None, asCode=False):
+        """Convenience function to list datasets for a project
+
+        Returns a list of data loaded from the ``.def`` files in the directory
+
+        Parameters
+        ----------
+        pattern : string (None)
+            Regex pattern to filter on dataset names, if unspecified, defaults to ``.*``
+        asCode : bool (False)
+            If True prints a code snippet that allows the dataset to be loaded (with imports and path updates)
+        """
         if pattern is None:
             pattern = '.*'
         dataPath = Path(self.dataDirectory, self.projectName.asSnake)
