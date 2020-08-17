@@ -21,6 +21,8 @@ class TensorflowModelManager:
             Hypergol dataset to use for training
         project: HypergolProject
             Hypergol project to handle directories
+        modelName: string
+            Name of the model
         restoreWeightsPath: path
             path to restore variables from previously trained model
         """
@@ -35,7 +37,7 @@ class TensorflowModelManager:
         self.evaluationSummaryWriter = None
 
     def save_model(self):
-        """ saves tensorflow model, block definitions, and weights """
+        """Saves Tensorflow model, block definitions, and weights """
         modelDirectory = Path(self.project.modelDataPath, self.modelName, str(self.globalStep))
         modelDirectory.mkdir(parents=True, exist_ok=True)
         tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures={'signature_default': self.model.get_outputs})
@@ -44,16 +46,16 @@ class TensorflowModelManager:
         self.model.save_weights(f'{modelDirectory}/{self.model.get_name()}.h5', save_format='h5')
 
     def restore_model_weights(self):
-        """ restores tensorflow model weights """
+        """Restores Tensorflow model weights """
         self.model.load_weights(f'{self.restoreWeightsPath}/{self.model.get_name()}.h5')
 
     def train(self, withTracing):
-        """runs a training step for the model
+        """Runs a single training step for the model
 
         Parameters
         ----------
-        withMetadata: bool
-            log tensorflow graph metadata for step
+        withTracing: bool
+            log tensorflow graph metadata for the step
         """
         inputs, targets = next(self.batchProcessor)
         if withTracing:
@@ -77,11 +79,11 @@ class TensorflowModelManager:
         return loss
 
     def evaluate(self, withTracing):
-        """runs an evaluation step for the model
+        """Runs a single evaluation step for the model
 
         Parameters
         ----------
-        withMetadata: bool
+        withTracing: bool
             log tensorflow graph metadata for step
         """
         inputs, targets = next(self.batchProcessor)
@@ -102,6 +104,8 @@ class TensorflowModelManager:
         return loss
 
     def start(self):
+        """Prepares to run the training cycle by creating the model data directories, create the ``SummaryWriters`` for Tensorboard for training and evaluation, initialises the batchprocessor (opens the output dataset for writing) and reloads the weights if ``restoreWeightsPath`` is specified.
+        """
         Path(self.project.tensorboardPath, self.modelName).mkdir(parents=True, exist_ok=True)
         self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=str(Path(self.project.tensorboardPath, self.modelName, 'train')))
         self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=str(Path(self.project.tensorboardPath, self.modelName, 'evaluate')))
@@ -111,7 +115,9 @@ class TensorflowModelManager:
             self.restore_model_weights()
 
     def run(self, stepCount, evaluationSteps, tracingSteps):
-        """runs a training schedule
+        """Runs a training schedule
+
+        Model is saved in every evaluation step and at the very last step.
 
         Parameters
         ----------
@@ -120,7 +126,7 @@ class TensorflowModelManager:
         evaluationSteps: List[int]
             which steps to produce metrics on an evaluation sample
         tracingSteps: List[int]
-            which steps to log graph metadata (components, memory consumption, etc) to tensorboard
+            which steps to log graph metadata (components, memory consumption, etc) to Tensorboard
         """
         self.start()
         try:
@@ -134,4 +140,8 @@ class TensorflowModelManager:
             self.finish()
 
     def finish(self):
+        """Finishes training run by closing the output dataset.
+
+        Runs even if the training was interrupted by an exception (e.g. Ctrl-C)
+        """
         self.batchProcessor.finish()
