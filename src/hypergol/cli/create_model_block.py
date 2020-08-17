@@ -6,6 +6,13 @@ from hypergol.hypergol_project import HypergolProject
 
 
 def create_model_block(className, projectDirectory='.', dryrun=None, force=None,):
+    """Generates a Model Block class.
+
+    Parameters
+    ----------
+    className : string (CamelCase)
+        Name of the class to be created
+    """
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     className = NameString(className)
 

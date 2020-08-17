@@ -13,6 +13,7 @@ def create_project(projectName, dryrun=None, force=None):
         - ``data_models`` with ``__init__.py``
         - ``pipelines`` with ``__init__.py``
         - ``tasks`` with ``__init__.py``
+        - ``models`` with ``__init__.py``
         - ``tests``
 
     Executables:

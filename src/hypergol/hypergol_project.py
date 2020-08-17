@@ -20,8 +20,19 @@ def locate(fname):
 
 
 class RepoManager:
+    """Wrapper class around git that provides all information about the repo connected to the project.
+
+    """
 
     def __init__(self, repoDirectory=None, raiseIfDirty=False):
+        """
+        Parameters
+        ----------
+        repoDirectory : string
+            directory where the the `.git` directory is located
+        raiseIfDirty : bool
+            if set and the repo contains uncommited code it raises an error
+        """
         self.repoDirectory = repoDirectory
         self.repoExists = False
         try:
