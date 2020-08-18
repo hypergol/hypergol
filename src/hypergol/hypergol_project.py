@@ -339,6 +339,8 @@ class HypergolProject:
                 content = content.replace(f'data_models.{oldName.asSnake}', f'data_models.{oldName.asSnake}_{commit[:7]}')
             if self.isDryRun:
                 result.append(content)
+                print(f'DRYRUN - Creating class {name.asClass}{commit[:7].upper()} in {name.asSnake}_{commit[:7]}.py')
+                print(content+'\n')
             else:
                 print(f'Creating class {name.asClass}{commit[:7].upper()} in {name.asSnake}_{commit[:7]}.py')
                 with open(Path(self.dataModelsPath, f'{name.asSnake}_{commit[:7]}.py'), 'wt') as outFile:
