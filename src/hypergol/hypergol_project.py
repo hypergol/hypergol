@@ -1,4 +1,6 @@
 import os
+import re
+import json
 import stat
 import glob
 from pathlib import Path
@@ -13,6 +15,27 @@ from hypergol.utils import Mode
 from hypergol.utils import create_text_file
 from hypergol.utils import create_directory
 from hypergol.name_string import NameString
+
+
+DATASET_TEMPLATE = """sys.path.insert(0, '{projectDirectory}')
+from data_models.{dataTypeFile} import {dataType}
+from hypergol import Dataset
+from hypergol import RepoData
+ds=Dataset(
+    dataType={dataType},
+    location='{location}',
+    project='{project}',
+    branch='{branch}',
+    name='{name}',
+    chunkCount={chunkCount},
+    repoData=RepoData(
+        branchName='{branchName}',
+        commitHash='{commitHash}',
+        commitMessage='{commitMessage}',
+        comitterName='{comitterName}',
+        comitterEmail='{comitterEmail}'
+    )
+)"""
 
 
 def locate(fname):
@@ -135,13 +158,13 @@ class HypergolProject:
         self._taskClasses = []
         self._modelBlockClasses = []
         if os.path.exists(self.dataModelsPath):
-            dataModelFiles = glob.glob(str(Path(self.dataModelsPath, '*.py')))
+            dataModelFiles = glob.glob(str(Path(self.dataModelsPath, '[!_][!_]*.py')))
             self._dataModelClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in dataModelFiles]
         if os.path.exists(self.tasksPath):
-            taskFiles = glob.glob(str(Path(self.projectDirectory, 'tasks', '*.py')))
+            taskFiles = glob.glob(str(Path(self.projectDirectory, 'tasks', '[!_][!_]*.py')))
             self._taskClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in taskFiles]
         if os.path.exists(self.modelsPath):
-            blockFiles = glob.glob(str(Path(self.projectDirectory, 'models', '*.py')))
+            blockFiles = glob.glob(str(Path(self.projectDirectory, 'models', '[!_][!_]*.py')))
             self._modelBlockClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in blockFiles]
 
     @property
@@ -256,3 +279,97 @@ class HypergolProject:
 
     def render_simple(self, templateName, filePath):
         return self.render(templateName=templateName, templateData={'name': self.projectName}, filePath=filePath)
+
+    def list_datasets(self, pattern=None, ascode=False):
+        """Convenience function to list datasets for a project
+
+        Returns a list of data loaded from the ``.def`` files in the directory
+
+        Parameters
+        ----------
+        pattern : string (None)
+            Regex pattern to filter on dataset names, if unspecified, defaults to ``.*``
+        ascode : bool (False)
+            If True prints a code snippet that allows the dataset to be loaded (with imports and path updates)
+        """
+        if pattern is None:
+            pattern = '.*'
+        dataPath = Path(self.dataDirectory, self.projectName.asSnake)
+        result = []
+        for pathName, _, fileNames in os.walk(dataPath):
+            for fileName in fileNames:
+                if fileName.endswith('.def') and re.match(pattern, fileName[:-4]) is not None:
+                    data = json.load(open(Path(pathName, fileName), 'rt'))
+                    result.append(data)
+                    if ascode:
+                        values = {**data, **data['repo']}
+                        values['location'] = self.dataDirectory
+                        values['commitMessage'] = values['commitMessage'].replace('\n', '\\n')
+                        values['dataTypeFile'] = NameString(values['dataType']).asSnake
+                        values['projectDirectory'] = self.projectDirectory
+                        print(DATASET_TEMPLATE.format(**values))
+        return result
+
+    def diff_data_model(self, commit, *args):
+        """Convenience function to compare old data model class definitions to the current one
+
+        Prints the diffs from the specified commit to the current commit
+
+        Parameters
+        ----------
+        commit : string
+            git commit to start comparison from
+        *args : List[string]
+            List of class names to compare, if empty it compares all
+        """
+        if len(args) == 0:
+            names = self._dataModelClasses
+        else:
+            names = [NameString(name) for name in args]
+        repo = Repo(self.projectDirectory)
+        if repo.is_dirty():
+            print('Warning! Current git repo is dirty, this will result in incorrect diff')
+        currentCommit = repo.commit().hexsha
+        for name in names:
+            print(f'------ data_models/{name.asSnake}.py ------')
+            print(repo.git.diff(commit, currentCommit, f'data_models/{name.asSnake}.py'))
+
+    def create_old_data_model(self, commit, *args):
+        """Convenience function to generate data model classes at an old commit to be able to load datasets created then
+
+        Full commit hash required.
+
+        ``project.create_old_data_model(commit='fbd8110b7194425e2323f68ef54dac15bb01ee7b', 'OneClass', 'TwoClass')``
+
+        Will create ``data_models/one_class_fbd8110.py`` and ``data_models/two_class_fbd8110.py`` and replaces all occurences of ``OneClass`` and ``TwoClass`` to ``OneClassFBD8110`` and ``TwoClassFBD8110`` in each file.
+
+        Parameters
+        ----------
+        commit : string
+            git commit to retrieve classes from
+        args : List[string]
+            List of class names to generate, if empty it generates all
+        """
+        if len(args) == 0:
+            names = self._dataModelClasses
+        else:
+            names = [NameString(name) for name in args]
+        result = []
+        repo = Repo(self.projectDirectory)
+        if repo.is_dirty():
+            print('Warning! Current git repo is dirty, this will result in incorrect data_model_files created.')
+        for name in names:
+            content = repo.git.show(f'{commit}:data_models/{name.asSnake}.py')
+            for oldName in names:
+                content = content.replace(oldName.asClass, f'{oldName.asClass}{commit[:7].upper()}')
+                content = content.replace(f'data_models.{oldName.asSnake}', f'data_models.{oldName.asSnake}_{commit[:7]}')
+            if self.isDryRun:
+                result.append(content)
+                print(f'DRYRUN - Creating class {name.asClass}{commit[:7].upper()} in {name.asSnake}_{commit[:7]}.py')
+                print(content+'\n')
+            else:
+                print(f'Creating class {name.asClass}{commit[:7].upper()} in {name.asSnake}_{commit[:7]}.py')
+                with open(Path(self.dataModelsPath, f'{name.asSnake}_{commit[:7]}.py'), 'wt') as outFile:
+                    outFile.write(content+'\n')
+        self._init_known_class_lists()
+        return result

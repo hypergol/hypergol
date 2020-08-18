@@ -17,7 +17,7 @@ BaseData - Base class for domain objects
 Dataset - Class for storing domain objects
 ==========================================
 
-.. currentmodule:: hypergol
+.. currentmodule:: hypergol.dataset
 .. autoclass:: Dataset
 
 ==========================================
