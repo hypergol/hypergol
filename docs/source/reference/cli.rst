@@ -67,8 +67,6 @@ Also generates training script and batch data manager class
 list_datasets - List existing datasets
 ======================================
 
-Use ``--ascode`` to print executable code to the terminal
-
 .. currentmodule:: hypergol.cli.list_datasets
 .. autofunction:: list_datasets
 
