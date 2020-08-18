@@ -62,3 +62,26 @@ Also generates training script and batch data manager class
 
 .. currentmodule:: hypergol.cli.create_model
 .. autofunction:: create_model
+
+======================================
+list_datasets - List existing datasets
+======================================
+
+Use ``--ascode`` to print executable code to the terminal
+
+.. currentmodule:: hypergol.cli.list_datasets
+.. autofunction:: list_datasets
+
+===============================================================
+diff_data_model - Print differences between data model versions
+===============================================================
+
+.. currentmodule:: hypergol.cli.diff_data_model
+.. autofunction:: diff_data_model
+
+=========================================================================
+create_old_data_model - Create an older version of the datamodel from git
+=========================================================================
+
+.. currentmodule:: hypergol.cli.create_old_data_model
+.. autofunction:: create_old_data_model

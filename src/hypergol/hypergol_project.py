@@ -280,7 +280,7 @@ class HypergolProject:
     def render_simple(self, templateName, filePath):
         return self.render(templateName=templateName, templateData={'name': self.projectName}, filePath=filePath)
 
-    def list_datasets(self, pattern=None, asCode=False):
+    def list_datasets(self, pattern=None, ascode=False):
         """Convenience function to list datasets for a project
 
         Returns a list of data loaded from the ``.def`` files in the directory
@@ -289,7 +289,7 @@ class HypergolProject:
         ----------
         pattern : string (None)
             Regex pattern to filter on dataset names, if unspecified, defaults to ``.*``
-        asCode : bool (False)
+        ascode : bool (False)
             If True prints a code snippet that allows the dataset to be loaded (with imports and path updates)
         """
         if pattern is None:
@@ -301,7 +301,7 @@ class HypergolProject:
                 if fileName.endswith('.def') and re.match(pattern, fileName[:-4]) is not None:
                     data = json.load(open(Path(pathName, fileName), 'rt'))
                     result.append(data)
-                    if asCode:
+                    if ascode:
                         values = {**data, **data['repo']}
                         values['location'] = self.dataDirectory
                         values['commitMessage'] = values['commitMessage'].replace('\n', '\\n')
