@@ -310,30 +310,24 @@ class HypergolProject:
                         print(DATASET_TEMPLATE.format(**values))
         return result
 
-    def diff_datamodel(self, oldCommit, newCommit, name=None, names=None):
-        if names is None:
-            names = []
-        if name is not None:
-            names.append(name)
+    def diff_data_model(self, oldCommit, newCommit, *args):
+        if len(args) == 0:
+            names = self._dataModelClasses
+        else:
+            names = [NameString(name) for name in args]
         repo = Repo(self.projectDirectory)
-        for name_ in names:
-            content = repo.git.diff(oldCommit, newCommit, f'data_models/{name_}.py')
-            print(content)
+        for name in names:
+            print(repo.git.diff(oldCommit, newCommit, f'data_models/{name.asSnake}.py'))
 
-    def get_old_datamodel(self, commit, name=None, names=None):
-        if names is None:
-            names = []
-        if name is not None:
-            names.append(name)
+    def create_old_data_model(self, commit, *args):
+        names = [NameString(name) for name in args]
         result = []
-        for name_ in names:
-            repo = Repo(self.projectDirectory)
-            name_ = NameString(name_)
-            content = repo.git.show(f'{commit}:data_models/{name_.asSnake}.py')
-            for oldName_ in names:
-                oldName_ = NameString(oldName_)
-                content.replace(oldName_, f'{oldName_}{commit[:7].upper()}')
-                content.replace(oldName_.asSnake, f'{oldName_.asSnake}{commit[:7]}')
+        repo = Repo(self.projectDirectory)
+        for name in names:
+            content = repo.git.show(f'{commit}:data_models/{name.asSnake}.py')
+            for oldName in names:
+                content.replace(oldName, f'{oldName}{commit[:7].upper()}')
+                content.replace(oldName.asSnake, f'{oldName.asSnake}{commit[:7]}')
             if self.isDryRun:
                 result.append(content)
             else:
