@@ -311,6 +311,17 @@ class HypergolProject:
         return result
 
     def diff_data_model(self, commit, *args):
+        """Convenience function to compare old data model class definitions to the current one
+
+        Prints the diffs from the specified commit to the current commit
+
+        Parameters
+        ----------
+        commit : string
+            git commit to start comparison from
+        *args : List[string]
+            List of class names to compare, if empty it compares all
+        """
         if len(args) == 0:
             names = self._dataModelClasses
         else:
@@ -324,6 +335,21 @@ class HypergolProject:
             print(repo.git.diff(commit, currentCommit, f'data_models/{name.asSnake}.py'))
 
     def create_old_data_model(self, commit, *args):
+        """Convenience function to generate data model classes at an old commit to be able to load datasets created then
+
+        Full commit hash required.
+
+        ``project.create_old_data_model(commit='fbd8110b7194425e2323f68ef54dac15bb01ee7b', 'OneClass', 'TwoClass')``
+
+        Will create ``data_models/one_class_fbd8110.py`` and ``data_models/two_class_fbd8110.py`` and replaces all occurences of ``OneClass`` and ``TwoClass`` to ``OneClassFBD8110`` and ``TwoClassFBD8110`` in each file.
+
+        Parameters
+        ----------
+        commit : string
+            git commit to retrieve classes from
+        args : List[string]
+            List of class names to generate, if empty it generates all
+        """
         if len(args) == 0:
             names = self._dataModelClasses
         else:
