@@ -158,13 +158,13 @@ class HypergolProject:
         self._taskClasses = []
         self._modelBlockClasses = []
         if os.path.exists(self.dataModelsPath):
-            dataModelFiles = glob.glob(str(Path(self.dataModelsPath, '*.py')))
+            dataModelFiles = glob.glob(str(Path(self.dataModelsPath, '[!_][!_]*.py')))
             self._dataModelClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in dataModelFiles]
         if os.path.exists(self.tasksPath):
-            taskFiles = glob.glob(str(Path(self.projectDirectory, 'tasks', '*.py')))
+            taskFiles = glob.glob(str(Path(self.projectDirectory, 'tasks', '[!_][!_]*.py')))
             self._taskClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in taskFiles]
         if os.path.exists(self.modelsPath):
-            blockFiles = glob.glob(str(Path(self.projectDirectory, 'models', '*.py')))
+            blockFiles = glob.glob(str(Path(self.projectDirectory, 'models', '[!_][!_]*.py')))
             self._modelBlockClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in blockFiles]
 
     @property
@@ -310,28 +310,38 @@ class HypergolProject:
                         print(DATASET_TEMPLATE.format(**values))
         return result
 
-    def diff_data_model(self, oldCommit, newCommit, *args):
+    def diff_data_model(self, commit, *args):
         if len(args) == 0:
             names = self._dataModelClasses
         else:
             names = [NameString(name) for name in args]
         repo = Repo(self.projectDirectory)
+        if repo.is_dirty():
+            print('Warning! Current git repo is dirty, this will result in incorrect diff')
+        currentCommit = repo.commit().hexsha
         for name in names:
-            print(repo.git.diff(oldCommit, newCommit, f'data_models/{name.asSnake}.py'))
+            print(f'------ data_models/{name.asSnake}.py ------')
+            print(repo.git.diff(commit, currentCommit, f'data_models/{name.asSnake}.py'))
 
     def create_old_data_model(self, commit, *args):
-        names = [NameString(name) for name in args]
+        if len(args) == 0:
+            names = self._dataModelClasses
+        else:
+            names = [NameString(name) for name in args]
         result = []
         repo = Repo(self.projectDirectory)
+        if repo.is_dirty():
+            print('Warning! Current git repo is dirty, this will result in incorrect data_model_files created.')
         for name in names:
             content = repo.git.show(f'{commit}:data_models/{name.asSnake}.py')
             for oldName in names:
-                content.replace(oldName, f'{oldName}{commit[:7].upper()}')
-                content.replace(oldName.asSnake, f'{oldName.asSnake}{commit[:7]}')
+                content = content.replace(oldName.asClass, f'{oldName.asClass}{commit[:7].upper()}')
+                content = content.replace(f'data_models.{oldName.asSnake}', f'data_models.{oldName.asSnake}_{commit[:7]}')
             if self.isDryRun:
                 result.append(content)
             else:
-                with open(Path(self.dataModelsPath, f'{name.asSnake}{commit[:7]}.py', 'wt')) as outFile:
-                    outFile.write(content)
+                print(f'Creating class {name.asClass}{commit[:7].upper()} in {name.asSnake}_{commit[:7]}.py')
+                with open(Path(self.dataModelsPath, f'{name.asSnake}_{commit[:7]}.py'), 'wt') as outFile:
+                    outFile.write(content+'\n')
         self._init_known_class_lists()
         return result
