@@ -1,6 +1,7 @@
 import tensorflow as tf
 from hypergol import BaseBatchProcessor
 from data_models.evaluation_output import EvaluationOutput
+from data_models.model_output import ModelOutput
 
 
 class MyTestModelBatchProcessor(BaseBatchProcessor):
