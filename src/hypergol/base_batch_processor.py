@@ -78,7 +78,7 @@ class BaseBatchProcessor:
         batch: List[BaseData]
             Values to be converted into tensors
         """
-        raise NotImplementedError(f'{self.__class__.__name__} must implement `process_input_batch`')
+        raise NotImplementedError(f'{self.__class__.__name__} must implement `process_output_batch`')
 
     def process_evaluation_batch(self, inputs, targets, outputs):
         """Processing code for saving batches of model inputs + targets + outputs into Hypergol dataset
