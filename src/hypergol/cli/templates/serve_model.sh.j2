@@ -1,0 +1,6 @@
+export PYTHONPATH="${PWD}/..:${PWD}/../..:"
+
+python3 \
+    ./models/serve_{{ snakeName }}.py \
+    --port=8000 \
+    --host="0.0.0.0"

@@ -7,17 +7,17 @@ from models.{{ modelName.asSnake }} import {{ modelName }}
 {%- for name in blockDependencies %}
 from models.{{ name.asSnake }} import {{ name }}
 {%- endfor %}
-from data_models.{{ inputClass.asSnake }} import {{ inputClass }}
-from data_models.{{ outputClass.asSnake }} import {{ outputClass }}
+from data_models.{{ trainingClass.asSnake }} import {{ trainingClass }}
+from data_models.{{ evaluationClass.asSnake }} import {{ evaluationClass }}
 
 
 def train_{{ modelName.asSnake }}(force=False):
     project = HypergolProject(dataDirectory='.', force=force)
 
     batchProcessor = {{ modelName }}BatchProcessor(
-        inputDataset=project.datasetFactory.get(dataType={{ inputClass }}, name='inputs'),
+        inputDataset=project.datasetFactory.get(dataType={{ trainingClass }}, name='inputs'),
         inputBatchSize=16,
-        outputDataset=project.datasetFactory.get(dataType={{ outputClass }}, name='outputs'),
+        outputDataset=project.datasetFactory.get(dataType={{ evaluationClass }}, name='outputs'),
         exampleArgument=''
     )
     {{ modelName.asVariable }} = {{ modelName }}(
