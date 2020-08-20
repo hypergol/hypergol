@@ -6,8 +6,6 @@ import tensorflow as tf
 from pydantic import create_model
 from hypergol.base_data import BaseData
 
-MAX_MEMBER_REPR_LENGTH = 1000
-
 
 def load_model(modelDirectory, threads, useGPU):
     if not useGPU:
@@ -25,9 +23,9 @@ def create_pydantic_type(type_):
             parameterType = parameterData.annotation
             if getattr(parameterType, '_name', None) == 'List':
                 if issubclass(parameterType.__args__[0], BaseData):
-                    parameterType = List[get_pydantic_type(parameterType.__args__[0])]
+                    parameterType = List[create_pydantic_type(parameterType.__args__[0])]
             elif issubclass(parameterType, BaseData):
-                parameterType = get_pydantic_type(parameterType)
+                parameterType = create_pydantic_type(parameterType)
             parameters[parameter] = (parameterType, ...)
     return create_model(type_.__name__, **parameters)
 
@@ -113,17 +111,3 @@ def create_directory(path, mode):
         mode=mode,
         handledFunction=_create_directory
     )
-
-
-class Repr:
-    """Convencience class to automatically add standard ``__repr__()`` and ``__str__()`` functions to class.
-
-    Uses ``__dict__`` property.
-    """
-
-    def __repr__(self):
-        members = ', '.join(f'{k}={str(v)[:MAX_MEMBER_REPR_LENGTH]}' for k, v in self.__dict__.items())
-        return f"{self.__class__.__name__}({members})"
-
-    def __str__(self):
-        return self.__repr__()

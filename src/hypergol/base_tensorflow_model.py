@@ -10,7 +10,7 @@ class BaseTensorflowModel(keras.Model):
 
     It is recommended to avoid overwriting ``keras``'s ``call()`` and ``build()`` functions because of their sideeffects. Model blocks should be initialised at construction and if additional tensors are needed in this model they should be initialised in the ``__init__()`` function as well.
 
-    Inputs for the three (``get_loss()``, ``produce_metrics()`` and ``get_outputs()``) implemented functions must match and match with the return value of the model's batchprocessr's process_input_batch() function. The output of get_outputs()
+    Inputs for the three (``get_loss()``, ``produce_metrics()`` and ``get_outputs()``) implemented functions must match and match with the return value of the model's batchprocessr's process_training_batch() function. The output of get_outputs()
     """
 
     def __init__(self, **kwargs):

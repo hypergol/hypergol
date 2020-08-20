@@ -1,4 +1,4 @@
-from hypergol.utils import Repr
+from hypergol.repr import Repr
 from hypergol.dataset import Dataset
 from hypergol.repo_data import RepoData
 

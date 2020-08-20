@@ -38,13 +38,13 @@ class BaseBatchProcessor:
             for value in self.inputDataset.open('r'):
                 batch.append(value)
                 if len(batch) == self.inputBatchSize:
-                    yield self.process_input_batch(batch=batch)
+                    yield self.process_training_batch(batch=batch)
                     batch = []
 
     def process_input_batch(self, batch):
-        """Additional batch processing code for model-specific uses
+        """Process data model class into input tensors in inference
 
-        Must return (inputs, targets) tuple, where inputs is a dictionary of tensors, where keys matching the last arguments of functions ``get_loss()``, ``produce_metrics()`` and ``get_outputs()`` in the implemented model.
+        Must return a dictionary of tensors, where keys matching the last arguments of functions ``get_loss()``, ``produce_metrics()`` and ``get_outputs()`` in the implemented model.
 
         Parameters
         ----------
@@ -53,12 +53,34 @@ class BaseBatchProcessor:
         """
         raise NotImplementedError(f'{self.__class__.__name__} must implement `process_input_batch`')
 
+    def process_training_batch(self, batch):
+        """Returns Tensorflow compatible training data
+
+        Must return (inputs, targets) tuple, where inputs is a dictionary of tensors, where keys matching the last arguments of functions ``get_loss()``, ``produce_metrics()`` and ``get_outputs()`` in the implemented model.
+
+        Parameters
+        ----------
+        batch: List[BaseData]
+            Values to be converted into tensors
+        """
+        raise NotImplementedError(f'{self.__class__.__name__} must implement `process_training_batch`')
+
     def save_batch(self, inputs, targets, outputs):
         """Saves batch of model inputs + targets + outputs into Hypergol dataset"""
-        for value in self.process_output_batch(inputs=inputs, targets=targets, outputs=outputs):
+        for value in self.process_evaluation_batch(inputs=inputs, targets=targets, outputs=outputs):
             self.datasetWriter.append(value)
 
-    def process_output_batch(self, inputs, targets, outputs):
+    def process_output_batch(self, outputs):
+        """Process the tensorflow model's output into data model classes
+
+        Parameters
+        ----------
+        batch: List[BaseData]
+            Values to be converted into tensors
+        """
+        raise NotImplementedError(f'{self.__class__.__name__} must implement `process_input_batch`')
+
+    def process_evaluation_batch(self, inputs, targets, outputs):
         """Processing code for saving batches of model inputs + targets + outputs into Hypergol dataset
         Must return an instance compatible with ``self.outputDataset``.
 
@@ -71,7 +93,7 @@ class BaseBatchProcessor:
         outputs :
             Model response to `inputs`
         """
-        raise NotImplementedError(f'{self.__class__.__name__} must implement `process_output_batch`')
+        raise NotImplementedError(f'{self.__class__.__name__} must implement `process_evaluation_batch`')
 
     def finish(self):
         """:class:`.TensorflowModelManager` calls this to close the output after writing

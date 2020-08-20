@@ -8,7 +8,7 @@ from hypergol.hypergol_project import HypergolProject
 def create_model(modelName, inputClass, outputClass, *args, projectDirectory='.', dryrun=None, force=None):
     """Generates stubs for the Tensorflow model, data processing class and training script and shell script to run it from command line
 
-    After creation the user must implement the ``process_input_batch()`` and ``process_output_batch()`` member functions that take and ``inputClass`` and output a ``outputClass`` respectively.
+    After creation the user must implement the ``process_training_batch()`` and ``process_evaluation_batch()`` member functions that take and ``inputClass`` and output a ``outputClass`` respectively.
 
     The model must implement the ``get_loss()``, ``produce_metrics()`` and ``get_outputs()`` functions (see documentation of :class:`.BaseTensorflowModel` and the ``Tutorial`` for more detailed instructions)
 

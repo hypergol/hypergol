@@ -4,7 +4,7 @@ import glob
 from pathlib import Path
 
 from hypergol.datachunk import DataChunk
-from hypergol.utils import Repr
+from hypergol.repr import Repr
 from hypergol.utils import get_hash
 from hypergol.repo_data import RepoData
 from hypergol.dataset_chk_file import DataSetChkFile

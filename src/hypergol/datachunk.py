@@ -2,7 +2,7 @@ import gzip
 import json
 import hashlib
 
-from hypergol.utils import Repr
+from hypergol.repr import Repr
 
 
 class DatasetTypeDoesNotMatchDataTypeException(Exception):

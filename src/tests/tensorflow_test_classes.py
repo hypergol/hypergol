@@ -25,7 +25,7 @@ class ExampleBatchProcessor(BaseBatchProcessor):
     def __init__(self, inputDataset, inputBatchSize, outputDataset):
         super(ExampleBatchProcessor, self).__init__(inputDataset=inputDataset, inputBatchSize=inputBatchSize, outputDataset=outputDataset)
 
-    def process_input_batch(self, batch):
+    def process_training_batch(self, batch):
         # sorting needs to happen for testing, because impossible to know ordering of items that come out of dataset
         inputs = {
             'ids': sorted([v.id_ for v in batch]),
@@ -35,7 +35,7 @@ class ExampleBatchProcessor(BaseBatchProcessor):
         targets = sorted([v.value1 for v in batch])
         return inputs, targets
 
-    def process_output_batch(self, inputs, targets, outputs):
+    def process_evaluation_batch(self, inputs, targets, outputs):
         outputData = []
         for k, batchId in enumerate(inputs['ids']):
             outputData.append(ExampleOutputDataClass(
@@ -52,7 +52,7 @@ class ExampleTensorflowBatchProcessor(BaseBatchProcessor):
     def __init__(self, inputDataset, inputBatchSize, outputDataset):
         super(ExampleTensorflowBatchProcessor, self).__init__(inputDataset=inputDataset, inputBatchSize=inputBatchSize, outputDataset=outputDataset)
 
-    def process_input_batch(self, batch):
+    def process_training_batch(self, batch):
         inputs = {
             'ids': [v.id_ for v in batch],
             'input1': tf.constant([[v.value1, v.value1 + 1, v.value1 + 2] for v in batch], dtype=tf.float32)
@@ -60,7 +60,7 @@ class ExampleTensorflowBatchProcessor(BaseBatchProcessor):
         targets = tf.constant([v.value1 for v in batch], dtype=tf.float32)
         return inputs, targets
 
-    def process_output_batch(self, inputs, targets, outputs):
+    def process_evaluation_batch(self, inputs, targets, outputs):
         outputData = []
         for k, batchId in enumerate(inputs['ids']):
             outputData.append(ExampleOutputDataClass(

@@ -13,7 +13,7 @@ class MyTestModel(BaseTensorflowModel):
         raise NotImplementedError('BaseTensorflowModel must implement get_loss()')
         # calculate loss here and return it
         # input arguments must be the same in all three functions
-        # and match with the keys of the return value of BatchProcessor.process_input_batch()
+        # and match with the keys of the return value of BatchProcessor.process_training_batch()
 
     @tf.function(input_signature=[
         tf.TensorSpec(shape=[None, None], dtype=tf.int32, name='exampleInput1'),

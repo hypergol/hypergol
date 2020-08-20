@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 
-from hypergol.utils import Repr
+from hypergol.repr import Repr
 from hypergol.logger import Logger
 
 class SourceIteratorNotIterableException(Exception):
