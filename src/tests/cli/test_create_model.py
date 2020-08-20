@@ -44,6 +44,7 @@ TEST_BATCH_PROCESSOR = """
 import tensorflow as tf
 from hypergol import BaseBatchProcessor
 from data_models.test_evaluation_class import TestEvaluationClass
+from data_models.test_output import TestOutput
 
 
 class TestModelBatchProcessor(BaseBatchProcessor):
@@ -59,8 +60,8 @@ class TestModelBatchProcessor(BaseBatchProcessor):
         # exampleInput1 = []
         # exampleInput2 = []
         # for exampleValue in batch:
-        #      exampleInput1.append(exampleValue.exampleList)
-        #      exampleInput2.append(len(exampleValue.exampleList))
+        #     exampleInput1.append(exampleValue.exampleList)
+        #     exampleInput2.append(len(exampleValue.exampleList))
         # inputs = {
         #     'exampleInput1': tf.ragged.constant(lemmas, dtype=tf.string).to_tensor()[:, 10]
         #     'exampleInput2': tf.constant(sentenceLengths, dtype=tf.int32)
@@ -165,6 +166,7 @@ python3 \\
 
 TEST_SERVE = """
 import json
+from typing import List
 import fire
 import uvicorn
 import tensorflow as tf
@@ -218,13 +220,13 @@ def test_main():
     }
 
 
-@app.post("/output", response_model=pyDanticTestOutput)
-def get_outputs(testInput: pyDanticTestInput):
-    testInput = TestInput.from_data(json.loads(testInput.json()))
-    tensorInput = batchProcessor.process_input_batch(testInput)
-    tensorOutput = model.get_outputs(**tensorInput)
-    testOutput = batchProcessor.process_output_batch(tensorOutput)
-    return pyDanticTestOutput.parse_raw(json.dumps(testOutput.to_data()))
+@app.post("/output", response_model=List[pyDanticTestOutput])
+def get_outputs(testInputs: List[pyDanticTestInput]):
+    testInputs = [TestInput.from_data(json.loads(testInput.json())) for testInput in testInputs]
+    tensorInputs = batchProcessor.process_input_batch(testInputs)
+    tensorOutputs = model.get_outputs(**tensorInputs)
+    testOutputs = batchProcessor.process_output_batch(tensorOutputs)
+    return [pyDanticTestOutput.parse_raw(json.dumps(testOutput.to_data())) for testOutput in testOutputs]
 
 
 def uvicorn_serve_test_model_run(port=8000, host='0.0.0.0'):

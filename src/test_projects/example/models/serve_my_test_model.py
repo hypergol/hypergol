@@ -1,4 +1,5 @@
 import json
+from typing import List
 import fire
 import uvicorn
 import tensorflow as tf
@@ -52,13 +53,13 @@ def test_main():
     }
 
 
-@app.post("/output", response_model=pyDanticModelOutput)
-def get_outputs(sentence: pyDanticSentence):
-    sentence = Sentence.from_data(json.loads(sentence.json()))
-    tensorInput = batchProcessor.process_input_batch(sentence)
-    tensorOutput = model.get_outputs(**tensorInput)
-    modelOutput = batchProcessor.process_output_batch(tensorOutput)
-    return pyDanticModelOutput.parse_raw(json.dumps(modelOutput.to_data()))
+@app.post("/output", response_model=List[pyDanticModelOutput])
+def get_outputs(sentences: List[pyDanticSentence]):
+    sentences = [Sentence.from_data(json.loads(sentence.json())) for sentence in sentences]
+    tensorInputs = batchProcessor.process_input_batch(sentences)
+    tensorOutputs = model.get_outputs(**tensorInputs)
+    modelOutputs = batchProcessor.process_output_batch(tensorOutputs)
+    return [pyDanticModelOutput.parse_raw(json.dumps(modelOutput.to_data())) for modelOutput in modelOutputs]
 
 
 def uvicorn_serve_my_test_model_run(port=8000, host='0.0.0.0'):

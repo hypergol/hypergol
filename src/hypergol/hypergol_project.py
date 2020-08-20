@@ -135,6 +135,7 @@ class HypergolProject:
             self.datasetFactory = None
             self.tensorboardPath = None
             self.modelDataPath = None
+            print('Repo does not exist, data related functionality disabled')
             return
 
         self.datasetFactory = DatasetFactory(

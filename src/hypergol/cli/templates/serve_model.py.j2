@@ -1,4 +1,5 @@
 import json
+from typing import List
 import fire
 import uvicorn
 import tensorflow as tf
@@ -52,13 +53,13 @@ def test_main():
     }
 
 
-@app.post("/output", response_model=pyDantic{{ outputClass }})
-def get_outputs({{ inputClass.asVariable }}: pyDantic{{ inputClass }}):
-    {{ inputClass.asVariable }} = {{ inputClass }}.from_data(json.loads({{ inputClass.asVariable }}.json()))
-    tensorInput = batchProcessor.process_input_batch({{ inputClass.asVariable }})
-    tensorOutput = model.get_outputs(**tensorInput)
-    {{ outputClass.asVariable }} = batchProcessor.process_output_batch(tensorOutput)
-    return pyDantic{{ outputClass }}.parse_raw(json.dumps({{ outputClass.asVariable }}.to_data()))
+@app.post("/output", response_model=List[pyDantic{{ outputClass }}])
+def get_outputs({{ inputClass.asPluralVariable }}: List[pyDantic{{ inputClass }}]):
+    {{ inputClass.asPluralVariable }} = [{{ inputClass }}.from_data(json.loads({{ inputClass.asVariable }}.json())) for {{ inputClass.asVariable }} in {{ inputClass.asPluralVariable }}]
+    tensorInputs = batchProcessor.process_input_batch({{ inputClass.asPluralVariable }})
+    tensorOutputs = model.get_outputs(**tensorInputs)
+    {{ outputClass.asPluralVariable }} = batchProcessor.process_output_batch(tensorOutputs)
+    return [pyDantic{{ outputClass }}.parse_raw(json.dumps({{ outputClass.asVariable }}.to_data())) for {{ outputClass.asVariable }} in {{ outputClass.asPluralVariable }}]
 
 
 def uvicorn_serve_{{ modelName.asSnake }}_run(port=8000, host='0.0.0.0'):
