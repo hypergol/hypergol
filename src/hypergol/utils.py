@@ -1,7 +1,35 @@
 import os
 import hashlib
+import inspect
+from typing import List
+import tensorflow as tf
+from pydantic import create_model
+from hypergol.base_data import BaseData
 
 MAX_MEMBER_REPR_LENGTH = 1000
+
+
+def load_model(modelDirectory, threads, useGPU):
+    if not useGPU:
+        tf.config.experimental.set_visible_devices([], 'GPU')
+    if threads is not None:
+        tf.config.threading.set_inter_op_parallelism_threads(threads)
+        tf.config.threading.set_intra_op_parallelism_threads(threads)
+    return tf.saved_model.load(export_dir=modelDirectory)
+
+
+def create_pydantic_type(type_):
+    parameters = {}
+    for parameter, parameterData in inspect.signature(type_.__init__).parameters.items():
+        if parameter != 'self':
+            parameterType = parameterData.annotation
+            if getattr(parameterType, '_name', None) == 'List':
+                if issubclass(parameterType.__args__[0], BaseData):
+                    parameterType = List[get_pydantic_type(parameterType.__args__[0])]
+            elif issubclass(parameterType, BaseData):
+                parameterType = get_pydantic_type(parameterType)
+            parameters[parameter] = (parameterType, ...)
+    return create_model(type_.__name__, **parameters)
 
 
 def get_hash(data):
