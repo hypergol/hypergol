@@ -5,3 +5,4 @@ hypergol
 tensorflow==2.2.0
 pydantic
 fastapi
+uvicorn

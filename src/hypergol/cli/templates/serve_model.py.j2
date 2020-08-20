@@ -4,7 +4,7 @@ import uvicorn
 import tensorflow as tf
 from fastapi import FastAPI
 from hypergol.utils import create_pydantic_type
-from models.{{ modelName.asSnake }} import {{ modelName }}BatchProcessor
+from models.{{ modelName.asSnake }}_batch_processor import {{ modelName }}BatchProcessor
 from data_models.{{ inputClass.asSnake }} import {{ inputClass }}
 from data_models.{{ outputClass.asSnake }} import {{ outputClass }}
 
@@ -33,8 +33,8 @@ batchProcessor = {{ modelName }}BatchProcessor(
     outputDataset=None
 )
 
-pyDantic{{ inputClass }}= create_pydantic_type({{ inputClass }})
-pyDantic{{ outputClass }}= create_pydantic_type({{ outputClass }})
+pyDantic{{ inputClass }} = create_pydantic_type({{ inputClass }})
+pyDantic{{ outputClass }} = create_pydantic_type({{ outputClass }})
 
 app = FastAPI(
     title=TITLE,
@@ -66,4 +66,5 @@ def uvicorn_serve_{{ modelName.asSnake }}_run(port=8000, host='0.0.0.0'):
 
 
 if __name__ == "__main__":
+    tf.get_logger().setLevel('ERROR')
     fire.Fire(uvicorn_serve_{{ modelName.asSnake }}_run)

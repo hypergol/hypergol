@@ -4,7 +4,7 @@ import uvicorn
 import tensorflow as tf
 from fastapi import FastAPI
 from hypergol.utils import create_pydantic_type
-from models.my_test_model import MyTestModelBatchProcessor
+from models.my_test_model_batch_processor import MyTestModelBatchProcessor
 from data_models.sentence import Sentence
 from data_models.model_output import ModelOutput
 
@@ -33,8 +33,8 @@ batchProcessor = MyTestModelBatchProcessor(
     outputDataset=None
 )
 
-pyDanticSentence= create_pydantic_type(Sentence)
-pyDanticModelOutput= create_pydantic_type(ModelOutput)
+pyDanticSentence = create_pydantic_type(Sentence)
+pyDanticModelOutput = create_pydantic_type(ModelOutput)
 
 app = FastAPI(
     title=TITLE,
@@ -66,4 +66,5 @@ def uvicorn_serve_my_test_model_run(port=8000, host='0.0.0.0'):
 
 
 if __name__ == "__main__":
+    tf.get_logger().setLevel('ERROR')
     fire.Fire(uvicorn_serve_my_test_model_run)

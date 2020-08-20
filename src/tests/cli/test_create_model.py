@@ -146,7 +146,7 @@ import uvicorn
 import tensorflow as tf
 from fastapi import FastAPI
 from hypergol.utils import create_pydantic_type
-from models.test_model import TestModelBatchProcessor
+from models.test_model_batch_processor import TestModelBatchProcessor
 from data_models.test_input import TestInput
 from data_models.test_output import TestOutput
 
@@ -208,6 +208,7 @@ def uvicorn_serve_test_model_run(port=8000, host='0.0.0.0'):
 
 
 if __name__ == "__main__":
+    tf.get_logger().setLevel('ERROR')
     fire.Fire(uvicorn_serve_test_model_run)
 """.lstrip()
 
