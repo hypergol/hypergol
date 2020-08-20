@@ -19,9 +19,10 @@ python -m hypergol.cli.create_task --projectDirectory=example CreateArticleTexts
 python -m hypergol.cli.create_task --projectDirectory=example CreateArticlesTask Article Sentence Token --simple && \
 python -m hypergol.cli.create_task --projectDirectory=example CreateSentencesTask Article Sentence && \
 python -m hypergol.cli.create_pipeline --projectDirectory=example ProcessBlogposts LoadHtmlPagesTask CreateArticleTextsTask CreateArticlesTask CreateSentencesTask Article ArticleText ArticlePage Sentence && \
-python -m hypergol.cli.create_data_model --projectDirectory=example ModelOutput articleId:int:id sentenceId:int:id inputs:object outputs:object targets:object && \
+python -m hypergol.cli.create_data_model --projectDirectory=example EvaluationOutput articleId:int:id sentenceId:int:id inputs:object outputs:object targets:object && \
 python -m hypergol.cli.create_model_block --projectDirectory=example EmbeddingBlock && \
 python -m hypergol.cli.create_model_block --projectDirectory=example LstmBlock && \
 python -m hypergol.cli.create_model_block --projectDirectory=example OutputBlock && \
-python -m hypergol.cli.create_model --projectDirectory=example MyTestModel Sentence ModelOutput EmbeddingBlock LstmBlock OutputBlock && \
+python -m hypergol.cli.create_data_model --projectDirectory=example ModelOutput articleId:int:id sentenceId:int:id "posTags:List[str]" && \
+python -m hypergol.cli.create_model --projectDirectory=example MyTestModel Sentence EvaluationOutput Sentence ModelOutput EmbeddingBlock LstmBlock OutputBlock && \
 diff --suppress-common-lines --no-ignore-file-name-case --recursive example/ src/test_projects/example/

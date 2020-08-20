@@ -2,7 +2,7 @@ import os
 import hashlib
 import inspect
 from typing import List
-from pydantic import create_model
+from pydantic import create_model           # pylint: disable=no-name-in-module
 from hypergol.base_data import BaseData
 
 

@@ -50,7 +50,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
         templateName='batch_processor.py.j2',
         templateData={
             'name': modelName,
-            'trainingClass': trainingClass
+            'evaluationClass': evaluationClass
         },
         filePath=Path(projectDirectory, 'models', f'{modelName.asSnake}_batch_processor.py')
     )

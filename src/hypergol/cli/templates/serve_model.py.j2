@@ -5,7 +5,7 @@ import tensorflow as tf
 from fastapi import FastAPI
 from hypergol.utils import create_pydantic_type
 from models.{{ modelName.asSnake }} import {{ modelName }}BatchProcessor
-from data_models.{{ inputclass.asSnake }} import {{ inputclass }}
+from data_models.{{ inputClass.asSnake }} import {{ inputClass }}
 from data_models.{{ outputClass.asSnake }} import {{ outputClass }}
 
 TITLE = 'Serve {{ modelName }}'
@@ -33,7 +33,7 @@ batchProcessor = {{ modelName }}BatchProcessor(
     outputDataset=None
 )
 
-pyDantic{{ inputclass }}= create_pydantic_type({{ inputclass }})
+pyDantic{{ inputClass }}= create_pydantic_type({{ inputClass }})
 pyDantic{{ outputClass }}= create_pydantic_type({{ outputClass }})
 
 app = FastAPI(
@@ -53,9 +53,9 @@ def test_main():
 
 
 @app.post("/output", response_model=pyDantic{{ outputClass }})
-def get_outputs({{ inputclass.asVariable }}: pyDantic{{ inputclass }}):
-    {{ inputclass.asVariable }} = {{ inputclass }}.from_data(json.loads({{ inputclass.asVariable }}.json()))
-    tensorInput = batchProcessor.process_input_batch({{ inputclass.asVariable }})
+def get_outputs({{ inputClass.asVariable }}: pyDantic{{ inputClass }}):
+    {{ inputClass.asVariable }} = {{ inputClass }}.from_data(json.loads({{ inputClass.asVariable }}.json()))
+    tensorInput = batchProcessor.process_input_batch({{ inputClass.asVariable }})
     tensorOutput = model.get_outputs(**tensorInput)
     {{ outputClass.asVariable }} = batchProcessor.process_output_batch(tensorOutput)
     return pyDantic{{ outputClass }}.parse_raw(json.dumps({{ outputClass.asVariable }}.to_data()))
