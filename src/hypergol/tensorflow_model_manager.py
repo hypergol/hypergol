@@ -10,7 +10,7 @@ class TensorflowModelManager:
     Class for managing tensorflow model training.
     """
 
-    def __init__(self, model, optimizer, batchProcessor, project, modelName, restoreWeightsPath=None):
+    def __init__(self, model, optimizer, batchProcessor, project, restoreWeightsPath=None):
         """
         Parameters
         ----------
@@ -22,8 +22,6 @@ class TensorflowModelManager:
             Hypergol dataset to use for training
         project: HypergolProject
             Hypergol project to handle directories
-        modelName: string
-            Name of the model
         restoreWeightsPath: path
             path to restore variables from previously trained model
         """
@@ -131,10 +129,10 @@ class TensorflowModelManager:
         self.start()
         try:
             for step in tqdm(range(stepCount)):
-                self.train(withTracing=step in tracingSteps)
                 if step in evaluationSteps:
                     self.save_model()
                     self.evaluate(withTracing=step in tracingSteps)
+                self.train(withTracing=step in tracingSteps)
             self.save_model()
         finally:
             self.finish()

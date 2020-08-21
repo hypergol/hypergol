@@ -1,3 +1,5 @@
+from datetime import date
+
 import fire
 import tensorflow as tf
 from hypergol import HypergolProject
@@ -22,6 +24,8 @@ def train_{{ modelName.asSnake }}(force=False):
         exampleArgument=''
     )
     {{ modelName.asVariable }} = {{ modelName }}(
+        modelName={{ modelName }}.__name__,
+        longName=f'{{ '{' }}{{ modelName }}.__name__{{ '}' }}_{date.today().strftime("%Y%m%d")}_{project.repoManager.commitHash}',
         {%- for name in blockDependencies %}
         {{ name.asVariable }}={{ name }}(
             blockArgument1='',
@@ -34,7 +38,6 @@ def train_{{ modelName.asSnake }}(force=False):
         optimizer=tf.keras.optimizers.Adam(lr=1),
         batchProcessor=batchProcessor,
         project=project,
-        modelName='{{ modelName }}',
         restoreWeightsPath=None
     )
     modelManager.run(

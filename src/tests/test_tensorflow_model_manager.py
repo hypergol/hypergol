@@ -56,7 +56,6 @@ class TestTensorflowModelManager(HypergolTestCase):
             optimizer=tf.keras.optimizers.Adam(lr=1),
             batchProcessor=self.batchProcessor,
             project=self.project,
-            modelName='testTfModel',
             restoreWeightsPath=None
         )
 
@@ -126,7 +125,6 @@ class TestTensorflowModelManager(HypergolTestCase):
             optimizer=tf.keras.optimizers.Adam(lr=1),
             batchProcessor=newBatchProcessor,
             project=self.project,
-            modelName='newTestTfModel',
             restoreWeightsPath=modelDirectory
         )
         newModelManager.start()

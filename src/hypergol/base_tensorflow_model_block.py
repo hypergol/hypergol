@@ -13,7 +13,7 @@ class BaseTensorflowModelBlock(layers.Layer):
         There is no delayed initialisation in Hypergol models.
     """
 
-    def __init__(self, blockName=None, *args, **kwargs):
+    def __init__(self, *args, blockName=None, **kwargs):
         """If further keras layers are required, they should be created here"""
         super(BaseTensorflowModelBlock, self).__init__(*args, **kwargs)
         self.blockName = blockName or self.__class__.__name__

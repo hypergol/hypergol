@@ -46,7 +46,7 @@ def test_main():
         'title': TITLE,
         'version': VERSION,
         'description': DESCRIPTION,
-        'model': model.get_long_name()
+        'model': model.get_long_name().numpy().decode('utf-8')
     }
 
 

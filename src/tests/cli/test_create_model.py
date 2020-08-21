@@ -107,6 +107,8 @@ class TestModelBatchProcessor(BaseBatchProcessor):
 """.lstrip()
 
 TEST_TRAIN_MODEL = """
+from datetime import date
+
 import fire
 import tensorflow as tf
 from hypergol import HypergolProject
@@ -130,6 +132,8 @@ def train_test_model(force=False):
         exampleArgument=''
     )
     testModel = TestModel(
+        modelName=TestModel.__name__,
+        longName=f'{TestModel.__name__}_{date.today().strftime("%Y%m%d")}_{project.repoManager.commitHash}',
         testBlock1=TestBlock1(
             blockArgument1='',
             blockArgument2='',
@@ -144,7 +148,6 @@ def train_test_model(force=False):
         optimizer=tf.keras.optimizers.Adam(lr=1),
         batchProcessor=batchProcessor,
         project=project,
-        modelName='TestModel',
         restoreWeightsPath=None
     )
     modelManager.run(
@@ -216,7 +219,7 @@ def test_main():
         'title': TITLE,
         'version': VERSION,
         'description': DESCRIPTION,
-        'model': model.get_long_name()
+        'model': model.get_long_name().numpy().decode('utf-8')
     }
 
 

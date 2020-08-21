@@ -30,7 +30,7 @@ class BaseTensorflowModel(keras.Model):
         self.longName = longName or self.modelName
 
     @tf.function(input_signature=[])
-    def get_model_long_name(self):
+    def get_long_name(self):
         return self.longName
 
     def get_model_blocks(self):
