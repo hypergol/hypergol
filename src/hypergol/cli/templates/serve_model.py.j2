@@ -26,6 +26,7 @@ def load_model(modelDirectory, threads, useGPU):
     return tf.saved_model.load(export_dir=modelDirectory)
 
 
+app = FastAPI(title=TITLE, version=VERSION, description=DESCRIPTION)
 model = load_model(modelDirectory=MODEL_DIRECTORY, threads=THREADS, useGPU=USE_GPU)
 batchProcessor = {{ modelName }}BatchProcessor(
     inputDataset=None,
@@ -33,15 +34,8 @@ batchProcessor = {{ modelName }}BatchProcessor(
     maxTokenCount=100,
     outputDataset=None
 )
-
 pyDantic{{ inputClass }} = create_pydantic_type({{ inputClass }})
 pyDantic{{ outputClass }} = create_pydantic_type({{ outputClass }})
-
-app = FastAPI(
-    title=TITLE,
-    version=VERSION,
-    description=DESCRIPTION
-)
 
 
 @app.get("/")

@@ -201,8 +201,10 @@ batchProcessor = TestModelBatchProcessor(
     outputDataset=None
 )
 
+
 pyDanticTestInput = create_pydantic_type(TestInput)
 pyDanticTestOutput = create_pydantic_type(TestOutput)
+
 
 app = FastAPI(
     title=TITLE,
