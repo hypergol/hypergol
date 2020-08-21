@@ -25,7 +25,7 @@ class TestBaseTensorflowModelBlock(TestCase):
         Path(self.location).mkdir(parents=True, exist_ok=True)
         self.blockWithConstructionParam = ExampleTrainableBlock(requiredOutputSize=self.exampleEmbeddingSize)
         self.nonTrainableBlock = ExampleNonTrainableBlock()
-        self.blockSaveFile = f'{self.location}/{self.blockWithConstructionParam.get_name()}.json'
+        self.blockSaveFile = f'{self.location}/{self.blockWithConstructionParam.blockName}.json'
 
     def tearDown(self):
         super().tearDown()

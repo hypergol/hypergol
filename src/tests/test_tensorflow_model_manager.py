@@ -99,19 +99,19 @@ class TestTensorflowModelManager(HypergolTestCase):
 
     def test_save_model(self):
         self.modelManager.train(withTracing=True)
-        modelDirectory = Path(self.modelManager.project.modelDataPath, self.modelManager.modelName, str(self.modelManager.globalStep))
+        modelDirectory = Path(self.modelManager.project.modelDataPath, self.modelManager.model.modelName, str(self.modelManager.globalStep))
         self.modelManager.save_model()
         self.assertTrue(os.path.exists(modelDirectory))
         self.assertTrue(os.path.exists(f'{modelDirectory}/assets'))
         self.assertTrue(os.path.exists(f'{modelDirectory}/variables'))
-        self.assertTrue(os.path.exists(f'{modelDirectory}/{self.modelBlock.get_name()}.json'))
+        self.assertTrue(os.path.exists(f'{modelDirectory}/{self.modelBlock.blockName}.json'))
         self.assertTrue(os.path.exists(f'{modelDirectory}/saved_model.pb'))
-        self.assertTrue(os.path.exists(f'{modelDirectory}/{self.model.get_name()}.h5'))
+        self.assertTrue(os.path.exists(f'{modelDirectory}/{self.model.modelName}.h5'))
 
     def test_restore_model(self):
         self.modelManager.train(withTracing=True)
         originalBlockWeights = self.modelManager.model.exampleBlock.weights[0].numpy()
-        modelDirectory = Path(self.modelManager.project.modelDataPath, self.modelManager.modelName, str(self.modelManager.globalStep))
+        modelDirectory = Path(self.modelManager.project.modelDataPath, self.modelManager.model.modelName, str(self.modelManager.globalStep))
         self.modelManager.save_model()
         newModel = TensorflowModelExample(exampleBlock=ExampleTrainableBlock(requiredOutputSize=1))
         # new batch processor needed to avoid DataSet collision with previous processor

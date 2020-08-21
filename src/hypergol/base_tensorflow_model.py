@@ -2,6 +2,7 @@
 
 import inspect
 
+import tensorflow as tf
 from tensorflow.python import keras
 
 from hypergol.base_tensorflow_model_block import BaseTensorflowModelBlock
@@ -15,7 +16,7 @@ class BaseTensorflowModel(keras.Model):
     Inputs for the three (``get_loss()``, ``produce_metrics()`` and ``get_outputs()``) implemented functions must match and match with the return value of the model's batchprocessor's process_training_batch() function. The output of get_outputs()
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, modelName=None, longName=None, **kwargs):
         """
         Parameters
         ----------
@@ -25,14 +26,17 @@ class BaseTensorflowModel(keras.Model):
 
         """
         super(BaseTensorflowModel, self).__init__(**kwargs)
+        self.modelName = modelName or self.__class__.__name__
+        self.longName = longName or self.modelName
+
+    @tf.function(input_signature=[])
+    def get_model_long_name(self):
+        return self.longName
 
     def get_model_blocks(self):
         """Returns blocks that are both member variables and arguments of the constructor for serialisation"""
         constructorParameters = inspect.signature(self.__class__.__init__).parameters.keys()
         return [v for k, v in self.__dict__.items() if k in constructorParameters and isinstance(v, BaseTensorflowModelBlock)]
-
-    def get_name(self):
-        return self.__class__.__name__
 
     def call(self, inputs, training=None, mask=None):
         """This function is obsolete"""
