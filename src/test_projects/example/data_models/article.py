@@ -1,6 +1,8 @@
 from typing import List
 from datetime import datetime
+
 from hypergol import BaseData
+
 from data_models.sentence import Sentence
 
 

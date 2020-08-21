@@ -2,6 +2,7 @@ import fire
 import tensorflow as tf
 from hypergol import HypergolProject
 from hypergol import TensorflowModelManager
+
 from models.my_test_model_batch_processor import MyTestModelBatchProcessor
 from models.my_test_model import MyTestModel
 from models.embedding_block import EmbeddingBlock

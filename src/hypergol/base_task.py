@@ -1,4 +1,5 @@
 from typing import List
+
 from hypergol.delayed import Delayed
 from hypergol.dataset import Dataset
 from hypergol.repr import Repr

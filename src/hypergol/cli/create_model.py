@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import fire
 
 from hypergol.name_string import NameString

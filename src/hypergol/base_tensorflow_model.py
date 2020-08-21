@@ -1,7 +1,9 @@
 # pylint: disable=E0611, W0235
 
 import inspect
+
 from tensorflow.python import keras
+
 from hypergol.base_tensorflow_model_block import BaseTensorflowModelBlock
 
 

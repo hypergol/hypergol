@@ -4,6 +4,7 @@ import mock
 
 from hypergol.cli.create_pipeline import create_pipeline
 from hypergol.hypergol_project import HypergolProject
+
 from tests.hypergol_test_case import TestRepoManager
 from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 

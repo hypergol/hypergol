@@ -1,6 +1,8 @@
+from unittest import TestCase
+
 import numpy as np
 import tensorflow as tf
-from unittest import TestCase
+
 from tests.tensorflow_test_classes import ExampleNonTrainableBlock
 from tests.tensorflow_test_classes import ExampleTrainableBlock
 from tests.tensorflow_test_classes import TensorflowModelExample

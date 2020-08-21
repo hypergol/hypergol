@@ -1,5 +1,6 @@
 from unittest import TestCase
 import mock
+
 from hypergol.cli.create_data_model import create_data_model
 
 
@@ -29,6 +30,7 @@ class Test(BaseData):
 
 TEST_CLASS_WITH_CONVERTER = """
 from datetime import datetime
+
 from hypergol import BaseData
 
 
@@ -51,6 +53,7 @@ class Test(BaseData):
 
 TEST_CLASS_WITH_LIST = """
 from typing import List
+
 from hypergol import BaseData
 
 
@@ -63,7 +66,9 @@ class Test(BaseData):
 
 TEST_CLASS_WITH_DATA_MODEL_DEPENDENCY = """
 from typing import List
+
 from hypergol import BaseData
+
 from data_models.other_test import OtherTest
 
 
