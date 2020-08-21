@@ -193,6 +193,7 @@ def load_model(modelDirectory, threads, useGPU):
     return tf.saved_model.load(export_dir=modelDirectory)
 
 
+app = FastAPI(title=TITLE, version=VERSION, description=DESCRIPTION)
 model = load_model(modelDirectory=MODEL_DIRECTORY, threads=THREADS, useGPU=USE_GPU)
 batchProcessor = TestModelBatchProcessor(
     inputDataset=None,
@@ -200,17 +201,8 @@ batchProcessor = TestModelBatchProcessor(
     maxTokenCount=100,
     outputDataset=None
 )
-
-
 pyDanticTestInput = create_pydantic_type(TestInput)
 pyDanticTestOutput = create_pydantic_type(TestOutput)
-
-
-app = FastAPI(
-    title=TITLE,
-    version=VERSION,
-    description=DESCRIPTION
-)
 
 
 @app.get("/")
