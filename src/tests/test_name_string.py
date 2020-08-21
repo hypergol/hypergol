@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from hypergol.name_string import NameString
 
 

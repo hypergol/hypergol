@@ -1,8 +1,10 @@
 import os
 import pickle
+
 from hypergol.task import Task
 from hypergol.base_data import BaseData
 from hypergol.dataset import Dataset
+
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import HypergolTestCase
 

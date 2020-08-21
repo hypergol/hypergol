@@ -2,6 +2,7 @@ import fire
 import tensorflow as tf
 from hypergol import HypergolProject
 from hypergol import TensorflowModelManager
+
 from models.{{ modelName.asSnake }}_batch_processor import {{ modelName }}BatchProcessor
 from models.{{ modelName.asSnake }} import {{ modelName }}
 {%- for name in blockDependencies %}

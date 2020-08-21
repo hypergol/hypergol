@@ -1,4 +1,5 @@
 from hypergol import SimpleTask
+
 {%- for name in dependencies %}
 from data_models.{{ name.asSnake }} import {{ name }}
 {%- endfor %}

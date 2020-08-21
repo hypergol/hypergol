@@ -1,12 +1,13 @@
 import os
 import pickle
 
+from hypergol.base_data import BaseData
+from hypergol.simple_task import SimpleTask
+
 from tests.hypergol_test_case import HypergolTestCase
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import DataClass2
 from tests.hypergol_test_case import DataClass3
-from hypergol.base_data import BaseData
-from hypergol.simple_task import SimpleTask
 
 
 class OutputDataClass(BaseData):

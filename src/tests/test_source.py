@@ -1,10 +1,11 @@
 import os
 
-from tests.hypergol_test_case import HypergolTestCase
-from tests.hypergol_test_case import DataClass1
 from hypergol.base_data import BaseData
 from hypergol.source import Source
 from hypergol.source import SourceIteratorNotIterableException
+
+from tests.hypergol_test_case import HypergolTestCase
+from tests.hypergol_test_case import DataClass1
 
 
 class SourceExample(Source):

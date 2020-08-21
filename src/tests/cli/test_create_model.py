@@ -4,6 +4,7 @@ import mock
 
 from hypergol.cli.create_model import create_model
 from hypergol.hypergol_project import HypergolProject
+
 from tests.hypergol_test_case import TestRepoManager
 from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 
@@ -43,6 +44,7 @@ class TestModel(BaseTensorflowModel):
 TEST_BATCH_PROCESSOR = """
 import tensorflow as tf
 from hypergol import BaseBatchProcessor
+
 from data_models.test_evaluation_class import TestEvaluationClass
 from data_models.test_output import TestOutput
 
@@ -109,6 +111,7 @@ import fire
 import tensorflow as tf
 from hypergol import HypergolProject
 from hypergol import TensorflowModelManager
+
 from models.test_model_batch_processor import TestModelBatchProcessor
 from models.test_model import TestModel
 from models.test_block1 import TestBlock1
@@ -167,11 +170,13 @@ python3 \\
 TEST_SERVE = """
 import json
 from typing import List
+
 import fire
 import uvicorn
 import tensorflow as tf
 from fastapi import FastAPI
 from hypergol.utils import create_pydantic_type
+
 from models.test_model_batch_processor import TestModelBatchProcessor
 from data_models.test_input import TestInput
 from data_models.test_output import TestOutput

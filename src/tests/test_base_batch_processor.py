@@ -1,4 +1,5 @@
 import shutil
+
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import HypergolTestCase
 from tests.tensorflow_test_classes import ExampleBatchProcessor

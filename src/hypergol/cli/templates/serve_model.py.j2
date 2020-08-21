@@ -1,10 +1,12 @@
 import json
 from typing import List
+
 import fire
 import uvicorn
 import tensorflow as tf
 from fastapi import FastAPI
 from hypergol.utils import create_pydantic_type
+
 from models.{{ modelName.asSnake }}_batch_processor import {{ modelName }}BatchProcessor
 from data_models.{{ inputClass.asSnake }} import {{ inputClass }}
 from data_models.{{ outputClass.asSnake }} import {{ outputClass }}

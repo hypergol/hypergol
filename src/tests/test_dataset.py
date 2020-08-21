@@ -1,15 +1,16 @@
 import os
 from pathlib import PosixPath
 
-from tests.hypergol_test_case import HypergolTestCase
-from tests.hypergol_test_case import DataClass1
-from tests.hypergol_test_case import DataClass2
 from hypergol.dataset import DatasetWriter
 from hypergol.dataset import DatasetReader
 from hypergol.dataset import DatasetDoesNotExistException
 from hypergol.dataset import DatasetAlreadyExistsException
 from hypergol.dataset_def_file import DatasetDefFileDoesNotMatchException
 from hypergol.datachunk import DatasetTypeDoesNotMatchDataTypeException
+
+from tests.hypergol_test_case import HypergolTestCase
+from tests.hypergol_test_case import DataClass1
+from tests.hypergol_test_case import DataClass2
 
 
 class TestDataset(HypergolTestCase):

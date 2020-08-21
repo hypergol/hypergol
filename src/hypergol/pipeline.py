@@ -1,4 +1,5 @@
 from multiprocessing import Pool
+
 from hypergol.source import Source
 from hypergol.simple_task import SimpleTask
 from hypergol.task import Task

@@ -1,5 +1,7 @@
 from typing import List
+
 from hypergol import BaseData
+
 from data_models.token import Token
 
 

@@ -3,6 +3,7 @@ import glob
 import gzip
 from pathlib import Path
 from multiprocessing import Pool
+
 from hypergol.base_task import BaseTask
 from hypergol.base_task import Job
 from hypergol.base_task import JobReport

@@ -2,6 +2,7 @@ from datetime import time
 from datetime import date
 from datetime import datetime
 from unittest import TestCase
+
 from data_models.labelled_article import LabelledArticle
 
 

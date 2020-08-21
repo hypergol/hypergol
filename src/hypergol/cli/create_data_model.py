@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import fire
 
 from hypergol.name_string import NameString
@@ -111,12 +112,16 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
     for value in args:
         dataModel.process_inputs(value)
 
+    temporalDependencies = sorted(list({m.type_ for m in dataModel.conversions if m.isTemporal}))
+    dataModelDependencies = [{'snake': m.type_.asSnake, 'name': m.type_} for m in dataModel.conversions if not m.isTemporal and not m.isObject]
     content = (
         DataModelRenderer()
         .add('from typing import List               ', dataModel.isListDependent)
-        .add('from datetime import {0}              ', sorted(list({m.type_ for m in dataModel.conversions if m.isTemporal})))
+        .add('from datetime import {0}              ', temporalDependencies)
+        .add('                                      ', dataModel.isListDependent or len(temporalDependencies) > 0)
         .add('from hypergol import BaseData         ')
-        .add('from data_models.{snake} import {name}', [{'snake': m.type_.asSnake, 'name': m.type_} for m in dataModel.conversions if not m.isTemporal and not m.isObject])
+        .add('                                      ', len(dataModelDependencies) > 0)
+        .add('from data_models.{snake} import {name}', dataModelDependencies)
         .add('                                      ')
         .add('                                      ')
         .add('class {className}(BaseData):          ', className=dataModel.className)
