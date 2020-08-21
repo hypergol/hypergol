@@ -8,7 +8,7 @@ from models.embedding_block import EmbeddingBlock
 from models.lstm_block import LstmBlock
 from models.output_block import OutputBlock
 from data_models.sentence import Sentence
-from data_models.model_output import ModelOutput
+from data_models.evaluation_output import EvaluationOutput
 
 
 def train_my_test_model(force=False):
@@ -17,7 +17,7 @@ def train_my_test_model(force=False):
     batchProcessor = MyTestModelBatchProcessor(
         inputDataset=project.datasetFactory.get(dataType=Sentence, name='inputs'),
         inputBatchSize=16,
-        outputDataset=project.datasetFactory.get(dataType=ModelOutput, name='outputs'),
+        outputDataset=project.datasetFactory.get(dataType=EvaluationOutput, name='outputs'),
         exampleArgument=''
     )
     myTestModel = MyTestModel(

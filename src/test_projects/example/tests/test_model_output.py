@@ -9,7 +9,7 @@ class TestModelOutput(TestCase):
 
     def __init__(self, methodName):
         super(TestModelOutput, self).__init__(methodName=methodName)
-        self.modelOutput = ModelOutput(articleId=0, sentenceId=0, inputs={"sample": "sample"}, outputs={"sample": "sample"}, targets={"sample": "sample"})
+        self.modelOutput = ModelOutput(articleId=0, sentenceId=0, posTags=['', ''])
 
     def setUp(self):
         super().setUp()

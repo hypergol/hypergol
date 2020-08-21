@@ -1,7 +1,23 @@
 import os
 import hashlib
+import inspect
+from typing import List
+from pydantic import create_model           # pylint: disable=no-name-in-module
+from hypergol.base_data import BaseData
 
-MAX_MEMBER_REPR_LENGTH = 1000
+
+def create_pydantic_type(type_):
+    parameters = {}
+    for parameter, parameterData in inspect.signature(type_.__init__).parameters.items():
+        if parameter != 'self':
+            parameterType = parameterData.annotation
+            if getattr(parameterType, '_name', None) == 'List':
+                if issubclass(parameterType.__args__[0], BaseData):
+                    parameterType = List[create_pydantic_type(parameterType.__args__[0])]
+            elif issubclass(parameterType, BaseData):
+                parameterType = create_pydantic_type(parameterType)
+            parameters[parameter] = (parameterType, ...)
+    return create_model(type_.__name__, **parameters)
 
 
 def get_hash(data):
@@ -85,17 +101,3 @@ def create_directory(path, mode):
         mode=mode,
         handledFunction=_create_directory
     )
-
-
-class Repr:
-    """Convencience class to automatically add standard ``__repr__()`` and ``__str__()`` functions to class.
-
-    Uses ``__dict__`` property.
-    """
-
-    def __repr__(self):
-        members = ', '.join(f'{k}={str(v)[:MAX_MEMBER_REPR_LENGTH]}' for k, v in self.__dict__.items())
-        return f"{self.__class__.__name__}({members})"
-
-    def __str__(self):
-        return self.__repr__()

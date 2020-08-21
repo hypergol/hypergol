@@ -1,7 +1,7 @@
 from typing import List
 from hypergol.delayed import Delayed
 from hypergol.dataset import Dataset
-from hypergol.utils import Repr
+from hypergol.repr import Repr
 from hypergol.logger import Logger
 
 

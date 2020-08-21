@@ -1,9 +1,7 @@
 import json
 import base64
 import pickle
-
-
-from hypergol.utils import Repr
+from hypergol.repr import Repr
 
 
 class NoIdException(Exception):
