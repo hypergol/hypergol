@@ -54,7 +54,7 @@ This will list all existing datasets that matches `pattern` as self contained ex
 
 ### How to start Tensorboard
 
-It is recommended to start it in a screen session so you can close the terminal window or if you disconnect from a remote Linux machine. In the project directory:
+It is recommended to start it in a screen session (`screen -S tensorboard`) so you can close the terminal window or if you disconnect from a remote Linux machine (reconnect with `screen -x tensorboard`). In the project directory:
 
 ```
 screen -S tensorboard
@@ -124,4 +124,4 @@ response = requests.post(
 outputs = [ExampleOutput.from_data(v) for v in json.loads(response.text)]
 ```
 
-It is not recommended to do large scale evaluation through the API as the overhead per object is too high and it is single threaded. 
+It is not recommended to do large scale evaluation through the API as the overhead per object is too high and it is single threaded.
