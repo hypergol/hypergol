@@ -1,3 +1,5 @@
+from datetime import date
+
 import fire
 import tensorflow as tf
 from hypergol import HypergolProject
@@ -22,6 +24,8 @@ def train_my_test_model(force=False):
         exampleArgument=''
     )
     myTestModel = MyTestModel(
+        modelName=MyTestModel.__name__,
+        longName=f'{MyTestModel.__name__}_{date.today().strftime("%Y%m%d")}_{project.repoManager.commitHash}',
         embeddingBlock=EmbeddingBlock(
             blockArgument1='',
             blockArgument2='',
@@ -40,7 +44,6 @@ def train_my_test_model(force=False):
         optimizer=tf.keras.optimizers.Adam(lr=1),
         batchProcessor=batchProcessor,
         project=project,
-        modelName='MyTestModel',
         restoreWeightsPath=None
     )
     modelManager.run(

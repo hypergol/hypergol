@@ -10,7 +10,7 @@ class TensorflowModelManager:
     Class for managing tensorflow model training.
     """
 
-    def __init__(self, model, optimizer, batchProcessor, project, modelName, restoreWeightsPath=None):
+    def __init__(self, model, optimizer, batchProcessor, project, restoreWeightsPath=None):
         """
         Parameters
         ----------
@@ -22,8 +22,6 @@ class TensorflowModelManager:
             Hypergol dataset to use for training
         project: HypergolProject
             Hypergol project to handle directories
-        modelName: string
-            Name of the model
         restoreWeightsPath: path
             path to restore variables from previously trained model
         """
@@ -31,7 +29,6 @@ class TensorflowModelManager:
         self.optimizer = optimizer
         self.batchProcessor = batchProcessor
         self.project = project
-        self.modelName = modelName or self.model.get_name()
         self.restoreWeightsPath = restoreWeightsPath
         self.globalStep = 0
         self.trainingSummaryWriter = None
@@ -39,16 +36,16 @@ class TensorflowModelManager:
 
     def save_model(self):
         """Saves Tensorflow model, block definitions, and weights """
-        modelDirectory = Path(self.project.modelDataPath, self.modelName, str(self.globalStep))
-        modelDirectory.mkdir(parents=True, exist_ok=True)
+        modelDirectory = Path(self.project.modelDataPath, self.model.modelName, str(self.globalStep))
+        modelDirectory.mkdir(parents=True, exist_ok=False)
         tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures={'signature_default': self.model.get_outputs})
         for modelBlock in self.model.get_model_blocks():
-            json.dump(modelBlock.get_config(), open(f'{modelDirectory}/{modelBlock.get_name()}.json', 'w'))
-        self.model.save_weights(f'{modelDirectory}/{self.model.get_name()}.h5', save_format='h5')
+            json.dump(modelBlock.get_config(), open(f'{modelDirectory}/{modelBlock.blockName}.json', 'w'))
+        self.model.save_weights(f'{modelDirectory}/{self.model.modelName}.h5', save_format='h5')
 
     def restore_model_weights(self):
         """Restores Tensorflow model weights """
-        self.model.load_weights(f'{self.restoreWeightsPath}/{self.model.get_name()}.h5')
+        self.model.load_weights(f'{self.restoreWeightsPath}/{self.model.modelName}.h5')
 
     def train(self, withTracing):
         """Runs a single training step for the model
@@ -72,9 +69,9 @@ class TensorflowModelManager:
             tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
             if withTracing:
                 tf.summary.trace_export(
-                    name=f'{self.model.get_name()}{self.globalStep}',
+                    name=f'{self.model.modelName}{self.globalStep}',
                     step=self.globalStep,
-                    profiler_outdir=str(Path(self.project.tensorboardPath, self.modelName, 'trainGraph'))
+                    profiler_outdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'trainGraph'))
                 )
         self.globalStep += 1
         return loss
@@ -97,9 +94,9 @@ class TensorflowModelManager:
             self.model.produce_metrics(targets=targets, training=False, globalStep=self.globalStep, **inputs)
             if withTracing:
                 tf.summary.trace_export(
-                    name=f'{self.model.get_name()}{self.globalStep}',
+                    name=f'{self.model.modelName}{self.globalStep}',
                     step=self.globalStep,
-                    profiler_outdir=str(Path(self.project.tensorboardPath, self.modelName, 'evaluateGraph'))
+                    profiler_outdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'evaluateGraph'))
                 )
         self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
         return loss
@@ -107,9 +104,9 @@ class TensorflowModelManager:
     def start(self):
         """Prepares to run the training cycle by creating the model data directories, create the ``SummaryWriters`` for Tensorboard for training and evaluation, initialises the batchprocessor (opens the output dataset for writing) and reloads the weights if ``restoreWeightsPath`` is specified.
         """
-        Path(self.project.tensorboardPath, self.modelName).mkdir(parents=True, exist_ok=True)
-        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=str(Path(self.project.tensorboardPath, self.modelName, 'train')))
-        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=str(Path(self.project.tensorboardPath, self.modelName, 'evaluate')))
+        Path(self.project.tensorboardPath, self.model.modelName).mkdir(parents=True, exist_ok=True)
+        self.trainingSummaryWriter = tf.summary.create_file_writer(logdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'train')))
+        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'evaluate')))
         self.batchProcessor.start()
         if self.restoreWeightsPath is not None:
             self.evaluate(withTracing=False)  # model call needed to initialize layers/weights before reloading
@@ -132,10 +129,10 @@ class TensorflowModelManager:
         self.start()
         try:
             for step in tqdm(range(stepCount)):
-                self.train(withTracing=step in tracingSteps)
                 if step in evaluationSteps:
                     self.save_model()
                     self.evaluate(withTracing=step in tracingSteps)
+                self.train(withTracing=step in tracingSteps)
             self.save_model()
         finally:
             self.finish()
