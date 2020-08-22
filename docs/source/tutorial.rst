@@ -3,7 +3,7 @@ Tutorial
 
 .. currentmodule:: hypergol
 
-This guide can help you start working with ``hypergol``. This tutorial assumes you use ``githubcom`` for source control but using other sites must be straightforward as well.
+This guide can help you start working with ``hypergol``. This tutorial assumes you use ``github`` for source control but using other sites must be straightforward as well. Further examples for CLI usage can be found in the ``run_project_tests.sh`` script.
 
 Creating a project
 ------------------
