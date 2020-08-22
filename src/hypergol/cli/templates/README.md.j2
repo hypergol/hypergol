@@ -10,7 +10,7 @@ Hypergol is heavily integrated with git, all projects must be in a git repositor
 
 Initialise git with:
 
-```git init```
+```git init .```
 
 Create the first commit (datasets record the last commit when they are created and without this there is nothing to record):
 
@@ -37,12 +37,90 @@ deactivate
 source .venv/bin/activate
 ```
 
+
+### How to list existing Datasets (in Jupyter)
+
+```
+from hypergol import HypergolProject
+project = HypergolProject(
+    projectDirectory='<project_directory>/{{ name.asSnake }}',
+    dataDirectory=f'<data_directory>'
+)
+project.list_datasets(pattern='.*', asCode=True);
+```
+
+This will list all existing datasets that matches `pattern` as self contained executable code.
+
+
 ### How to start Tensorboard
 
-It is recommended to start it in a screen session so you can close the terminal window or if you disconnect from a remote Linux machine. In the project directory:
+It is recommended to start it in a screen session (`screen -S tensorboard`) so you can close the terminal window or if you disconnect from a remote Linux machine (reconnect with `screen -x tensorboard`). In the project directory:
 
 ```
 screen -S tensorboard
 source .venv/bin/activate
 tensorboard --logdir=<data_directory>/{{ name.asSnake }}/tensorboard/
 ```
+
+
+### How to train your model
+
+After implementing all components and required functions:
+
+```
+./train_{{ name.asSnake }}.sh
+```
+
+This will execute the model manager's run() function with the prescribed schedule (training steps, evaluation steps, etc.). Training can be stopped with Ctrl-C, this will won't result in the corruption of the output dataset (datasets must be closed properly to generate their chk file after they are read only). This is possible because the entire training happen in a `try/finally` block.
+
+### How to serve your model
+
+In the generated `models/serve_{{ name.asSnake }}.py` function specify the directory of the model to be served at:
+
+```
+MODEL_DIRECTORY = '<data_directory>/{{ name }}/<branch>/models/{{ name.asSnake }}/<epoch_number>'
+```
+
+then start serving with (port and host can be set in the shell script):
+
+```
+./serve_{{ name.asSnake }}.sh
+```
+
+
+### How to call your model from python with requests
+
+```
+import requests
+response = json.loads(requests.get('http://0.0.0.0:8000', headers={'accept': 'application/json'}).text)
+modelLongName = response['model']
+```
+
+This allows to verify if indeed the intended model is served. The generated training script sets training day and the commit hash at that point to be part of the long name and to ensure that the exact conditions of training are available at serving. Long name should be used in logging to identify which model created an output.
+
+To get the response of the model to a list of objects, see example below. Replace `ExampleOutput` with the correct output type and load a dataset into `ds`, use `list_datasets` from above to do this.
+
+```
+sys.path.insert(0, '<project_directory>/{{ name.asSnake }}')
+import requests
+from itertools import islice
+
+from data_models.example_output import ExampleOutput
+
+
+with ds.open('r') as dsr:
+    values = [value.to_data() for value in islice(dsr, 10)]
+
+
+response = requests.post(
+    'http://0.0.0.0:8000/output',
+    headers={
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+    },
+    data=json.dumps(values)
+)
+outputs = [ExampleOutput.from_data(v) for v in json.loads(response.text)]
+```
+
+It is not recommended to do large scale evaluation through the API as the overhead per object is too high and it is single threaded.

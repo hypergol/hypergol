@@ -3,7 +3,7 @@ Tutorial
 
 .. currentmodule:: hypergol
 
-This guide can help you start working with ``hypergol``. This tutorial assumes you use ``githubcom`` for source control but using other sites must be straightforward as well.
+This guide can help you start working with ``hypergol``. This tutorial assumes you use ``github`` for source control but using other sites must be straightforward as well. Further examples for CLI usage can be found in the ``run_project_tests.sh`` script.
 
 Creating a project
 ------------------
@@ -391,15 +391,15 @@ Create the model
 
 .. code-block:: bash
 
-    $ python -m hypergol.cli.create_model ExampleModel InputClass OutputClass Block1 Block2
+    $ python -m hypergol.cli.create_model ExampleModel TrainingClass EvaluationClass InputClass OutputClass Block1 Block2
 
-This will create three main components: :class:`ExampleModel` in ``example_model.py`` that is the model itself, it also imports the blocks specified, :class:`ExampleModelBatchProcessor` in ``example_model_batch_processor.py`` and also imports the input/output datamodel classes and `train_example_model` that is a ``fire`` script that manages the training process through the :class:`TensorflowModelManager` class and imports and instantiate all the necessary components. The training can be started with ``train_example_model.sh`` in the main project directory.
+This will create three main components: :class:`ExampleModel` in ``example_model.py`` that is the model itself, it also imports the blocks specified, :class:`ExampleModelBatchProcessor` in ``example_model_batch_processor.py`` and also imports the train/evaluation datamodel classes. `train_example_model.py` is a ``fire`` script that manages the training process through the :class:`TensorflowModelManager` class and imports and instantiate all the necessary components. The training can be started with ``train_example_model.sh`` in the main project directory.
 
 Each of the abstract functions the model implement (``get_loss``, ``produce_metrics`` and ``get_outputs``) must accept input the same way. :class:`TensorflowModelManager` gets an ``(input, target)`` and passes on the the above functions with double asterisk (`**`) operator. This means that the `(key, value)` items in the dictionary will turn into keyword arguments in the the model's respective functions:
 
 .. code-block:: python
 
-    # in ExampleModelBatchProcessor.process_input_batch()
+    # in ExampleModelBatchProcessor.process_training_batch()
     inputs = {
         'exampleInput1': tf.constant(value1, dtype=tf.int32),
         'exampleInput2': tf.ragged.constant(values, dtype=tf.string).to_tensor()
@@ -412,9 +412,13 @@ Each of the abstract functions the model implement (``get_loss``, ``produce_metr
     def get_loss(self, targets, training, exampleInput1, exampleInput2):
         ...
 
-This ensures that if either one of the four (``process_input_batch``, ``get_loss``, ``produce_metrics`` and ``get_outputs``) is changed, the rest must follow suit to be consistent.
+This ensures that if either one of the four (``process_training_batch``, ``get_loss``, ``produce_metrics`` and ``get_outputs``) is changed, the rest must follow suit to be consistent.
 
-For the batch processor two functions must be implemented. ``process_input_batch`` is responsible for feeding the correct data to the model during training and evaluation. it returns an ``(inputs, targets)`` tuple where ``inputs`` is a dictionary of tensors and ``targets`` is a single tensor.
+For the batch processor two functions must be implemented for training/evaluation. ``process_training_batch`` is responsible for feeding the correct data to the model during training and evaluation. it returns an ``(inputs, targets)`` tuple where ``inputs`` is a dictionary of tensors and ``targets`` is a single tensor. And ``process_evaluation_batch`` that is responsible of turning the output of the model from tensors to datamodel classes that can be saved into datasets.
+
+The other two functions are ``process_input_batch`` and ``process_output_batch`` that is used in deployment. ``process_input_batch`` takes the input part of the ``process_training_batch`` to feed the model at inference time. ``process_output_batch`` takes the return value of the models ``get_outputs`` (the output part of the arguments of ``process_evaluation_batch``).
+
+The similarities between these functions enable significant code simplifications that are possible given that all four functions are in the same class. These similarities can be reflected in the datamodel as well (e.g.: TrainingClass and EvaluationClass are composite/decorated classes of InputClass and OutputClass).
 
 The ``produce_metrics`` function is running in a context of a ``tf.summary.SummaryWriter`` so the implementation just need to call ``tf.summary.scalar`` or any other summary functions to record data to TensorBoard. See `https://www.tensorflow.org/api_docs/python/tf/summary <https://www.tensorflow.org/api_docs/python/tf/summary>`__ for further documentation on this.
 
@@ -439,7 +443,59 @@ One important issue: Datasets must be closed properly to generate their `.chk` f
 
 The evaluation part is to debug the model at early stages of the training, large scale evalutation should happen parallelized through a dedicated ``Hypergol`` pipeline.
 
-Deploy the model
-~~~~~~~~~~~~~~~~
+Deploying a Tensorflow model
+----------------------------
 
-This is not done yet.
+Model serving is done by `FastAPI <https://https://fastapi.tiangolo.com/>`__ and `uvicorn <https://www.uvicorn.org/>`__ with self contained code generated. To start the server ``./serve_<model_name>.sh`` (port and host can be set in the shell script), this in turn calls ``models/serve_<model_name>.py``. The only detail that needs to be specified is the directory of the model to be served:
+
+.. code-block:: python
+
+    MODEL_DIRECTORY = '<data_directory>/<project>/<branch>/models/<model_name>/<epoch_number>'
+
+The ``/`` endpoint provides information on the served model. The most important among these are the models ``"long name"``, this contains the date the training happened and the repo's commit hash at that point. This is an optional feature set in the training python script so can be changed freely to something else. This information enables data lineage if saved in logs with the calculated outputs, which is useful in case of historical analysis of the various version of the model. To call it with ``requests``:
+
+.. code-block:: python
+
+    import requests
+    response = json.loads(requests.get('http://0.0.0.0:8000', headers={'accept': 'application/json'}).text)
+    modelLongName = response['model']
+
+And the result:
+
+.. code-block:: python
+
+    {
+        "title": "Serve <ModelName>",
+        "version": "0.1",
+        "description": "FastApi wrapper on <ModelName>, see /docs for API details",
+        "model": "<ModelName>_20200101_1108ee9eccb0000dd31d8fda01cc26031dbc3cc6"
+    }
+
+The autogenerated code creates `pydantic <https://pydantic-docs.helpmanual.io/>`__ types on the fly (even for complex types) from the model's BatchProcessor's input/output types (not to be confused with the training/evaluation types in the same class). These ``pydantic`` types are then used by ``FastAPI`` to enable `swagger <https://swagger.io/>`__ to create typed endpoints automatically.
+
+The ``/output`` endpoint accepts a list of the same types that ``BatchProcessor.process_inputs()`` can in json form (see the generated projects ``README.md`` for a working example as well), the example assumes the input objects are available in a dataset called ``ds``, this can be achieved easiest by creating a ``HypergolProject`` and calling its ``list_datasets()`` function with ``asCode=True`` enabled:
+
+.. code-block:: python
+
+    sys.path.insert(0, '<project_directory>/<example_model>')
+    import requests
+    from itertools import islice
+
+    from data_models.example_output import ExampleOutput
+
+
+    with ds.open('r') as dsr:
+        values = [value.to_data() for value in islice(dsr, 10)]
+
+
+    response = requests.post(
+        'http://0.0.0.0:8000/output',
+        headers={
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        data=json.dumps(values)
+    )
+    outputs = [ExampleOutput.from_data(v) for v in json.loads(response.text)]
+
+For large scale analysis it is not recommended to use the deployed model due to multiple factors: The network latency, the conversion back and forth and the single threaded ness of the execution. If a large set of outputs must be calculated a dedicated pipeline with many threads is the best way forward. Use the implementation of the ``/output`` endpoint for reference (without the ``pydantic`` conversion.
