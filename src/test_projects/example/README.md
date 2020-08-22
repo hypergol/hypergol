@@ -105,12 +105,11 @@ sys.path.insert(0, '<project_directory>/example')
 import requests
 from itertools import islice
 
-from data_models.sentence import Sentence
 from data_models.example_output import ExampleOutput
 
 
 with ds.open('r') as dsr:
-    values = [value.to_data() for value in islice(dsr, 10):
+    values = [value.to_data() for value in islice(dsr, 10)]
 
 
 response = requests.post(
