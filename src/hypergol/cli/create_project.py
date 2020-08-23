@@ -16,6 +16,7 @@ def create_project(projectName, dryrun=None, force=None):
         - ``pipelines`` with ``__init__.py``
         - ``tasks`` with ``__init__.py``
         - ``models`` with ``__init__.py``
+        - ``models\blocks`` with ``__init__.py``
         - ``tests``
 
     Executables:
@@ -50,6 +51,8 @@ def create_project(projectName, dryrun=None, force=None):
     project.render_simple(templateName='__init__.py.j2', filePath=Path(project.pipelinesPath, '__init__.py'))
     project.create_models_directory()
     project.render_simple(templateName='__init__.py.j2', filePath=Path(project.modelsPath, '__init__.py'))
+    project.create_blocks_directory()
+    project.render_simple(templateName='__init__.py.j2', filePath=Path(project.blocksPath, '__init__.py'))
     project.create_tests_directory()
     project.render_executable(templateName='make_venv.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'make_venv.sh'))
     project.render_executable(templateName='run_tests.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'run_tests.sh'))

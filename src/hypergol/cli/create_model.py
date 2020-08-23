@@ -39,12 +39,15 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
     blocks = [NameString(value) for value in args]
     project.check_dependencies([trainingClass, evaluationClass, inputClass, outputClass] + blocks)
 
+    project.create_model_directory(modelName=modelName)
+    project.render_simple(templateName='__init__.py.j2', filePath=Path(project.modelsPath, modelName.asSnake, '__init__.py'))
+
     content = project.render(
         templateName='model.py.j2',
         templateData={
             'name': modelName,
         },
-        filePath=Path(projectDirectory, 'models', modelName.asFileName)
+        filePath=Path(projectDirectory, 'models', modelName.asSnake, modelName.asFileName)
     )
 
     batchProcessorContent = project.render(
@@ -54,7 +57,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
             'evaluationClass': evaluationClass,
             'outputClass': outputClass,
         },
-        filePath=Path(projectDirectory, 'models', f'{modelName.asSnake}_batch_processor.py')
+        filePath=Path(projectDirectory, 'models', modelName.asSnake, f'{modelName.asSnake}_batch_processor.py')
     )
 
     trainModelContent = project.render(
@@ -65,7 +68,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
             'evaluationClass': evaluationClass,
             'blockDependencies': [name for name in blocks if project.is_model_block_class(name)],
         },
-        filePath=Path(projectDirectory, 'models', f'train_{modelName.asFileName}')
+        filePath=Path(projectDirectory, 'models', modelName.asSnake, f'train_{modelName.asFileName}')
     )
 
     scriptContent = project.render_executable(
@@ -81,7 +84,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
             'inputClass': inputClass,
             'outputClass': outputClass
         },
-        filePath=Path(projectDirectory, 'models', f'serve_{modelName.asFileName}')
+        filePath=Path(projectDirectory, 'models', modelName.asSnake, f'serve_{modelName.asFileName}')
     )
 
     serveScriptContent = project.render_executable(

@@ -20,7 +20,7 @@ def create_model_block(className, projectDirectory='.', dryrun=None, force=None,
     content = project.render(
         templateName='model_block.py.j2',
         templateData={'className': className},
-        filePath=Path(projectDirectory, 'models', className.asFileName)
+        filePath=Path(projectDirectory, 'models', 'blocks', className.asFileName)
     )
 
     return project.cli_final_message(creationType='ModelBlock', name=className, content=(content, ))

@@ -5,11 +5,11 @@ import tensorflow as tf
 from hypergol import HypergolProject
 from hypergol import TensorflowModelManager
 
-from models.my_test_model_batch_processor import MyTestModelBatchProcessor
-from models.my_test_model import MyTestModel
-from models.embedding_block import EmbeddingBlock
-from models.lstm_block import LstmBlock
-from models.output_block import OutputBlock
+from models.my_test_model.my_test_model_batch_processor import MyTestModelBatchProcessor
+from models.my_test_model.my_test_model import MyTestModel
+from models.blocks.embedding_block import EmbeddingBlock
+from models.blocks.lstm_block import LstmBlock
+from models.blocks.output_block import OutputBlock
 from data_models.sentence import Sentence
 from data_models.evaluation_output import EvaluationOutput
 

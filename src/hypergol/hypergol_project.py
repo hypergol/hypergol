@@ -124,6 +124,7 @@ class HypergolProject:
         self.tasksPath = Path(projectDirectory, 'tasks')
         self.pipelinesPath = Path(projectDirectory, 'pipelines')
         self.modelsPath = Path(projectDirectory, 'models')
+        self.blocksPath = Path(projectDirectory, 'models', 'blocks')
         self.testsPath = Path(projectDirectory, 'tests')
         self._init_known_class_lists()
         self.templateEnvironment = jinja2.Environment(
@@ -166,8 +167,8 @@ class HypergolProject:
         if os.path.exists(self.tasksPath):
             taskFiles = glob.glob(str(Path(self.projectDirectory, 'tasks', '[!_][!_]*.py')))
             self._taskClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in taskFiles]
-        if os.path.exists(self.modelsPath):
-            blockFiles = glob.glob(str(Path(self.projectDirectory, 'models', '[!_][!_]*.py')))
+        if os.path.exists(self.blocksPath):
+            blockFiles = glob.glob(str(Path(self.projectDirectory, 'models', 'blocks', '[!_][!_]*.py')))
             self._modelBlockClasses = [NameString(os.path.split(filePath)[1][:-3]) for filePath in blockFiles]
 
     @property
@@ -203,6 +204,9 @@ class HypergolProject:
             return content
         return None
 
+    def create_model_directory(self, modelName):
+        create_directory(Path(self.modelsPath, modelName.asSnake), self.mode)
+
     def create_project_directory(self):
         create_directory(self.projectDirectory, self.mode)
 
@@ -214,6 +218,9 @@ class HypergolProject:
 
     def create_pipelines_directory(self):
         create_directory(self.pipelinesPath, self.mode)
+
+    def create_blocks_directory(self):
+        create_directory(self.blocksPath, self.mode)
 
     def create_models_directory(self):
         create_directory(self.modelsPath, self.mode)

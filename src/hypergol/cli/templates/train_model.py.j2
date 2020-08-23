@@ -5,10 +5,10 @@ import tensorflow as tf
 from hypergol import HypergolProject
 from hypergol import TensorflowModelManager
 
-from models.{{ modelName.asSnake }}_batch_processor import {{ modelName }}BatchProcessor
-from models.{{ modelName.asSnake }} import {{ modelName }}
+from models.{{ modelName.asSnake }}.{{ modelName.asSnake }}_batch_processor import {{ modelName }}BatchProcessor
+from models.{{ modelName.asSnake }}.{{ modelName.asSnake }} import {{ modelName }}
 {%- for name in blockDependencies %}
-from models.{{ name.asSnake }} import {{ name }}
+from models.blocks.{{ name.asSnake }} import {{ name }}
 {%- endfor %}
 from data_models.{{ trainingClass.asSnake }} import {{ trainingClass }}
 from data_models.{{ evaluationClass.asSnake }} import {{ evaluationClass }}
