@@ -48,6 +48,7 @@ class TestCreateModelBlock(HypergolCreateTestCase):
         )
         self.project.create_project_directory()
         self.project.create_models_directory()
+        self.project.create_blocks_directory()
 
     def test_create_model_block_creates_files(self):
         create_model_block(className='TestModelBlock', projectDirectory=self.projectDirectory)
