@@ -18,7 +18,7 @@ Make sure you are in the directory you intend to create the project into:
 
 Project name must be camel-case, and the command will create a snake-case directory. See (insert link here) documentation for creating a project from python interactive shell or from jupyter notebooks.
 
-Once this is done, the next step is to create the project's own virtual environment. This enables encapsulate all the dependencies your project relies on. The example assumes that you created an empty (no ``README.md`` and ``.gitignore``) repository on github named ``project_name``. To do this execute the following steps (Don't forget to ``deactivate`` your current environment):
+The example assumes that you created an empty (no ``README.md`` and ``.gitignore``) repository on github named ``project_name``. Once this is done, the next step is to create the project's own virtual environment. This enables encapsulate all the dependencies your project relies on.  To do this execute the following steps (Don't forget to ``deactivate`` your current environment):
 
 .. code:: bash
 
