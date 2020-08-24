@@ -7,7 +7,7 @@ from hypergol.hypergol_project import HypergolProject
 
 
 def create_model(modelName, trainingClass, evaluationClass, inputClass, outputClass, *args, projectDirectory='.', dryrun=None, force=None):
-    """Generates stubs for the Tensorflow model, data processing class and training script and shell script to run it from command line
+    """Generates stubs for the Tensorflow model, data processing class and training script and shell script to run it from command line. Shell scripts will be located in the project main directory (which should be the current directory when running them) and model files will be located in ``project_name/models/model_name/*.py``.
 
     After creation the user must implement the ``process_training_batch()`` , ``process_evaluation_batch()``, ``process_input_batch()`` and ``process_output_batch`` member functions that take  ``trainingClass``, ``evaluationClass``, ``inputClass`` and ``outputClass`` respectively.
 
@@ -39,12 +39,15 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
     blocks = [NameString(value) for value in args]
     project.check_dependencies([trainingClass, evaluationClass, inputClass, outputClass] + blocks)
 
+    project.create_model_directory(modelName=modelName)
+    project.render_simple(templateName='__init__.py.j2', filePath=Path(project.modelsPath, modelName.asSnake, '__init__.py'))
+
     content = project.render(
         templateName='model.py.j2',
         templateData={
             'name': modelName,
         },
-        filePath=Path(projectDirectory, 'models', modelName.asFileName)
+        filePath=Path(projectDirectory, 'models', modelName.asSnake, modelName.asFileName)
     )
 
     batchProcessorContent = project.render(
@@ -54,7 +57,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
             'evaluationClass': evaluationClass,
             'outputClass': outputClass,
         },
-        filePath=Path(projectDirectory, 'models', f'{modelName.asSnake}_batch_processor.py')
+        filePath=Path(projectDirectory, 'models', modelName.asSnake, f'{modelName.asSnake}_batch_processor.py')
     )
 
     trainModelContent = project.render(
@@ -65,7 +68,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
             'evaluationClass': evaluationClass,
             'blockDependencies': [name for name in blocks if project.is_model_block_class(name)],
         },
-        filePath=Path(projectDirectory, 'models', f'train_{modelName.asFileName}')
+        filePath=Path(projectDirectory, 'models', modelName.asSnake, f'train_{modelName.asFileName}')
     )
 
     scriptContent = project.render_executable(
@@ -81,7 +84,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
             'inputClass': inputClass,
             'outputClass': outputClass
         },
-        filePath=Path(projectDirectory, 'models', f'serve_{modelName.asFileName}')
+        filePath=Path(projectDirectory, 'models', modelName.asSnake, f'serve_{modelName.asFileName}')
     )
 
     serveScriptContent = project.render_executable(

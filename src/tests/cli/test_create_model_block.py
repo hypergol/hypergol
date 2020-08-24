@@ -33,7 +33,8 @@ class TestCreateModelBlock(HypergolCreateTestCase):
     def __init__(self, methodName):
         super(TestCreateModelBlock, self).__init__(projectName='TestProject', methodName=methodName)
         self.allPaths = [
-            Path(self.projectDirectory, 'models', 'test_model_block.py'),
+            Path(self.projectDirectory, 'models', 'blocks', 'test_model_block.py'),
+            Path(self.projectDirectory, 'models', 'blocks'),
             Path(self.projectDirectory, 'models'),
             Path(self.projectDirectory)
         ]
@@ -47,6 +48,7 @@ class TestCreateModelBlock(HypergolCreateTestCase):
         )
         self.project.create_project_directory()
         self.project.create_models_directory()
+        self.project.create_blocks_directory()
 
     def test_create_model_block_creates_files(self):
         create_model_block(className='TestModelBlock', projectDirectory=self.projectDirectory)

@@ -1,5 +1,5 @@
 export PYTHONPATH="${PWD}/..:${PWD}/../..:"
 
 python3 \
-    ./models/train_{{ snakeName }}.py \
+    ./models/{{ snakeName }}/train_{{ snakeName }}.py \
     $1

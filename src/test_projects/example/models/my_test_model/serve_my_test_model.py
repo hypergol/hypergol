@@ -7,7 +7,7 @@ import tensorflow as tf
 from fastapi import FastAPI
 from hypergol.utils import create_pydantic_type
 
-from models.my_test_model_batch_processor import MyTestModelBatchProcessor
+from models.my_test_model.my_test_model_batch_processor import MyTestModelBatchProcessor
 from data_models.sentence import Sentence
 from data_models.model_output import ModelOutput
 

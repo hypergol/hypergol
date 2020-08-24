@@ -114,10 +114,10 @@ import tensorflow as tf
 from hypergol import HypergolProject
 from hypergol import TensorflowModelManager
 
-from models.test_model_batch_processor import TestModelBatchProcessor
-from models.test_model import TestModel
-from models.test_block1 import TestBlock1
-from models.test_block2 import TestBlock2
+from models.test_model.test_model_batch_processor import TestModelBatchProcessor
+from models.test_model.test_model import TestModel
+from models.blocks.test_block1 import TestBlock1
+from models.blocks.test_block2 import TestBlock2
 from data_models.test_training_class import TestTrainingClass
 from data_models.test_evaluation_class import TestEvaluationClass
 
@@ -166,7 +166,7 @@ TEST_SCRIPT = """
 export PYTHONPATH="${PWD}/..:${PWD}/../..:"
 
 python3 \\
-    ./models/train_test_model.py \\
+    ./models/test_model/train_test_model.py \\
     $1
 """.lstrip()
 
@@ -180,7 +180,7 @@ import tensorflow as tf
 from fastapi import FastAPI
 from hypergol.utils import create_pydantic_type
 
-from models.test_model_batch_processor import TestModelBatchProcessor
+from models.test_model.test_model_batch_processor import TestModelBatchProcessor
 from data_models.test_input import TestInput
 from data_models.test_output import TestOutput
 
@@ -245,7 +245,7 @@ TEST_SERVE_SCRIPT = """
 export PYTHONPATH="${PWD}/..:${PWD}/../..:"
 
 python3 \\
-    ./models/serve_test_model.py \\
+    ./models/test_model/serve_test_model.py \\
     --port=8000 \\
     --host="0.0.0.0"
 """.lstrip()
@@ -256,10 +256,11 @@ class TestCreateModel(HypergolCreateTestCase):
     def __init__(self, methodName):
         super(TestCreateModel, self).__init__(projectName='TestProject', methodName=methodName)
         self.allPaths = [
-            Path(self.projectDirectory, 'models', 'test_model.py'),
-            Path(self.projectDirectory, 'models', 'test_model_batch_processor.py'),
-            Path(self.projectDirectory, 'models', 'train_test_model.py'),
-            Path(self.projectDirectory, 'models', 'serve_test_model.py'),
+            Path(self.projectDirectory, 'models', 'test_model', 'test_model.py'),
+            Path(self.projectDirectory, 'models', 'test_model', 'test_model_batch_processor.py'),
+            Path(self.projectDirectory, 'models', 'test_model', 'train_test_model.py'),
+            Path(self.projectDirectory, 'models', 'test_model', 'serve_test_model.py'),
+            Path(self.projectDirectory, 'models', 'test_model'),
             Path(self.projectDirectory, 'models'),
             Path(self.projectDirectory, 'train_test_model.sh'),
             Path(self.projectDirectory, 'serve_test_model.sh'),
