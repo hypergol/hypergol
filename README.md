@@ -13,7 +13,7 @@ Tensorflow model stubs can be generated that enable standardised model developme
 
 See documentation for further details at: [https://hypergol.readthedocs.io/en/latest/](https://hypergol.readthedocs.io/en/latest/)
 
-Join our community at: [Hypergol Slack Community](https://join.slack.com/t/hypergol/shared_invite/zt-g4fiy8wz-VInECQlxeYk4cxFjXyVbcA)
+Join our community at: [Hypergol Slack Community](https://join.slack.com/t/hypergol/shared_invite/zt-gmwvtutj-Df1DJOB_Xha0vbj1OFc0vw)
 
 Quick Start
 -----------
@@ -40,6 +40,6 @@ The authors wish that Hypergol frees you from tedious tasks so you can focus mor
 
 May the productivity be with you!
 
-Join our community at: [Hypergol Slack Community](https://join.slack.com/t/hypergol/shared_invite/zt-g4fiy8wz-VInECQlxeYk4cxFjXyVbcA)
+Join our community at: [Hypergol Slack Community](https://join.slack.com/t/hypergol/shared_invite/zt-gmwvtutj-Df1DJOB_Xha0vbj1OFc0vw)
 
 All feedback is welcome at: [hypergol.developer@gmail.com](mailto:hypergol.developer@gmail.com?subject=Hypergol%20Feedback)
