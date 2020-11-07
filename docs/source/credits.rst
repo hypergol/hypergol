@@ -1,7 +1,7 @@
 Credits
 =======
 
-Hypergol was originally written by Laszlo Sragner and Rhys Patten,
+Hypergol was written initially by Laszlo Sragner and Rhys Patten
 and has been developed with the help of many others. Thanks to everyone who has
 improved Hypergol by contributing code, bug reports (and fixes), documentation,
 and input on design, features, and the future of Hypergol.
