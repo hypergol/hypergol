@@ -7,7 +7,7 @@ from tqdm.auto import tqdm
 
 class TensorflowModelManager:
     """
-    Class for managing tensorflow model training.
+    Class for managing TensorFlow model training.
     """
 
     def __init__(self, model, optimizer, batchProcessor, project, restoreWeightsPath=None):
@@ -16,14 +16,14 @@ class TensorflowModelManager:
         ----------
         model: BaseModel
             model subclassed from BaseModel that is to be trained
-        optimizer: tensorflow optimizer
-            optimizer from tensorflow package to use for training
+        optimizer: TensorFlow optimizer
+            optimizer from TensorFlow package to use for training
         batchProcessor: Dataset
             Hypergol dataset to use for training
         project: HypergolProject
             Hypergol project to handle directories
         restoreWeightsPath: path
-            path to restore variables from previously trained model
+            path to restore variables from a previously trained model
         """
         self.model = model
         self.optimizer = optimizer
@@ -35,7 +35,7 @@ class TensorflowModelManager:
         self.evaluationSummaryWriter = None
 
     def save_model(self):
-        """Saves Tensorflow model, block definitions, and weights """
+        """Saves TensorFlow model, block definitions, and weights """
         modelDirectory = Path(self.project.modelDataPath, self.model.modelName, str(self.globalStep))
         modelDirectory.mkdir(parents=True, exist_ok=False)
         tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures={'signature_default': self.model.get_outputs})
@@ -44,7 +44,7 @@ class TensorflowModelManager:
         self.model.save_weights(f'{modelDirectory}/{self.model.modelName}.h5', save_format='h5')
 
     def restore_model_weights(self):
-        """Restores Tensorflow model weights """
+        """Restores TensorFlow model weights """
         self.model.load_weights(f'{self.restoreWeightsPath}/{self.model.modelName}.h5')
 
     def train(self, withTracing):
@@ -53,7 +53,7 @@ class TensorflowModelManager:
         Parameters
         ----------
         withTracing: bool
-            log tensorflow graph metadata for the step
+            log TensorFlow graph metadata for the step
         """
         inputs, targets = next(self.batchProcessor)
         if withTracing:
@@ -82,7 +82,7 @@ class TensorflowModelManager:
         Parameters
         ----------
         withTracing: bool
-            log tensorflow graph metadata for step
+            log TensorFlow graph metadata for step
         """
         inputs, targets = next(self.batchProcessor)
         if withTracing:
@@ -120,11 +120,11 @@ class TensorflowModelManager:
         Parameters
         ----------
         stepCount: int
-            num total steps in schedule
+            num total steps in the schedule
         evaluationSteps: List[int]
             which steps to produce metrics on an evaluation sample
         tracingSteps: List[int]
-            which steps to log graph metadata (components, memory consumption, etc) to Tensorboard
+            which steps to log graph metadata (components, memory consumption, etc.) to Tensorboard
         """
         self.start()
         try:

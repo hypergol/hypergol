@@ -85,7 +85,7 @@ class DataModel:
 def create_data_model(className, *args, projectDirectory='.', dryrun=None, force=None):
     """Generates domain class from the parameters derived from :class:`.BaseData`
 
-    Fails if the target file already exist unless ``force=True`` or ``--force`` in CLI is set.
+    Fails if the target file already exists unless ``force=True`` or ``--force`` in CLI is set.
 
     Parameters
     ----------

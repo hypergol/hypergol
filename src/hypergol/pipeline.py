@@ -6,7 +6,7 @@ from hypergol.task import Task
 
 
 class Pipeline:
-    """Simple pipeline that enable multithreaded execution of tasks."""
+    """A simple pipeline that enables multithreaded execution of tasks"""
 
     def __init__(self, tasks):
         """
@@ -37,4 +37,4 @@ class Pipeline:
                 pool.join()
                 pool.terminate()
             else:
-                raise ValueError('task must be of type Task, SimpleTask or Source')
+                raise ValueError('Task must be of type Task, SimpleTask or Source')

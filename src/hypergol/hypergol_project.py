@@ -56,7 +56,7 @@ class RepoManager:
         repoDirectory : string
             directory where the the `.git` directory is located
         raiseIfDirty : bool
-            if set and the repo contains uncommited code it raises an error
+            if set and the repo contains uncommitted code, it raises an error
         """
         self.repoDirectory = repoDirectory
         self.repoExists = False
@@ -71,12 +71,12 @@ class RepoManager:
             return
         if repo.is_dirty():
             if raiseIfDirty:
-                raise ValueError("Current git repo is dirty, please commit your work befour you run the pipeline")
-            print('Warning! Current git repo is dirty, this will result in incorrect commit hash in datasets')
+                raise ValueError("The current git repo is dirty; please commit your work before you run the pipeline.")
+            print('Warning! The current git repo is dirty; this will result in incorrect commit hash in datasets.')
         try:
             commit = repo.commit()
         except ValueError as ex:
-            print('No commits in this repo, please crete an initial commit')
+            print('No commits in this repo; please create an initial commit.')
             raise ex
         self.commitHash = commit.hexsha
         self.commitMessage = commit.message
@@ -91,7 +91,7 @@ class RepoManager:
 class HypergolProject:
     """Owner of all information about the project
 
-    CLI functions define what needs to be created and this class creates them. It also consistently handles the mode flags (normal/dryrun/force)
+    CLI functions define what needs to be created, and this class creates them. It also consistently handles the mode flags (normal/dryrun/force)
 
     It also verifies if a requested class exists in the respective directory (data_models, tasks) and identifies its type, e.g.: for ``HelloWorld`` it checks if ``data_models/hello_world.py`` or ``tasks/hello_world.py`` exists and assumes its role from that. Used in :func:`.create_data_model` and :func:`.create_pipeline`
 
@@ -138,7 +138,7 @@ class HypergolProject:
             self.datasetFactory = None
             self.tensorboardPath = None
             self.modelDataPath = None
-            print('Repo does not exist, data related functionality disabled')
+            print('Repo does not exist, data related functionality disabled.')
             return
 
         self.datasetFactory = DatasetFactory(
@@ -241,7 +241,7 @@ class HypergolProject:
         return value in self._modelBlockClasses
 
     def check_dependencies(self, dependencies):
-        """Raises error if any dependency is unknown"""
+        """Raises an error if any dependency is unknown"""
         for dependency in dependencies:
             if dependency not in self._dataModelClasses + self._taskClasses + self._modelBlockClasses:
                 raise ValueError(f'Unknown dependency {dependency}')
@@ -250,7 +250,7 @@ class HypergolProject:
         create_text_file(filePath=filePath, content=content, mode=self.mode)
 
     def render(self, templateName, templateData, filePath):
-        """creates a file from a template using jinja2
+        """Creates a file from a template using jinja2
 
         Parameters
         ----------
@@ -328,7 +328,7 @@ class HypergolProject:
         Parameters
         ----------
         commit : string
-            git commit to start comparison from
+            The git commit from where the comparison starts
         *args : List[string]
             List of class names to compare, if empty it compares all
         """
@@ -367,7 +367,7 @@ class HypergolProject:
         result = []
         repo = Repo(self.projectDirectory)
         if repo.is_dirty():
-            print('Warning! Current git repo is dirty, this will result in incorrect data_model_files created.')
+            print('Warning! The current git repo is dirty; this will result in incorrect data_model_files created.')
         for name in names:
             content = repo.git.show(f'{commit}:data_models/{name.asSnake}.py')
             for oldName in names:

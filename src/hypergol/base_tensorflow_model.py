@@ -9,9 +9,9 @@ from hypergol.base_tensorflow_model_block import BaseTensorflowModelBlock
 
 
 class BaseTensorflowModel(keras.Model):
-    """Main Tensorflow model class, responsible for implementing the interface of the model and the connection between the model blocks.
+    """Main Tensorflow model class, responsible for implementing the interface of the model and the connection between the model blocks
 
-    It is recommended to avoid overwriting ``keras``'s ``call()`` and ``build()`` functions because of their sideeffects. Model blocks should be initialised at construction and if additional tensors are needed in this model they should be initialised in the ``__init__()`` function as well.
+    It is recommended to avoid overwriting ``keras``'s ``call()`` and ``build()`` functions because of their side effects. Model blocks should be initialised at construction, and if additional tensors are needed in this model, they should be initialised in the ``__init__()`` function as well.
 
     Inputs for the three (``get_loss()``, ``produce_metrics()`` and ``get_outputs()``) implemented functions must match and match with the return value of the model's batchprocessor's process_training_batch() function. The output of get_outputs()
     """
@@ -75,11 +75,11 @@ class BaseTensorflowModel(keras.Model):
         raise NotImplementedError('Must implement `produce_metrics` function')
 
     def get_outputs(self, **kwargs):
-        """This function returns the models response for an input, when the model deployed this is the interface to the calculations.
+        """This function returns the models response for an input. When the model is deployed, this is the interface to the calculations.
 
-        The ``get_outputs()`` function must specify the signiture with the ``@tf.function`` decorator because this enables the model to be packaged and to be deployed as a standalone model. See the Tutorial for example.
+        The ``get_outputs()`` function must specify the signature with the ``@tf.function`` decorator because this enables the model to be packaged and to be deployed as a standalone model. See the Tutorial for an example.
 
-        Must return a single value that will be converted to the output datamodel class by the model's batch processor.
+        Must return a single value that will be converted to the output data model class by the model's batch processor.
 
         Parameters
         ----------
@@ -89,6 +89,6 @@ class BaseTensorflowModel(keras.Model):
         raise NotImplementedError('Must implement `get_outputs` function')
 
     def get_evaluation_outputs(self, **kwargs):
-        """If evaluation is different from training that can be implemented here as during evaluation :class:`.TensorflowModelManager` actually calls this and this calls ``self.get_outputs``. Same rules apply as for that.
+        """If the evaluation is different from the training, that can be implemented here. During evaluation :class:`.TensorflowModelManager` calls this actually and in turn this calls ``self.get_outputs``.
         """
         return self.get_outputs(**kwargs)

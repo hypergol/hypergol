@@ -25,7 +25,7 @@ class DataSetDefFile:
         return json.loads(open(self.defFilename, 'rt').read())
 
     def make_def_file(self):
-        """Creates the ``.def`` file, adds the dependencies ``.def`` data with that dataset's own checksum (which is the SHA1 of the contend of that dataset's ``.chk`` file)
+        """Creates the ``.def`` file, adds the dependencies ``.def`` data with that dataset's own checksum (which is the SHA1 of the content of that dataset's ``.chk`` file)
         """
         dependencyData = []
         for dataset in self.dependencies:
@@ -57,5 +57,5 @@ class DataSetDefFile:
             defFileData['chunkCount'] == self.dataset.chunkCount
         )
         if not isDefValuesMatch:
-            raise DatasetDefFileDoesNotMatchException('The defintion of the dataset class does not match the def file')
+            raise DatasetDefFileDoesNotMatchException('The definition of the dataset class does not match the def file.')
         return True

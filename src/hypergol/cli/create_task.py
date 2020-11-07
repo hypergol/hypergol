@@ -9,7 +9,7 @@ from hypergol.hypergol_project import HypergolProject
 def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False, simple=False):
     """Generates task class from the parameters derived from :class:`.Source`, :class:`.SimpleTask` or :class:`.Task` (default)
 
-    Fails if the target file already exist unless ``force=True`` or ``--force`` in CLI is set.
+    Fails if the target file already exists unless ``force=True`` or ``--force`` in CLI is set.
 
     The base class can be set by either ``--source`` or ``--simple`` switches.
 

@@ -7,7 +7,7 @@ from hypergol.hypergol_project import HypergolProject
 
 
 def create_model(modelName, trainingClass, evaluationClass, inputClass, outputClass, *args, projectDirectory='.', dryrun=None, force=None):
-    """Generates stubs for the Tensorflow model, data processing class and training script and shell script to run it from command line. Shell scripts will be located in the project main directory (which should be the current directory when running them) and model files will be located in ``project_name/models/model_name/*.py``.
+    """Generates stubs for the Tensorflow model, data processing class and training script and shell script to run it from the command line. Shell scripts will be located in the project main directory (which should be the current directory when running them) and model files will be located in ``project_name/models/model_name/*.py``.
 
     After creation the user must implement the ``process_training_batch()`` , ``process_evaluation_batch()``, ``process_input_batch()`` and ``process_output_batch`` member functions that take  ``trainingClass``, ``evaluationClass``, ``inputClass`` and ``outputClass`` respectively.
 
@@ -26,7 +26,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
     inputClass : BaseData
         Datamodel class (must exist) that will be used as the input when serving the model
     outputClass : BaseData
-        Datamodel class (must exist) that will be return as output when serving the model
+        Datamodel class (must exist) that will be returned as output when serving the model
     *args : BaseTensorflowModelBlock
         Names of blocks that will build up the model
     """

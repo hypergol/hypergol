@@ -15,11 +15,11 @@ class BaseData(Repr):
 
     Extends the Repr convenience base class that provides printing facilities.
 
-    Provides to_data and from_data serialisation interface.
+    Provides to_data and from_data serialisation interfaces.
 
     Provides get_id, get_hash_id interfaces.
 
-    Provide test capabilities for all of the above so changes to the derived classes can be checked quickly.
+    Provides test capabilities for all of the above so changes to the derived classes can be checked quickly.
     """
 
     def __eq__(self, other):
@@ -42,7 +42,7 @@ class BaseData(Repr):
         return self.get_id()
 
     def to_data(self):
-        """converts class to dictionary, usually overriden"""
+        """Converts class to a dictionary, usually overridden"""
         return self.__dict__.copy()
 
     @staticmethod
@@ -55,7 +55,7 @@ class BaseData(Repr):
 
     @classmethod
     def from_data(cls, data):
-        """creates a class from data, usually overriden
+        """Creates a class from data, usually overridden
 
         Parameters
         ----------
@@ -75,7 +75,7 @@ class BaseData(Repr):
         return True
 
     def test_to_data(self):
-        """Tests if the output of the derived class's to_data() function can be converted to string by ``json.dumps()``."""
+        """Tests if the output of the derived class's to_data() function can be converted to a string by ``json.dumps()``"""
         originalData = self.__dict__.copy()
         data = self.to_data()
         for k, v in self.__dict__.items():
@@ -88,7 +88,7 @@ class BaseData(Repr):
         return True
 
     def test_from_data(self):
-        """Tests if a roundtrip of ``self.from_data(self.to_data())`` modifies the class."""
+        """Tests if a roundtrip of ``self.from_data(self.to_data())`` modifies the class"""
         selfCopy = self.from_data(self.to_data())
         if not isinstance(self, type(selfCopy)):
             raise AssertionError(f'{self.__class__.__name__}.from_data() does not return the correct type: {self.__class__.__name__} vs {selfCopy.__class__.__name__}, from_data() return value should be "cls(**data)"')

@@ -4,7 +4,7 @@ class BaseBatchProcessor:
     """
     Base class for batch processors.
 
-    Converts Hypergol datasets to batches for training models and converts tensorflow model outputs to Datamodel classes and then saves them.
+    Converts Hypergol datasets to batches for training models and converts TensorFlow model outputs to data model classes and then saves them.
     """
 
     def __init__(self, inputDataset, inputBatchSize, outputDataset):
@@ -71,7 +71,7 @@ class BaseBatchProcessor:
             self.datasetWriter.append(value)
 
     def process_output_batch(self, outputs):
-        """Process the tensorflow model's output into data model classes
+        """Process the TensorFlow model's output into data model classes
 
         Parameters
         ----------
@@ -98,7 +98,7 @@ class BaseBatchProcessor:
     def finish(self):
         """:class:`.TensorflowModelManager` calls this to close the output after writing
 
-        This function runs even if training was stopped by Ctrl-C, otherwise the Dataset would remain in an undefinied state (with no ``.chk`` file).
+        This function runs even if the training was stopped by Ctrl-C. Otherwise, the Dataset would remain in an undefined state (with no ``.chk`` file).
         """
         if self.datasetWriter is not None:
             self.datasetWriter.close()

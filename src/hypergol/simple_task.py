@@ -4,11 +4,11 @@ from hypergol.base_task import JobReport
 
 
 class SimpleTask(BaseTask):
-    """Class to do simple update style processing, each :func:`run()` call must get inputs with the same if and create a class that have the same id as well.
+    """Class to do simple update style processing, each :func:`run()` call must get inputs with the same if and create a class that has the same id as well
     """
 
     def execute(self, job: Job):
-        """Organising the execution of the task, see Tutorial/SimpleTask for detailed description of steps
+        """Organising the execution of the task, see Tutorial/SimpleTask for a detailed description of steps
 
         Parameters
         ----------

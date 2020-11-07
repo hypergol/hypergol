@@ -86,7 +86,7 @@ class Dataset(Repr):
         Based on the mode if
 
         - mode=='w' : fails if the dataset already exists otherwise creates the ``.def`` file
-        - mode=='r' : fails if the dataset doesn't exist otherwise compares the data in the ``.def.`` file to the definiton in the class.
+        - mode=='r' : fails if the dataset doesn't exist otherwise compares the data in the ``.def.`` file to the definition in the class.
         - otherwise : fails due to unknown mode
         """
         if mode == 'w':
@@ -149,7 +149,7 @@ class Dataset(Repr):
 class DatasetReader(Repr):
     """Class to read from a dataset
 
-    Implements context manager and iterator, doesn't open any file until reading actually happen and then opens each chunk one by one.
+    Implements context manager and iterator. It doesn't open any file until any reading actually happens and then opens each chunk one by one.
     """
 
     def __init__(self, dataset):
@@ -183,7 +183,7 @@ class DatasetWriter(Repr):
         Parameters
         ----------
         dataset : Dataset
-            dataset to be written into, at this point it is already established that it doesn't yet exists
+            Dataset to be written into, at this point it is already established that it doesn't yet exist.
         """
         self.dataset = dataset
         self.dataChunks = {dataChunk.chunkId: dataChunk.open() for dataChunk in self.dataset.get_data_chunks(mode='w')}

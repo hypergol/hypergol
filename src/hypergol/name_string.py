@@ -6,7 +6,7 @@ class NameString:
 
         NameString stores the input string in components. The components are detected by splitting up the input name by single capital letters and underscores.
 
-        Irregular plural version can be supplied, otherwise an 'es' or 's' will be attached to the end to get plural form.
+        An irregular plural version can be supplied; otherwise an 'es' or 's' will be attached to the end to get plural form.
     """
 
     def __init__(self, name, plural=None):
@@ -17,7 +17,7 @@ class NameString:
         name : string
             String in any case
         plural: string (default=None)
-            If the plural form of a word is irregular, it can be provided here same style as the name
+            If the plural form of a word is irregular, it can be provided here the same style as the name
         """
 
         r1 = re.compile(r'(.)([A-Z][a-z]+)')
@@ -41,7 +41,7 @@ class NameString:
 
     @property
     def asFileName(self):
-        """returns the standard python filename
+        """Returns the standard python filename
 
         e.g.: HelloWorld -> hello_world.py
         """
@@ -49,7 +49,7 @@ class NameString:
 
     @property
     def asSnake(self):
-        """returns the string as snakecase
+        """Returns the string as snakecase
 
         e.g.: HelloWorld -> hello_world
         """
@@ -57,7 +57,7 @@ class NameString:
 
     @property
     def asClass(self):
-        """returns the string as a class name (PascalCase)
+        """Returns the string as a class name (PascalCase)
 
         e.g.: HelloWorld -> HelloWorld
         """
@@ -65,7 +65,7 @@ class NameString:
 
     @property
     def asVariable(self):
-        """returns the string as a variable name (camelCase)
+        """Returns the string as a variable name (camelCase)
 
         e.g.: HelloWorld -> helloWorld
         """
@@ -73,11 +73,11 @@ class NameString:
 
     @property
     def asPluralVariable(self):
-        """returns the string as a plural variable name
+        """Returns the string as a plural variable name
 
         e.g.: HelloWorld -> helloWorlds
 
-        used for autogenerating dataset variable names
+        Used for autogenerating dataset variable names
         """
         if len(self._pluralComponents) > 0:
             return self._pluralComponents[0].lower() + ''.join(self._pluralComponents[1:])
@@ -85,11 +85,11 @@ class NameString:
 
     @property
     def asPluralSnake(self):
-        """returns the string as a plural snake case name
+        """Returns the string as a plural snakecase name
 
         e.g.: HelloWorld -> hello_worlds
 
-        used for autogenerating dataset file names
+        Used for autogenerating dataset file names
         """
         if len(self._pluralComponents) > 0:
             return '_'.join(v.lower() for v in self._pluralComponents)

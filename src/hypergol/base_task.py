@@ -35,7 +35,7 @@ class Job(Repr):
 class JobReport(Repr):
     """Class for passing information from the tasks to the pipeline
 
-    Mainly used to pass the hash of the created chunk data for creating the output dataset's ``.chk`` file
+    Mainly used to pass the hash of the created chunk data for creating the output dataset's ``.chk`` file.
     """
 
     def __init__(self, outputChecksum):
@@ -67,7 +67,7 @@ class BaseTask(Repr):
         threads=None
             Number of threads this task should run parallel
         force=False
-            All input object's hashes must match in a single run() call use ``force=True`` to override this
+            All input object's hashes must match in a single run() call. Use ``force=True`` to override this.
         """
         if len(inputDatasets) == 0:
             raise ValueError('If there are no inputs to this task use Source')
@@ -94,7 +94,7 @@ class BaseTask(Repr):
             raise ValueError(f'different hashIds for input and output values in a single run() call, set force=True in {self.__class__.__name__} to continue')
 
     def _check_same_chunk_count(self):
-        """Raises error if any of the input/output datasets :term:`chunk count` differs, cannot be overriden by `force=True`"""
+        """Raises an error if any of the input/output datasets :term:`chunk count` differs, cannot be overridden by `force=True`"""
         chunkCount = self.inputDatasets[0].chunkCount
         for inputDataset in self.inputDatasets + self.loadedInputDatasets:
             if inputDataset.chunkCount != chunkCount:
@@ -130,7 +130,7 @@ class BaseTask(Repr):
         self.init()
 
     def init(self):
-        """User defined initialisation in each thread. Load files or complex classes here (e.g. a spacy model)"""
+        """User-defined initialisation in each thread. Load files or complex classes here (e.g. a spacy model)"""
 
     def log(self, message):
         """Standard logging"""
@@ -160,7 +160,7 @@ class BaseTask(Repr):
         Parameters
         ----------
         args: List[object]
-            list of single domain objects one from each `inputDataset` in the same order as in the task constuction then a list of list of domain objects which is the entire list from the `loadedInputDatasets` list.
+            list of single domain objects one from each `inputDataset` in the same order as in the task construction, after these a list of domain objects which is the entire list from the `loadedInputDatasets` list.
         """
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
 
@@ -169,4 +169,4 @@ class BaseTask(Repr):
         self.finish(jobReports=jobReports, threads=threads)
 
     def finish(self, jobReports, threads):
-        """User defined finalisation in each thread. Close filehandlers or release memory of non python objects here if necessary"""
+        """User-defined finalisation in each thread. Close file handlers or release memory of non-python objects here if necessary"""

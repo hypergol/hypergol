@@ -29,7 +29,7 @@ class Task(BaseTask):
         )
 
     def _get_temporary_dataset(self, inputChunkId):
-        """Based on the input chunk creates a temporary dataset and opens all chunks for writing, so the various output classes can be appended to the right chunk"""
+        """Based on the input chunk creates a temporary dataset and opens all chunks for writing so that the various output classes can be appended to the right chunk"""
         return self.datasetFactory.get(
             dataType=self.outputDataset.dataType,
             name=f'{self.outputDataset.name}_{inputChunkId}',
@@ -55,13 +55,14 @@ class Task(BaseTask):
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
 
     def finalise(self, jobReports, threads):
-        """After func:`execute` finished, all the temporary datasets are opened and copied into the the output dataset in a multithreaded way.
+        """After func:`execute` finished, all the temporary datasets are opened and copied into the output dataset in a multithreaded way.
 
         Parameters
         ----------
             jobReports : IGNORED
-                checksums's are recalculated for the actual output dataset
-            threads : number of concurent threads to do the merging
+                Checksums's are recalculated for the actual output dataset
+            threads :
+                Number of concurrent threads to do the merging
         """
         self.outputDataset.delete()
         jobs = [
@@ -92,7 +93,7 @@ class Task(BaseTask):
 
 
 def _merge_function(args):
-    """This is the actual function that is running multithreaded. Must be external to the class as after inititalise and execute, it is not possible to ensure that the task class is pickle-able.
+    """This is the actual function that is running multithreaded. This function must be external to the ``Task`` class because, after initialising and execution, it is not possible to ensure that the ``Task`` class is pickle-able.
 
     Returns the checksum so the caller can create the ``.chk`` file.
     """
