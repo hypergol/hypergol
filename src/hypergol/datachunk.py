@@ -17,9 +17,9 @@ class DataChunkChecksum(Repr):
 
 
 class DataChunk(Repr):
-    """This class represents the file that the data is actually stored in.
+    """This class represents the file that the data is actually stored in
 
-    When opened for writing it implements the :func:`append()` method and when reading the :func:`__iter__` iterator. Upon close it returns the checksum (SHA1 hash) of the the content that was written into it.
+    When opened for writing it implements the :func:`append()` method and when reading the :func:`__iter__` iterator. Upon close, it returns the checksum (SHA1 hash) of the content that was written into it.
 
     """
 
@@ -62,12 +62,12 @@ class DataChunk(Repr):
         return DataChunkChecksum(chunk=self, value=self.checksum)
 
     def append(self, value):
-        """Adds a datamodel object to the file, raises error if the type doesn't match the dataset's type or the hash of the object doesn't match the chunkId
+        """Adds a data model object to the file, raises an error if the type doesn't match the dataset's type or the hash of the object doesn't match the chunkId
 
         Parameters
         ----------
         value : object
-            Datamodel object matching the type of the Dataset this chunk belongs to
+            Data model object matching the type of the Dataset this chunk belongs to
         """
         if not isinstance(value, self.dataset.dataType):
             raise DatasetTypeDoesNotMatchDataTypeException(f"Trying to append an object of type {value.__class__.__name__} into a dataset of type {self.dataset.dataType.__name__}")

@@ -8,7 +8,7 @@ class SourceIteratorNotIterableException(Exception):
 
 
 class Source(Repr):
-    """Class for single threaded execution and creating datasets"""
+    """Class for single-threaded execution and creating datasets"""
 
     def __init__(self, outputDataset, logger=None):
         """

@@ -6,11 +6,11 @@ from tensorflow.python.keras import layers
 
 
 class BaseTensorflowModelBlock(layers.Layer):
-    """Subclasses tensorflow-keras layers to provide logical groupings of functionality/layers.
+    """Subclasses TensorFlow-Keras  layers to provide logical groupings of functionality/layers.
 
         Neither ``call()`` nor ``build()`` should be used as those won't be called eventually by the model
 
-        There is no delayed initialisation in Hypergol models.
+        There are no delayed initialisation in Hypergol models.
     """
 
     def __init__(self, *args, blockName=None, **kwargs):

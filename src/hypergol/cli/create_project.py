@@ -9,7 +9,7 @@ from hypergol.hypergol_project import HypergolProject
 def create_project(projectName, dryrun=None, force=None):
     """Generates the project directories and files
 
-    Fails if the target directory already exist unless ``force=True`` or ``--force`` in CLI is set.
+    Fails if the target directory already exists unless ``force=True`` or ``--force`` in CLI is set.
 
     Directories:
         - ``data_models`` with ``__init__.py``

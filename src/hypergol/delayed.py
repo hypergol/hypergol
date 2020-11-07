@@ -8,7 +8,7 @@ class Delayed:
         classType : Class
             type of the class to be created
         args, kwargs :
-            parameters of the class's constructor. If themselves cannot be pickled they should be turned into :class:`Delayed` as well
+            parameters of the class's constructor. If they cannot be pickled, they should be turned into :class:`Delayed` as well.
         """
         self.classType = classType
         self.args = args

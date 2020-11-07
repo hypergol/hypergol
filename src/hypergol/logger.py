@@ -2,7 +2,7 @@ import logging
 
 
 class Logger:
-    """Helper class to manage file based and screen based logging"""
+    """Helper class to manage file-based and screen-based logging"""
 
     CRITICAL = logging.CRITICAL
     ERROR = logging.ERROR

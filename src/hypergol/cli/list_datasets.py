@@ -11,7 +11,7 @@ def list_datasets(dataDirectory, projectDirectory='.', pattern=None):
     dataDirectory : string
         location of the project data
     projectDirectory : string (default ``.``)
-        location of data directory
+        location of the data directory
 
 
     Please see :func:`~hypergol.hypergol_project.HypergolProject.list_datasets` in :class:`HypergolProject` for details.
