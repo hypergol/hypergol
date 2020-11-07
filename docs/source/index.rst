@@ -21,7 +21,7 @@ Audience
 
 The audience for Hypergol is data scientists who need to deal with ad-hoc large data processing tasks on an ongoing basis. It replaces working with hard to replicate/iterate notebook based workflows with a version-controlled and streamlined process enabling the parallel processing of large datasets. On the other hand, it doesn't need the infrastructure of other ETL pipelines and can run on a machine of any size.
 
-It accelerates a project's start in experimental phase by code generation. Enables fast and efficient data processing by simple, map-reduce-like, single machine multithreaded pipeline.
+It accelerates a project's start in experimental phase by code generation. It also enables fast and efficient data processing by simple, map-reduce-like, single machine multithreaded pipeline.
 
 Free software
 -------------

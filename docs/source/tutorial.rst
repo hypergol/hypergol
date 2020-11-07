@@ -14,7 +14,7 @@ Make sure you are in the directory you intend to create the project into:
 
 .. code:: bash
 
-   $ python3 -m hypergol.cli.create_project <ProjectName>
+    $ python3 -m hypergol.cli.create_project <ProjectName>
 
 Project name must be camel-case, and the command will create a snake-case directory. See (insert link here) documentation for creating a project from python interactive shell or jupyter notebooks.
 
@@ -38,7 +38,7 @@ If you have dependencies that you will use in the future (e.g. ``numpy`` add the
    $ pip3 install -r requirements.txt
 
 Creating data model classes
---------------------------
+---------------------------
 
 The data model is the description of your project's data that your code operates on. Instead of raw numpy arrays or pandas dataframes, ``hypergol`` stores all data in these classes.  This enables us to create hierarchical structures and store them in files recursively, so you don't need to worry about loading and reloading complex data structures. This also helps to reason about and iterate on your code in case you need to change one of the objects and update a pipeline accordingly. Again, see (insert link here) documentation on how to create classes from interactive shells.
 
@@ -82,7 +82,7 @@ As you can see ``hypergol`` generated the class with the necessary imports (``da
 Also, the ``classId:int:id`` argument's ``id`` field made the field this class's id. It is assumed that this uniquely identifies this class so that the comparison will happen based on this/these fields. Multiple fields can be marked as ``id`` which will result in their tuple to be the id of this class. You do not necessarily need to specify an id field but only classes with id's can be types of datasets (see later, insert link here) and therefore stored in files, other classes can only be saved if they are part of another id-d class (also known as weak entities). Only ``int`` and ``str`` fields can be marked as ``id``.
 
 Creating classes that depend on other classes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Let's see a more complicated example to see hierarchical structures as well.
 
@@ -293,7 +293,7 @@ If you don't have any heavy-duty initialisation, you can delete the ``init()`` f
 Loaded Inputs
 ~~~~~~~~~~~~~
 
-Having the same id on the input and the output is a strong restriction. To circumvent this a limitation, each task can define a set of datasets in ``loadedInputs``. The objects from these are loaded into lists into the task's ``self.loadedData`` field and available both in the ``init()`` and in the ``run()`` functions. The ``init()`` function is ideal for converting these into a map for example:
+Having the same id on the input and the output is a strong restriction. To circumvent this limitation, each task can define a set of datasets in ``loadedInputs``. The objects from these are loaded into lists into the task's ``self.loadedData`` field and available both in the ``init()`` and in the ``run()`` functions. The ``init()`` function is ideal for converting these into a map for example:
 
 .. code-block:: python
 
@@ -329,7 +329,7 @@ This will generate the following stubs:
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
         self.output.append(data)
 
-From interface purposes it works exactly as ``SimpleTask``, apart from a ``self.output`` field is available in the ``run()`` function. The ``run()`` function can create any number of objects that match the output dataset's type and append it to the self.output field. Regardless of its id/hash_id it will end up in the right chunk in the output dataset. The pipeline will solve the sorting in the ``finalise `` function by launching a smaller, I/O only multithreaded task.
+From interface purposes it works exactly as ``SimpleTask``, apart from a ``self.output`` field is available in the ``run()`` function. The ``run()`` function can create any number of objects that match the output dataset's type and append it to the self.output field. Regardless of its id/hash_id it will end up in the right chunk in the output dataset. The pipeline will solve the sorting in the ``finalise`` function by launching a smaller, I/O only multithreaded task.
 
 Creating a pipeline
 -------------------
