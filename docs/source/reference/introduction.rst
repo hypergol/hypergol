@@ -14,10 +14,12 @@ Datasets
 --------
 
 The :class:`Dataset` object is the primary storage format in Hypergol. It enables parallel processing by the pipeline and also interactive access from notebooks. The following circumstances of the creation of the file are saved into the `.def` file:
--the location of the file
--the type of data stored in it
--the git commit at the time
--the committer's name.
+
+-  the location of the file
+-  the type of data stored in it
+-  the git commit at the time
+-  the committer's name.
+
 The gzipped JSON files content (before compression) is hashed with SHA1 which is then saved into ``.chk`` file so it can be verified that the file wasn't changed. The dataset's checksum is calculated by hashing the entire ``.chk`` file with SHA1, as this contains the hash of all the files in the dataset it uniquely verifies the dataset. No part of it can be changed and have the same hash. The hash of any dataset used by the pipeline in the creation will be added to the ``.def`` file as well. This is a recursive operation, so each dataset has the hashes of its complete history. This way, the entire processing is verified by a single hash.
 
 Tasks
