@@ -183,7 +183,7 @@ class DatasetWriter(Repr):
         Parameters
         ----------
         dataset : Dataset
-            dataset to be written into, at this point it is already established that it doesn't yet exist
+            Dataset to be written into, at this point it is already established that it doesn't yet exist.
         """
         self.dataset = dataset
         self.dataChunks = {dataChunk.chunkId: dataChunk.open() for dataChunk in self.dataset.get_data_chunks(mode='w')}

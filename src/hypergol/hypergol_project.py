@@ -328,7 +328,7 @@ class HypergolProject:
         Parameters
         ----------
         commit : string
-            the git commit from where the comparison starts
+            The git commit from where the comparison starts
         *args : List[string]
             List of class names to compare, if empty it compares all
         """
