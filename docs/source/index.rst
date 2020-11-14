@@ -1,3 +1,6 @@
+.. meta::
+   :google-site-verification: 0I5MQxqHDvxeNRoP4W8z1Wli0ur-W1kdXFv-lfLSlH8
+
 .. _contents:
 
 This project is under construction; please contact the authors with feedback by the `Contact page <contact.html#contact>`_.
