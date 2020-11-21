@@ -1,10 +1,12 @@
 import json
+import time
 from typing import List
 
 import fire
 import uvicorn
 import tensorflow as tf
 from fastapi import FastAPI
+from fastapi import Request
 from hypergol.utils import create_pydantic_type
 
 from models.{{ modelName.asSnake }}.{{ modelName.asSnake }}_batch_processor import {{ modelName }}BatchProcessor
@@ -38,6 +40,15 @@ batchProcessor = {{ modelName }}BatchProcessor(
 )
 pyDantic{{ inputClass }} = create_pydantic_type({{ inputClass }})
 pyDantic{{ outputClass }} = create_pydantic_type({{ outputClass }})
+
+
+@app.middleware("http")
+async def add_headers(request: Request, call_next):
+    startTime = time.time()
+    response = await call_next(request)
+    response.headers["X-Model-Long-Name"] = model.get_long_name().numpy().decode('utf-8')
+    response.headers["X-Process-Time"] = str(time.time() - startTime)
+    return response
 
 
 @app.get("/")
