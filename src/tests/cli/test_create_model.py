@@ -178,6 +178,7 @@ import fire
 import uvicorn
 import tensorflow as tf
 from fastapi import FastAPI
+from fastapi import Request
 from hypergol.utils import create_pydantic_type
 
 from models.test_model.test_model_batch_processor import TestModelBatchProcessor
@@ -211,6 +212,15 @@ batchProcessor = TestModelBatchProcessor(
 )
 pyDanticTestInput = create_pydantic_type(TestInput)
 pyDanticTestOutput = create_pydantic_type(TestOutput)
+
+
+@app.middleware("http")
+async def add_headers(request: Request, call_next):
+    startTime = time.time()
+    response = await call_next(request)
+    response.headers["X-Model-Long-Name"] = model.get_long_name().numpy().decode('utf-8')
+    response.headers["X-Process-Time"] = str(time.time() - startTime)
+    return response
 
 
 @app.get("/")
