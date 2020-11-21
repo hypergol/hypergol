@@ -22,8 +22,12 @@ class BaseTensorflowModel(keras.Model):
         ----------
         block1 : BaseTensorFlowBlock
             pass in block instances rather than construct them here
-        other parameters :
-
+        modelName : string
+            informal name of the model, defaults to the class name
+        longName : string
+            name of the model that uniquely identifies this current instance. It is set to <class name>_<training date>_<commit hash> by the generated training script
+        inputDatasetChkFileChecksum : string
+            checksum of the ``.chk`` file of the input dataset used in the training. This enables datalineage.
         """
         super(BaseTensorflowModel, self).__init__(**kwargs)
         self.modelName = modelName or self.__class__.__name__

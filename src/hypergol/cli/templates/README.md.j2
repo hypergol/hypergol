@@ -96,7 +96,7 @@ response = json.loads(requests.get('http://0.0.0.0:8000', headers={'accept': 'ap
 modelLongName = response['model']
 ```
 
-This allows to verify if indeed the intended model is served. The generated training script sets training day and the commit hash at that point to be part of the long name and to ensure that the exact conditions of training are available at serving. Long name should be used in logging to identify which model created an output.
+This allows to verify if indeed the intended model is served. The generated training script sets training day and the commit hash at that point to be part of the long name and to ensure that the exact conditions of training are available at serving. Long name should be used in logging to identify which model created an output. From v0.0.10 the long name is returned in the header of the response of `/output` endpoint as well in the `x-model-long-name` field.
 
 To get the response of the model to a list of objects, see example below. Replace `ExampleOutput` with the correct output type and load a dataset into `ds`, use `list_datasets` from above to do this.
 
@@ -121,6 +121,7 @@ response = requests.post(
     data=json.dumps(values)
 )
 outputs = [ExampleOutput.from_data(v) for v in json.loads(response.text)]
+modelLongName = response.headers['x-model-long-name']
 ```
 
 It is not recommended to do large scale evaluation through the API as the overhead per object is too high and it is single threaded.

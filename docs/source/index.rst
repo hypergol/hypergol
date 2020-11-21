@@ -30,8 +30,12 @@ Free software
 -------------
 
 Hypergol is free software; you can redistribute it and/or modify it under the
-terms of the :doc:`MIT </license>`.  We welcome contributions.
-Join us on `GitHub <https://github.com/hypergol/hypergol>`_.
+terms of the :doc:`MIT </license>` license.  We welcome contributions.
+
+Join us
+-------
+
+Join us on `GitHub <https://github.com/hypergol/hypergol>`_ or on `Slack <https://bit.ly/hypergol-slack>`_.
 
 History
 -------
