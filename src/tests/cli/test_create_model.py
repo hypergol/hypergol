@@ -172,6 +172,7 @@ python3 \\
 
 TEST_SERVE = """
 import json
+import time
 from typing import List
 
 import fire
