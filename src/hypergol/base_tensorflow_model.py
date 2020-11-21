@@ -16,7 +16,7 @@ class BaseTensorflowModel(keras.Model):
     Inputs for the three (``get_loss()``, ``produce_metrics()`` and ``get_outputs()``) implemented functions must match and match with the return value of the model's batchprocessor's process_training_batch() function. The output of get_outputs()
     """
 
-    def __init__(self, modelName=None, longName=None, **kwargs):
+    def __init__(self, modelName=None, longName=None, inputDatasetChkFileChecksum=None, **kwargs):
         """
         Parameters
         ----------
@@ -28,10 +28,15 @@ class BaseTensorflowModel(keras.Model):
         super(BaseTensorflowModel, self).__init__(**kwargs)
         self.modelName = modelName or self.__class__.__name__
         self.longName = longName or self.modelName
+        self.inputDatasetChkFileChecksum = inputDatasetChkFileChecksum or ''
 
     @tf.function(input_signature=[])
     def get_long_name(self):
         return self.longName
+
+    @tf.function(input_signature=[])
+    def get_input_dataset_chk_file_checksum(self):
+        return self.inputDatasetChkFileChecksum
 
     def get_model_blocks(self):
         """Returns blocks that are both member variables and arguments of the constructor for serialisation"""
