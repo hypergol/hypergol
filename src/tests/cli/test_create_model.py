@@ -134,6 +134,7 @@ def train_test_model(force=False):
     testModel = TestModel(
         modelName=TestModel.__name__,
         longName=f'{TestModel.__name__}_{date.today().strftime("%Y%m%d")}_{project.repoManager.commitHash}',
+        inputDatasetChkFileCheckSum=f'{batchProcessor.inputDataset.chkFile.get_checksum()}',
         testBlock1=TestBlock1(
             blockArgument1='',
             blockArgument2='',

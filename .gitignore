@@ -1,6 +1,7 @@
 .venv/
 .vscode/
 .idea/
+.DS_Store
 __pycache__
 __pycache__/*
 hypergol.egg-info

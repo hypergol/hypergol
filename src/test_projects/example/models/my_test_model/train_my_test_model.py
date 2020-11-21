@@ -26,6 +26,7 @@ def train_my_test_model(force=False):
     myTestModel = MyTestModel(
         modelName=MyTestModel.__name__,
         longName=f'{MyTestModel.__name__}_{date.today().strftime("%Y%m%d")}_{project.repoManager.commitHash}',
+        inputDatasetChkFileCheckSum=f'{batchProcessor.inputDataset.chkFile.get_checksum()}',
         embeddingBlock=EmbeddingBlock(
             blockArgument1='',
             blockArgument2='',
