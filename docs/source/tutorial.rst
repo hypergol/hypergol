@@ -441,6 +441,8 @@ The training script uses :class:`.HypergolProject` to find and maintain ``Datase
 
 Training can be started with the provided shell script. As with other Hypergol functionalities, parameters can be passed from the command line or the script to the python code through the ``fire`` package's functionalities.
 
+Hypergol TensorFlow models have two identifiers embedded into the packaged models: "longName" "inputDatasetChkFileChecksum" these can be accessed with the ``get_long_name`` and ``get_input_dataset_chk_file_checksum`` functions respectively. Given these are TensorFlow functions you can extract the actual string with ``model.get_long_name().numpy().decode('utf-8')`` for example for the long name. The long name is <classname>_<traind_date>_<git commit hash> format which can be changed in the training script. Out of these the commit hash uniquely identifies the model the rest is only there for human readability reasons. The ``inputDatasetChkFileChecksum`` is the SHA1 checksum of the training dataset's ``.chk`` file. This can be verified with the ``sha1sum <dataset>.chk`` command or the ``shasum <dataset>.chk`` on a Mac. Both of these are included for data lineage reasons so the origins of an eventual output in a client can be traced back to the version of the training code and the data that was used. Because datasets store their entire lineage of dependent datasets, this can be traced back to the source of the data providing full end-to-end transparency over model decisions.
+
 One important issue: Datasets must be closed properly to generate their `.chk` file to be openable again. Therefore the entire `train/evaluation` loop runs in a `try/finally` block, and the :class:`TensorflowModelManager`'s ``finish()`` function is guaranteed to be called, this, in turn, calls the :class:`BaseBatchProcessor`'s ``finish()`` function and that closes the OutputDataset so it can be opened at a later stage for evaluation.
 
 The evaluation part is to debug the model at the early stages of the training. Large scale evaluation should happen parallelised through a dedicated ``Hypergol`` pipeline.
@@ -454,7 +456,7 @@ Model serving is done by `FastAPI <https://https://fastapi.tiangolo.com/>`__ and
 
     MODEL_DIRECTORY = '<data_directory>/<project>/<branch>/models/<model_name>/<epoch_number>'
 
-The ``/`` endpoint provides information on the served model. The most important among these are the models ``"long name"``, this contains the date the training happened and the repo's commit hash at that point. This is an optional feature set in the training python script so can be changed freely to something else. This information enables data lineage if saved in logs with the calculated outputs, which is useful in case of historical analysis of the various version of the model. To call it with ``requests``:
+The ``/`` endpoint provides information on the served model. The most important among these are the models ``"long name"``. (``UPDATE``: From version 0.0.10 the response header of the ``/output`` endpoint has this information as well, see example below.) This contains the date the training happened and the repo's commit hash at that point. This is an optional feature set in the training python script so can be changed freely to something else. This information enables data lineage if saved in logs with the calculated outputs, which is useful in case of historical analysis of the various version of the model. To call it with ``requests``:
 
 .. code-block:: python
 
@@ -479,7 +481,8 @@ The ``/output`` endpoint accepts a list of the same types that ``BatchProcessor.
 
 .. code-block:: python
 
-    sys.path.insert(0, '<project_directory>/<example_model>')
+    sys.path.insert(0, '<project_directory>')
+    import json
     import requests
     from itertools import islice
 
@@ -499,5 +502,33 @@ The ``/output`` endpoint accepts a list of the same types that ``BatchProcessor.
         data=json.dumps(values)
     )
     outputs = [ExampleOutput.from_data(v) for v in json.loads(response.text)]
+    print(response.headers['x-model-long-name']
+
+From version 0.0.10 the response header contains the model long name as well in the ``x-model-long-name`` field, so the caller client can record it and use for end-to-end data lineage.
 
 For large scale analysis, it is not recommended to use the deployed model due to multiple factors: The network latency, the conversion back and forth and the single-threaded ness of the execution. If a large set of outputs must be calculated a dedicated pipeline with many threads is the best way forward. Use the implementation of the ``/output`` endpoint for reference (without the ``pydantic`` conversion.
+
+Utilities
+---------
+
+The following command lists all available datasets with their construction commands so they can be used in interactive environments
+
+.. code-block:: bash
+
+    $ python -m hypergol.cli.list_datasets <data_directory>
+
+Use the ``--pattern="<regex>"`` feature to filter for a specific (lowercase) dataset directory.
+
+Alternatively the DatasetFactory can create dataset classes:
+
+.. code-block:: python
+
+    import sys
+    sys.path.insert(0, '<project_directory>')
+    from hypergol import HypergolProject
+    from data_models.<example_class> import ExampleClass
+    hypergolProject=HypergolProject(
+        projectDirectory='<project_directory>',
+        dataDirectory='<data_directory>'
+    )
+    exampleClasses = hypergolProject.datasetFactory.get(dataType=ExampleClass, name='example_classes')
