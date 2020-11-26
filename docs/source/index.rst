@@ -35,7 +35,7 @@ terms of the :doc:`MIT </license>` license.  We welcome contributions.
 Join us
 -------
 
-Join us on `GitHub <https://github.com/hypergol/hypergol>`_ or on `Slack <https://bit.ly/hypergol-slack>`_.
+Join us on `GitHub <https://github.com/hypergol/hypergol>`_ or on `Slack <https://hypergol.ml/slack>`_.
 
 History
 -------
