@@ -25,6 +25,7 @@ The example assumes that you created an empty (no ``README.md`` and ``.gitignore
    $ deactivate
    $ cd <project_name>
    $ git init
+   $ git add .
    $ git commit -m "first commit"
    $ git remote add origin git@github.com:<your_user_name>/<project_name>.git
    $ git push -u origin master
