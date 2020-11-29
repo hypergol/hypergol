@@ -285,7 +285,7 @@ class TestCreateModel(HypergolCreateTestCase):
         super().setUp()
         self.project = HypergolProject(
             projectDirectory=self.projectDirectory,
-            repoManager=TestRepoManager()
+            repoManager=TestRepoManager(raiseIfDirty=False)
         )
         self.project.create_project_directory()
         self.project.create_models_directory()

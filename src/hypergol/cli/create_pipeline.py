@@ -6,7 +6,7 @@ from hypergol.name_string import NameString
 from hypergol.hypergol_project import HypergolProject
 
 
-def create_pipeline(pipeLineName, *args, projectDirectory='.', dryrun=None, force=None):
+def create_pipeline(pipeLineName, *args, projectDirectory='.', dryrun=None, force=None, project=None):
     """Generates a pipeline script from the parameters
 
     Fails if the target file already exists unless ``force=True`` or ``--force`` in CLI is set.
@@ -35,7 +35,8 @@ def create_pipeline(pipeLineName, *args, projectDirectory='.', dryrun=None, forc
         The generated shell script to run the pipeline if ``dryrun`` is specified
 
     """
-    project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
+    if project is None:
+        project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     pipeLineName = NameString(pipeLineName)
     dependencies = [NameString(value) for value in args]
     project.check_dependencies(dependencies)

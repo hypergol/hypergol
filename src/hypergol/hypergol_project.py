@@ -49,7 +49,7 @@ class RepoManager:
 
     """
 
-    def __init__(self, repoDirectory=None, raiseIfDirty=False):
+    def __init__(self, repoDirectory=None, raiseIfDirty=True):
         """
         Parameters
         ----------
@@ -59,6 +59,7 @@ class RepoManager:
             if set and the repo contains uncommitted code, it raises an error
         """
         self.repoDirectory = repoDirectory
+        self.raiseIfDirty = raiseIfDirty
         self.repoExists = False
         try:
             repo = Repo(path=self.repoDirectory)
@@ -70,7 +71,7 @@ class RepoManager:
             print(f'No git repository in {self.repoDirectory}')
             return
         if repo.is_dirty():
-            if raiseIfDirty:
+            if self.raiseIfDirty:
                 raise ValueError("The current git repo is dirty; please commit your work before you run the pipeline.")
             print('Warning! The current git repo is dirty; this will result in incorrect commit hash in datasets.')
         try:

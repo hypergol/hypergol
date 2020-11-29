@@ -1,7 +1,9 @@
 from unittest import TestCase
 import mock
 
+from hypergol.hypergol_project import HypergolProject
 from hypergol.cli.create_data_model import create_data_model
+from tests.hypergol_test_case import TestRepoManager
 
 
 TEST_CLASS = """
@@ -92,23 +94,36 @@ class Test(BaseData):
 
 class TestCreateDataModel(TestCase):
 
+    def __init__(self, methodName):
+        super(TestCreateDataModel, self).__init__(methodName=methodName)
+        self.project = None
+
+    def setUp(self):
+        super().setUp()
+        self.project = HypergolProject(
+            projectDirectory='.',
+            dryrun=True,
+            force=None,
+            repoManager=TestRepoManager(raiseIfDirty=False)
+        )
+
     def test_create_data_model_simple(self):
-        result = create_data_model('Test', 'testId:int:id', dryrun=True)
+        result = create_data_model('Test', 'testId:int:id', dryrun=True, project=self.project)
         self.assertEqual(result[0], TEST_CLASS)
 
     def test_create_data_model_no_id(self):
-        result = create_data_model('Test', 'testId:int', dryrun=True)
+        result = create_data_model('Test', 'testId:int', dryrun=True, project=self.project)
         self.assertEqual(result[0], TEST_CLASS_NO_ID)
 
     def test_create_data_model_with_converter(self):
-        result = create_data_model('Test', 'testId:int', 'dt:datetime', dryrun=True)
+        result = create_data_model('Test', 'testId:int', 'dt:datetime', dryrun=True, project=self.project)
         self.assertEqual(result[0], TEST_CLASS_WITH_CONVERTER)
 
     def test_create_data_model_with_list(self):
-        result = create_data_model('Test', 'testId:int', 'values:List[int]', dryrun=True)
+        result = create_data_model('Test', 'testId:int', 'values:List[int]', dryrun=True, project=self.project)
         self.assertEqual(result[0], TEST_CLASS_WITH_LIST)
 
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_data_model_class', side_effect=lambda x: x.asClass == 'OtherTest')
     def test_create_data_model_with_data_model_type(self, is_data_model_class):
-        result = create_data_model('Test', 'testId:int', 'values:List[OtherTest]', dryrun=True)
+        result = create_data_model('Test', 'testId:int', 'values:List[OtherTest]', dryrun=True, project=self.project)
         self.assertEqual(result[0], TEST_CLASS_WITH_DATA_MODEL_DEPENDENCY)

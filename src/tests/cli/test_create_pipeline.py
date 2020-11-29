@@ -76,7 +76,7 @@ class TestCreatePipeline(HypergolCreateTestCase):
         super().setUp()
         self.project = HypergolProject(
             projectDirectory=self.projectDirectory,
-            repoManager=TestRepoManager()
+            repoManager=TestRepoManager(raiseIfDirty=False)
         )
         self.project.create_project_directory()
         self.project.create_pipelines_directory()
@@ -90,6 +90,6 @@ class TestCreatePipeline(HypergolCreateTestCase):
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_data_model_class', side_effect=lambda x: x.asClass in ['DataModelTestClass'])
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_task_class', side_effect=lambda x: x.asClass in ['OtherTask', 'ExampleSource'])
     def test_create_pipeline_creates_content(self, mock_is_task_class, mock_is_data_model_class, mock_check_dependencies):
-        content, scriptContent = create_pipeline('TestPipeline', 'DataModelTestClass', 'ExampleSource', 'OtherTask', dryrun=True)
+        content, scriptContent = create_pipeline('TestPipeline', 'DataModelTestClass', 'ExampleSource', 'OtherTask', projectDirectory='test_project', dryrun=True)
         self.assertEqual(content, TEST_CONTENT)
         self.assertEqual(scriptContent, TEST_SHELL)
