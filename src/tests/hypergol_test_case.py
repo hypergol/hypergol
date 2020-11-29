@@ -47,7 +47,8 @@ class DataClass3(BaseData):
 
 class TestRepoManager:
 
-    def __init__(self, repoExists=None, commitHash=None, commitMessage=None, comitterName=None, comitterEmail=None, branchName=None):
+    def __init__(self, raiseIfDirty, repoExists=None, commitHash=None, commitMessage=None, comitterName=None, comitterEmail=None, branchName=None):
+        self.raiseIfDirty = raiseIfDirty
         self.repoExists = repoExists or True
         self.commitHash = commitHash or '0000000000000000000000000000000000000001'
         self.commitMessage = commitMessage or 'Test commit message.'

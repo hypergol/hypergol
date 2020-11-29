@@ -49,7 +49,7 @@ class TestTensorflowModelManager(HypergolTestCase):
         self.project = HypergolProject(
             projectDirectory='DOESNOTEXIST',
             dataDirectory=self.location,
-            repoManager=TestRepoManager()
+            repoManager=TestRepoManager(raiseIfDirty=False)
         )
         self.modelManager = TensorflowModelManager(
             model=self.model,

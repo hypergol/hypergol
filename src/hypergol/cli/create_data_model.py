@@ -82,7 +82,7 @@ class DataModel:
             raise ValueError(f'Unknown type: {value}')
 
 
-def create_data_model(className, *args, projectDirectory='.', dryrun=None, force=None):
+def create_data_model(className, *args, projectDirectory='.', dryrun=None, force=None, project=None):
     """Generates domain class from the parameters derived from :class:`.BaseData`
 
     Fails if the target file already exists unless ``force=True`` or ``--force`` in CLI is set.
@@ -107,7 +107,8 @@ def create_data_model(className, *args, projectDirectory='.', dryrun=None, force
     content : string
         The generated code if ``dryrun`` is specified
     """
-    project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
+    if project is None:
+        project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     dataModel = DataModel(className=NameString(className), project=project)
     for value in args:
         dataModel.process_inputs(value)
