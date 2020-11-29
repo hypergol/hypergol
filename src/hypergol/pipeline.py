@@ -3,6 +3,7 @@ from multiprocessing import Pool
 from hypergol.source import Source
 from hypergol.simple_task import SimpleTask
 from hypergol.task import Task
+from hypergol.dataset import DatasetAlreadyExistsException
 
 
 class Pipeline:
@@ -26,6 +27,9 @@ class Pipeline:
         threads : int = 1
             Number of threads to run
         """
+        for task in self.tasks:
+            if task.outputDataset.exists():
+                raise DatasetAlreadyExistsException(f"Dataset {task.outputDataset.defFilename} already exist, delete the dataset first with Dataset.delete()")
         for task in self.tasks:
             if isinstance(task, Source):
                 task.execute()
