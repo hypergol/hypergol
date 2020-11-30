@@ -54,15 +54,15 @@ def create_project(projectName, dryrun=None, force=None):
     project.create_blocks_directory()
     project.render_simple(templateName='__init__.py.j2', filePath=Path(project.blocksPath, '__init__.py'))
     project.create_tests_directory()
-    project.render_executable(templateName='make_venv.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'make_venv.sh'))
-    project.render_executable(templateName='run_tests.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'run_tests.sh'))
-    project.render_executable(templateName='run_pylint.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'run_pylint.sh'))
-    project.render_simple(templateName='requirements.txt.j2', filePath=Path(project.projectDirectory, 'requirements.txt'))
-    project.render_simple(templateName='.gitignore.j2', filePath=Path(project.projectDirectory, '.gitignore'))
-    project.render_simple(templateName='README.md.j2', filePath=Path(project.projectDirectory, 'README.md'))
-    project.render_simple(templateName='pylintrc.j2', filePath=Path(project.projectDirectory, 'pylintrc'))
-
-    return project.cli_final_message(creationType='Project', name=projectName, content=('', ))
+    makeVenvScript = project.render_executable(templateName='make_venv.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'make_venv.sh'))
+    runTestScript = project.render_executable(templateName='run_tests.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'run_tests.sh'))
+    runPylintScript = project.render_executable(templateName='run_pylint.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'run_pylint.sh'))
+    requirementsContent = project.render_simple(templateName='requirements.txt.j2', filePath=Path(project.projectDirectory, 'requirements.txt'))
+    gitignoreContent = project.render_simple(templateName='.gitignore.j2', filePath=Path(project.projectDirectory, '.gitignore'))
+    readmeContent = project.render_simple(templateName='README.md.j2', filePath=Path(project.projectDirectory, 'README.md'))
+    pylintrcContent = project.render_simple(templateName='pylintrc.j2', filePath=Path(project.projectDirectory, 'pylintrc'))
+    allContent = (makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, pylintrcContent)
+    return project.cli_final_message(creationType='Project', name=projectName, content=allContent)
 
 
 if __name__ == "__main__":
