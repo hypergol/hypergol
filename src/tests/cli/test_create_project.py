@@ -8,6 +8,50 @@ from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 from tests.cli.hypergol_create_test_case import delete_if_exists
 
 
+MAKE_VENV_SCRIPT = """
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install --upgrade pip
+pip3 install setuptools==47.1.1
+pip3 install wheel
+pip3 install -r requirements.txt
+""".lstrip()
+
+RUN_TEST_SCRIPT = """
+export PYTHONPATH="${PWD}/..:${PWD}/../..:"
+nose2 -s tests/
+""".lstrip()
+
+RUN_PYLINT_SCRIPT = """
+pylint --rcfile=pylintrc data_models pipelines tasks
+""".lstrip()
+
+REQUIREMENTS_CONTENT = """
+fire==0.3.1
+nose2==0.9.2
+pylint==2.5.3
+hypergol
+tensorflow==2.2.1
+pydantic==1.6.1
+fastapi==0.61.0
+uvicorn==0.11.8
+""".lstrip()
+
+GITIGNORE_CONTENT = """
+.venv/
+.vscode/
+.idea/
+__pycache__
+__pycache__/*
+""".lstrip()
+
+README_CONTENT = """
+""".lstrip()
+
+PYLINTRC_CONTENT = """
+""".lstrip()
+
+
 class TestCreateProject(HypergolCreateTestCase):
 
     def __init__(self, methodName):
@@ -60,3 +104,14 @@ class TestCreateProject(HypergolCreateTestCase):
         create_project(self.projectName, force=True)
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
+
+    def test_create_project_creates_content(self):
+        allContent = create_project(self.projectName, dryrun=True)
+        makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, pylintrcContent = allContent
+        self.assertEqual(makeVenvScript, MAKE_VENV_SCRIPT)
+        self.assertEqual(runTestScript, RUN_TEST_SCRIPT)
+        self.assertEqual(runPylintScript, RUN_PYLINT_SCRIPT)
+        self.assertEqual(requirementsContent, REQUIREMENTS_CONTENT)
+        self.assertEqual(gitignoreContent, GITIGNORE_CONTENT)
+        self.assertEqual(len(readmeContent), 4702)
+        self.assertEqual(len(pylintrcContent), 18741)

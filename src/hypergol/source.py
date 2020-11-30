@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from hypergol.repr import Repr
 from hypergol.logger import Logger
 
+
 class SourceIteratorNotIterableException(Exception):
     pass
 
@@ -43,3 +44,7 @@ class Source(Repr):
             Any data that the :func:`source_iterator()` returns
         """
         raise NotImplementedError('run() function must be implemented')
+
+    def log(self, message):
+        """Standard logging"""
+        self.logger.info(f'{self.__class__.__name__} - {message}')
