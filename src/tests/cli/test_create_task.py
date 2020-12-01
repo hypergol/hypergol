@@ -33,7 +33,7 @@ class TestSource(Task):
 
     def run(self, exampleData):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
-        # TODO: the exampleData from source_iterator
+        # TODO: Use the exampleData from source_iterator to construct a domain object
         return exampleOutputObject
 """.lstrip()
 
