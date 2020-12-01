@@ -17,4 +17,4 @@ class CreateSentencesTask(Task):
 
     def run(self, exampleInputObject1, exampleInputObject2):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
-        self.output.append(data)
+        self.output.append(exampleOutputObject)
