@@ -23,7 +23,8 @@ class {{ className }}(Task):
         raise NotImplementedError(f'{self.__class__.__name__} must implement source_iterator()')
         # TODO: use the parameters (from Job) to open
         # TODO: use yield in this function instead of return while you are consuming your source data
-        yield exampleData
+        # TODO: return type must be list or tuple as the * operator will be used on it
+        yield (exampleData, )
 
     def run(self, exampleData):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
