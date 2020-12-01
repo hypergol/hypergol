@@ -63,13 +63,13 @@ class TestTask(HypergolTestCase):
         super().tearDown()
         self.delete_if_exists(dataset=self.dataset1)
         self.delete_if_exists(dataset=self.outputDataset)
-        for inputChunkId in self.dataset1.get_chunk_ids():
+        for jobId in range(self.dataset1.chunkCount):
             self.delete_if_exists(dataset=Dataset(
                 dataType=OutputDataClass,
                 location=self.outputDataset.location,
                 project=self.outputDataset.project,
                 branch=f'{self.outputDataset.name}_temp',
-                name=f'{self.outputDataset.name}_{inputChunkId}',
+                name=f'{self.outputDataset.name}_{jobId:03}',
                 chunkCount=self.outputDataset.chunkCount,
                 repoData=self.outputDataset.repoData
             ))

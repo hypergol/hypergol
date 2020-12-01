@@ -5,35 +5,43 @@ from pathlib import Path
 from multiprocessing import Pool
 
 from typing import List
+from typing import Dict
 
 from hypergol.delayed import Delayed
 from hypergol.dataset import Dataset
+from hypergol.datachunk import DataChunk
 from hypergol.repr import Repr
 from hypergol.logger import Logger
 from hypergol.dataset_factory import DatasetFactory
 
 
+class SourceIteratorNotIterableException(Exception):
+    pass
+
+
 class Job(Repr):
     """Class for passing information on chunks to tasks"""
 
-    def __init__(self, outputChunk, id_, total, parameters):
+    def __init__(self, id_, total, parameters: Dict = None, inputChunks: List[DataChunk] = None, loadedInputChunks: List[DataChunk] = None):
         """
         Parameters
         ----------
-        outputChunk: DataChunk
-            chunk to save objects into
         id_: int
             what's the order of this job in the queue
         number: int
             number of total jobs in this task
         parameters: object
             any information to be passed to the source_iterator()
-            In case of a task it will be: {'inputChunks': [], 'loadedInputChunks': []}
+        inputChunks: List[DataChunk]
+            these chunks will be iterated over while run() function is called
+        loadedInputChunks: List[DataChunk]
+            these chunks will be fully loaded before any run() function called
         """
-        self.outputChunk = outputChunk
         self.id = id_
         self.total = total
-        self.parameters = parameters
+        self.parameters = parameters or {}
+        self.inputChunks = inputChunks or []
+        self.loadedInputChunks = loadedInputChunks or []
 
 
 class JobReport(Repr):
@@ -58,7 +66,7 @@ class BaseTask(Repr):
     # TODO(Laszlo): fix this doc
     """Base class for multithreaded abstract class Task"""
 
-    def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, loadedInputDatasets: List[Dataset] = None, logger=None, threads=None, force=False):
+    def __init__(self, outputDataset: Dataset, inputDatasets: List[Dataset] = None, loadedInputDatasets: List[Dataset] = None, logger=None, threads=None, force=False):
         """
         Parameters
         ----------
@@ -74,9 +82,7 @@ class BaseTask(Repr):
         force=False
             All input object's hashes must match in a single run() call. Use ``force=True`` to override this.
         """
-        if len(inputDatasets) == 0:
-            raise ValueError('If there are no inputs to this task use Source')
-        self.inputDatasets = inputDatasets
+        self.inputDatasets = inputDatasets or []
         self.outputDataset = outputDataset
         self.loadedInputDatasets = loadedInputDatasets or []
         for inputDataset in self.inputDatasets:
@@ -87,7 +93,6 @@ class BaseTask(Repr):
         self.threads = threads
         self.force = force
         self.inputChunks = None
-        self.outputChunk = None
         self.loadedData = None
         self.output = None
         self.datasetFactory = DatasetFactory(
@@ -127,22 +132,17 @@ class BaseTask(Repr):
         """Generates a list of :class:`Job` to be processed"""
         jobs = []
         self._check_same_chunk_count()
-        for id_, outputChunk in enumerate(self.outputDataset.get_data_chunks(mode='w')):
+        for id_ in range(self.outputDataset.chunkCount):
             jobs.append(Job(
-                outputChunk=outputChunk,
                 id_=id_,
-                total=self.inputDatasets[0].chunkCount,
-                parameters={
-                    'inputChunks': [],
-                    'loadedInputChunks': []
-                }
+                total=self.outputDataset.chunkCount,
             ))
         for inputDataset in self.inputDatasets:
             for id_, inputChunk in enumerate(inputDataset.get_data_chunks(mode='r')):
-                jobs[id_].parameters['inputChunks'].append(inputChunk)
+                jobs[id_].inputChunks.append(inputChunk)
         for loadedInputDataset in self.loadedInputDatasets:
             for id_, loadedInputChunk in enumerate(loadedInputDataset.get_data_chunks(mode='r')):
-                jobs[id_].parameters['loadedInputChunks'].append(loadedInputChunk)
+                jobs[id_].loadedInputChunks.append(loadedInputChunk)
         return jobs
 
     def initialise(self):
@@ -161,9 +161,9 @@ class BaseTask(Repr):
 
     def _open_input_chunks(self, job):
         """Opens input chunks and loads loaded input chunks"""
-        self.inputChunks = [inputChunk.open() for inputChunk in job.parameters['inputChunks']]
+        self.inputChunks = [inputChunk.open() for inputChunk in job.inputChunks]
         self.loadedData = []
-        for loadInputChunk in job.parameters['loadedInputChunks']:
+        for loadInputChunk in job.loadedInputChunks:
             loadInputChunkIterator = loadInputChunk.open()
             self.loadedData.append(list(loadInputChunkIterator))
             loadInputChunk.close()
@@ -200,7 +200,6 @@ class BaseTask(Repr):
             threads :
                 Number of concurrent threads to do the merging
         """
-        self.outputDataset.delete()
         jobs = [
             (chunk, self.__class__.__name__, k, self.outputDataset.chunkCount, self.logger)
             for k, chunk in enumerate(self.outputDataset.get_data_chunks(mode='w'))

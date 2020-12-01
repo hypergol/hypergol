@@ -1,12 +1,9 @@
-from collections.abc import Iterable
+from types import GeneratorType
 
 from hypergol.base_task import BaseTask
 from hypergol.base_task import Job
 from hypergol.base_task import JobReport
-
-
-class SourceIteratorNotIterableException(Exception):
-    pass
+from hypergol.base_task import SourceIteratorNotIterableException
 
 
 class Task(BaseTask):
@@ -26,10 +23,10 @@ class Task(BaseTask):
         self._open_input_chunks(job)
         with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
             sourceIterator = self.source_iterator()
-            if not isinstance(sourceIterator, Iterable):
+            if not isinstance(sourceIterator, GeneratorType):
                 raise SourceIteratorNotIterableException(f'{self.__class__.__name__}.source_iterator is not iterable, use yield instead of return')
             for inputData in sourceIterator:
-                if not self.force:
+                if not self.force and len(self.inputDatasets) != 0:
                     self._check_if_same_hash(inputData)
                 self.run(*inputData, *self.loadedData)
         self._close_input_chunks()
