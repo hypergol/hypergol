@@ -1,6 +1,12 @@
+from collections.abc import Iterable
+
 from hypergol.base_task import BaseTask
 from hypergol.base_task import Job
 from hypergol.base_task import JobReport
+
+
+class SourceIteratorNotIterableException(Exception):
+    pass
 
 
 class SimpleTask(BaseTask):
@@ -19,7 +25,10 @@ class SimpleTask(BaseTask):
         self.log(f'{job.id:3}/{job.total:3} - execute - START')
         self._open_input_chunks(job)
         with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
-            for inputValues in zip(*self.inputChunks):
+            sourceIterator = self.source_iterator()
+            if not isinstance(sourceIterator, Iterable):
+                raise SourceIteratorNotIterableException(f'{self.__class__.__name__}.source_iterator is not iterable, use yield instead of return')
+            for inputValues in sourceIterator:
                 if not self.force:
                     self._check_if_same_hash(inputValues)
                 self.run(*inputValues, *self.loadedData)

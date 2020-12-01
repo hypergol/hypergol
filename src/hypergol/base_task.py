@@ -22,7 +22,7 @@ class Job(Repr):
         ----------
         outputChunk: DataChunk
             chunk to save objects into
-        id: int
+        id_: int
             what's the order of this job in the queue
         number: int
             number of total jobs in this task
@@ -118,6 +118,10 @@ class BaseTask(Repr):
             if inputDataset.chunkCount != chunkCount:
                 raise ValueError(f'{self.__class__.__name__}: All datasets must have the same number of chunks: {inputDataset.name} != {chunkCount}')
 
+    def source_iterator(self):
+        for inputValues in zip(*self.inputChunks):
+            yield inputValues
+ 
     def get_jobs(self):
         """Generates a list of :class:`Job` to be processed"""
         jobs = []
