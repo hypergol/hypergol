@@ -8,31 +8,40 @@ from tests.hypergol_test_case import TestRepoManager
 from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 
 TEST_SOURCE = """
-from hypergol import Source
+from hypergol import Job
+from hypergol import Task
 
 
-class TestSource(Source):
+class TestSource(Task):
 
     def __init__(self, exampleParameter, *args, **kwargs):
         super(TestSource, self).__init__(*args, **kwargs)
-        # TODO: Source tasks are single threaded, no need for members to be pickle-able
+        # TODO: all member variables must be pickle-able, otherwise use the "Delayed" methodology
+        # TODO: (e.g. for a DB connection), see the documentation <add link here>
         self.exampleParameter = exampleParameter
 
-    def source_iterator(self):
+    def get_jobs(self):
+        raise NotImplementedError(f'{self.__class__.__name__} must implement get_jobs()')
+        # TODO: Return a list of Job classes here that will be passed on to the source_iterator
+        return [Job(id_=k, total= ..., parameters={...} for k, ... in enumerate(...)]
+
+    def source_iterator(self, parameters):
         raise NotImplementedError(f'{self.__class__.__name__} must implement source_iterator()')
-        # TODO: use yield in this function instead of return while your are consuming your source data
+        # TODO: use the parameters (from Job) to open
+        # TODO: use yield in this function instead of return while you are consuming your source data
         yield exampleData
 
-    def run(self, data):
+    def run(self, exampleData):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
+        # TODO: Use the exampleData from source_iterator to construct a domain object
         return exampleOutputObject
 """.lstrip()
 
 TEST_TASK = """
-from hypergol import SimpleTask
+from hypergol import Task
 
 
-class TestTask(SimpleTask):
+class TestTask(Task):
 
     def __init__(self, exampleParameter, *args, **kwargs):
         super(TestTask, self).__init__(*args, **kwargs)
@@ -46,7 +55,7 @@ class TestTask(SimpleTask):
 
     def run(self, exampleInputObject1, exampleInputObject2):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
-        return exampleOutputObject
+        self.output.append(exampleOutputObject)
 """.lstrip()
 
 
@@ -60,6 +69,7 @@ class TestCreateTask(HypergolCreateTestCase):
             Path(self.projectDirectory)
         ]
         self.project = None
+        self.maxDiff = 10000
 
     def setUp(self):
         super().setUp()
@@ -71,14 +81,14 @@ class TestCreateTask(HypergolCreateTestCase):
         self.project.create_tasks_directory()
 
     def test_create_task_creates_files(self):
-        create_task(className='TestTask', projectDirectory=self.projectDirectory, simple=True)
+        create_task(className='TestTask', projectDirectory=self.projectDirectory)
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
 
     def test_create_task_creates_content(self):
-        content = create_task(className='TestTask', projectDirectory=self.projectDirectory, simple=True, dryrun=True)
+        content = create_task(className='TestTask', projectDirectory=self.projectDirectory, dryrun=True)
         self.assertEqual(content[0], TEST_TASK)
 
     def test_create_task_creates_content_source(self):
-        content = create_task(className='TestSource', source=True, simple=False, projectDirectory=self.projectDirectory, dryrun=True)
+        content = create_task(className='TestSource', source=True, projectDirectory=self.projectDirectory, dryrun=True)
         self.assertEqual(content[0], TEST_SOURCE)
