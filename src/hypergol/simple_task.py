@@ -15,36 +15,22 @@ class SimpleTask(BaseTask):
         job : Job
             parameters of chunks to be opened
         """
-
-        self._open_input_chunks(job)
         self.initialise()
         self.log(f'{job.id:3}/{job.total:3} - execute - START')
-        self.outputChunk = job.outputChunk.open()
-        for inputValues in zip(*self.inputChunks):
-            outputValue = self.run(*inputValues, *self.loadedData)
-            if not self.force:
-                self._check_if_same_hash(inputValues, outputValue)
-            self.outputChunk.append(outputValue)
+        self._open_input_chunks(job)
+        with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
+            for inputValues in zip(*self.inputChunks):
+                if not self.force:
+                    self._check_if_same_hash(inputValues)
+                self.run(*inputValues, *self.loadedData)
         self._close_input_chunks()
-        outputChecksum = self.outputChunk.close()
         self.log(f'{job.id:3}/{job.total:3} - execute - END')
-        return JobReport(outputChecksum=outputChecksum)
+        return JobReport(outputChecksum=0)
 
     def run(self, *args, **kwargs):
         """Main computation
 
-        must return the domain object that will be saved in the output dataset
+        Input arguments will be an element from each inputDataset followed by the list of loadedInputDatasets
+        Append domain object to self.output to store in in the output dataset.
         """
         raise NotImplementedError(f'run() function must be implemented in {self.__class__.__name__}')
-
-    def finalise(self, jobReports, threads):
-        """Collects the checksums and creates the output dataset's ``.chk`` file
-        Parameters
-        ----------
-        jobReports : List[JobReport]
-            Result of each run which contains the checkSum of the output file
-        threads : unused
-        """
-        checksums = [jobReport.outputChecksum for jobReport in jobReports]
-        self.outputDataset.chkFile.make_chk_file(checksums=checksums)
-        self.finish(jobReports, threads)

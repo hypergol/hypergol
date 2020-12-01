@@ -79,6 +79,7 @@ class TestTask(HypergolTestCase):
         self.clean_directories()
 
     def test_task(self):
+        jobReports = []
         task = TaskExample(
             inputDatasets=[self.dataset1],
             outputDataset=self.outputDataset,
@@ -87,6 +88,7 @@ class TestTask(HypergolTestCase):
         )
         for job in task.get_jobs():
             taskCopy = pickle.loads(pickle.dumps(task))
-            taskCopy.execute(job)
-        task.finalise(jobReports=None, threads=3)
+            jobReport = taskCopy.execute(job)
+            jobReports.append(jobReport)
+        task.finalise(jobReports=jobReports, threads=3)
         self.assertEqual(set(self.outputDataset.open('r')), self.expectedOutputDataset)
