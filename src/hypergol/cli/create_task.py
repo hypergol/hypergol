@@ -6,8 +6,8 @@ from hypergol.name_string import NameString
 from hypergol.hypergol_project import HypergolProject
 
 
-def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False, simple=False):
-    """Generates task class from the parameters derived from :class:`.Source`, :class:`.SimpleTask` or :class:`.Task` (default)
+def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False):
+    """Generates task class from the parameters derived from :class:`.Source`,  or :class:`.Task` (default)
 
     Fails if the target file already exists unless ``force=True`` or ``--force`` in CLI is set.
 
@@ -25,8 +25,6 @@ def create_task(className, *args, projectDirectory='.', dryrun=None, force=None,
         If set to ``True`` it overwrites the target file
     source : bool (default=False)
         If set to ``True`` the class will be derived from :class:`.Source`
-    simple : bool (default=False)
-        If set to ``True`` the class will be derived from :class:`.SimpleTask`
     *args : List of strings (CamelCase)
         Classes to be imported into the generated code from the datamodel, fails if class not found
 
@@ -37,12 +35,8 @@ def create_task(className, *args, projectDirectory='.', dryrun=None, force=None,
         The generated code if ``dryrun`` is specified
     """
 
-    if source and simple:
-        raise ValueError('Task type cannot be determined, --source and --simple used together')
     if source:
         taskType = NameString('Source')
-    elif simple:
-        taskType = NameString('SimpleTask')
     else:
         taskType = NameString('Task')
 

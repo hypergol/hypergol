@@ -1,7 +1,6 @@
 from multiprocessing import Pool
 
 from hypergol.source import Source
-from hypergol.simple_task import SimpleTask
 from hypergol.task import Task
 from hypergol.dataset import DatasetAlreadyExistsException
 
@@ -33,7 +32,7 @@ class Pipeline:
         for task in self.tasks:
             if isinstance(task, Source):
                 task.execute()
-            elif isinstance(task, (SimpleTask, Task)):
+            elif isinstance(task, Task):
                 pool = Pool(task.threads or threads)
                 jobReports = pool.map(task.execute, task.get_jobs())
                 task.finalise(jobReports=jobReports, threads=task.threads or threads)
@@ -41,4 +40,4 @@ class Pipeline:
                 pool.join()
                 pool.terminate()
             else:
-                raise ValueError('Task must be of type Task, SimpleTask or Source')
+                raise ValueError('Task must be of type Task or Source')

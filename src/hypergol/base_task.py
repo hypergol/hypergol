@@ -55,7 +55,8 @@ class JobReport(Repr):
 
 
 class BaseTask(Repr):
-    """Base class for multithreaded abstract classes SimpleTask and Task"""
+    # TODO(Laszlo): fix this doc
+    """Base class for multithreaded abstract class Task"""
 
     def __init__(self, inputDatasets: List[Dataset], outputDataset: Dataset, loadedInputDatasets: List[Dataset] = None, logger=None, threads=None, force=False):
         """
@@ -121,7 +122,7 @@ class BaseTask(Repr):
     def source_iterator(self):
         for inputValues in zip(*self.inputChunks):
             yield inputValues
- 
+
     def get_jobs(self):
         """Generates a list of :class:`Job` to be processed"""
         jobs = []
@@ -145,7 +146,7 @@ class BaseTask(Repr):
         return jobs
 
     def initialise(self):
-        """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes and calls the task's custom `init()` see also: :class:`.SimpleTask` in Tutorial`"""
+        """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes and calls the task's custom `init()`"""
         for k, v in self.__dict__.items():
             if isinstance(v, Delayed):
                 setattr(self, k, v.make())
@@ -173,7 +174,7 @@ class BaseTask(Repr):
             inputChunk.close()
 
     def execute(self, job: Job):
-        """This function is implemented in the derived :class:`.SimpleTask` and :class:`.Task` classes"""
+        """This function is implemented in the derived :class:`.Task` classes"""
         raise NotImplementedError(f'execute() function must be implemented in {self.__class__.__name__}')
 
     def run(self, *args):

@@ -67,13 +67,6 @@ Source - Class for creating datasets from raw data
 .. currentmodule:: hypergol
 .. autoclass:: Source
 
-==========================================
-SimpleTask - Class for processing datasets
-==========================================
-
-.. currentmodule:: hypergol
-.. autoclass:: SimpleTask
-
 ====================================================
 Task - Class for create datasets from other datasets
 ====================================================

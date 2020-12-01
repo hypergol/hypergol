@@ -1,8 +1,8 @@
-from hypergol import SimpleTask
+from hypergol import Task
 from data_models.article_text import ArticleText
 
 
-class CreateArticleTextsTask(SimpleTask):
+class CreateArticleTextsTask(Task):
 
     def __init__(self, exampleParameter, *args, **kwargs):
         super(CreateArticleTextsTask, self).__init__(*args, **kwargs)
@@ -16,4 +16,4 @@ class CreateArticleTextsTask(SimpleTask):
 
     def run(self, exampleInputObject1, exampleInputObject2):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
-        return exampleOutputObject
+        self.output.append(exampleOutputObject)

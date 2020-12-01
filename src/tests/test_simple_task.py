@@ -2,7 +2,7 @@ import os
 import pickle
 
 from hypergol.base_data import BaseData
-from hypergol.simple_task import SimpleTask
+from hypergol.task import Task
 
 from tests.hypergol_test_case import HypergolTestCase
 from tests.hypergol_test_case import DataClass1
@@ -40,7 +40,7 @@ class OutputDataClass(BaseData):
         return hash((self.id_, hash(self.data1), hash(self.data2), self.value))
 
 
-class SimpleTaskExample(SimpleTask):
+class SimpleTaskExample(Task):
 
     def __init__(self, increment, *args, **kwargs):
         super(SimpleTaskExample, self).__init__(*args, **kwargs)
@@ -53,13 +53,13 @@ class SimpleTaskExample(SimpleTask):
         if data1.id_ != data2.id_:
             raise ValueError('ids are not matching')
         data3 = next(data for data in lstData3 if data.id_ == data1.id_)
-        return OutputDataClass(
+        self.output.append(OutputDataClass(
             id_=data1.id_,
             data1=data1,
             data2=data2,
             data3=data3,
             value=self.increment
-        )
+        ))
 
 
 class TestTask(HypergolTestCase):

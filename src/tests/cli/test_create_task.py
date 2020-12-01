@@ -29,10 +29,10 @@ class TestSource(Source):
 """.lstrip()
 
 TEST_TASK = """
-from hypergol import SimpleTask
+from hypergol import Task
 
 
-class TestTask(SimpleTask):
+class TestTask(Task):
 
     def __init__(self, exampleParameter, *args, **kwargs):
         super(TestTask, self).__init__(*args, **kwargs)
@@ -46,7 +46,7 @@ class TestTask(SimpleTask):
 
     def run(self, exampleInputObject1, exampleInputObject2):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
-        return exampleOutputObject
+        self.output.append(exampleOutputObject)
 """.lstrip()
 
 
@@ -60,6 +60,7 @@ class TestCreateTask(HypergolCreateTestCase):
             Path(self.projectDirectory)
         ]
         self.project = None
+        self.maxDiff = 10000
 
     def setUp(self):
         super().setUp()
@@ -71,14 +72,14 @@ class TestCreateTask(HypergolCreateTestCase):
         self.project.create_tasks_directory()
 
     def test_create_task_creates_files(self):
-        create_task(className='TestTask', projectDirectory=self.projectDirectory, simple=True)
+        create_task(className='TestTask', projectDirectory=self.projectDirectory)
         for filePath in self.allPaths:
             self.assertEqual(os.path.exists(filePath), True)
 
     def test_create_task_creates_content(self):
-        content = create_task(className='TestTask', projectDirectory=self.projectDirectory, simple=True, dryrun=True)
+        content = create_task(className='TestTask', projectDirectory=self.projectDirectory, dryrun=True)
         self.assertEqual(content[0], TEST_TASK)
 
     def test_create_task_creates_content_source(self):
-        content = create_task(className='TestSource', source=True, simple=False, projectDirectory=self.projectDirectory, dryrun=True)
+        content = create_task(className='TestSource', source=True, projectDirectory=self.projectDirectory, dryrun=True)
         self.assertEqual(content[0], TEST_SOURCE)

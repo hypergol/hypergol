@@ -194,7 +194,7 @@ class HypergolProject:
             creationPath = self.pipelinesPath
         elif creationType == 'Project':
             creationPath = self.projectDirectory
-        elif str(creationType) in ['Source', 'SimpleTask', 'Task']:
+        elif str(creationType) in ['Source', 'Task']:
             creationPath = self.tasksPath
         if creationPath is None:
             raise ValueError(f'{creationType} is an unknown type')
