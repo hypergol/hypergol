@@ -9,27 +9,23 @@ from hypergol.logger import Logger
 class Job(Repr):
     """Class for passing information on chunks to tasks"""
 
-    def __init__(self, inputChunks, outputChunk, loadedInputChunks, jobIndex, jobCount):
+    def __init__(self, outputChunk, jobIndex, jobCount, jobParameters):
         """
-
         Parameters
         ----------
-        inputChunks: List[DataChunk]
-            chunks to read line by line
         outputChunk: DataChunk
             chunk to save objects into
-        loadedInputChunks: List[DataChunk]
-            chunks to load entirely in each job, available in ``self.loadedData``
         jobIndex: int
             what's the order of this job in the queue
         jobCount: int
             number of total jobs in this task
+        jobParameters: object
+            any information to be passed to the source_iterator()
         """
-        self.inputChunks = inputChunks
         self.outputChunk = outputChunk
-        self.loadedInputChunks = loadedInputChunks
         self.jobIndex = jobIndex
         self.jobCount = jobCount
+        self.jobParameters = jobParameters
 
 
 class JobReport(Repr):
@@ -108,18 +104,20 @@ class BaseTask(Repr):
         self._check_same_chunk_count()
         for jobIndex, outputChunk in enumerate(self.outputDataset.get_data_chunks(mode='w')):
             jobs.append(Job(
-                inputChunks=[],
                 outputChunk=outputChunk,
-                loadedInputChunks=[],
                 jobIndex=jobIndex,
-                jobCount=self.inputDatasets[0].chunkCount
+                jobCount=self.inputDatasets[0].chunkCount,
+                jobParameters={
+                    'inputChunks': [],
+                    'loadedInputChunks': []
+                }
             ))
         for inputDataset in self.inputDatasets:
             for jobIndex, inputChunk in enumerate(inputDataset.get_data_chunks(mode='r')):
-                jobs[jobIndex].inputChunks.append(inputChunk)
+                jobs[jobIndex].jobParameters['inputChunks'].append(inputChunk)
         for loadedInputDataset in self.loadedInputDatasets:
             for jobIndex, loadedInputChunk in enumerate(loadedInputDataset.get_data_chunks(mode='r')):
-                jobs[jobIndex].loadedInputChunks.append(loadedInputChunk)
+                jobs[jobIndex].jobParameters['loadedInputChunks'].append(loadedInputChunk)
         return jobs
 
     def initialise(self):
@@ -138,9 +136,9 @@ class BaseTask(Repr):
 
     def _open_input_chunks(self, job):
         """Opens input chunks and loads loaded input chunks"""
-        self.inputChunks = [inputChunk.open() for inputChunk in job.inputChunks]
+        self.inputChunks = [inputChunk.open() for inputChunk in job.jobParameters['inputChunks']]
         self.loadedData = []
-        for loadInputChunk in job.loadedInputChunks:
+        for loadInputChunk in job.jobParameters['loadedInputChunks']:
             loadInputChunkIterator = loadInputChunk.open()
             self.loadedData.append(list(loadInputChunkIterator))
             loadInputChunk.close()
