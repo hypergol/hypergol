@@ -18,7 +18,7 @@ class SimpleTask(BaseTask):
 
         self._open_input_chunks(job)
         self.initialise()
-        self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - START')
+        self.log(f'{job.id:3}/{job.total:3} - execute - START')
         self.outputChunk = job.outputChunk.open()
         for inputValues in zip(*self.inputChunks):
             outputValue = self.run(*inputValues, *self.loadedData)
@@ -27,7 +27,7 @@ class SimpleTask(BaseTask):
             self.outputChunk.append(outputValue)
         self._close_input_chunks()
         outputChecksum = self.outputChunk.close()
-        self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - END')
+        self.log(f'{job.id:3}/{job.total:3} - execute - END')
         return JobReport(outputChecksum=outputChecksum)
 
     def run(self, *args, **kwargs):

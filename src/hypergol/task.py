@@ -40,7 +40,7 @@ class Task(BaseTask):
         """Same as :class:`SimpleTask` apart from :func:`run()` doesn't have a return value because output is updated by calling ``self.output.append()``
         """
         self.initialise()
-        self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - START')
+        self.log(f'{job.id:3}/{job.total:3} - execute - START')
         self._open_input_chunks(job)
         with self._get_temporary_dataset(self.inputChunks[0].chunkId).open('w') as self.output:
             for inputData in zip(*self.inputChunks):
@@ -48,7 +48,7 @@ class Task(BaseTask):
                     self._check_if_same_hash(inputData)
                 self.run(*inputData, *self.loadedData)
         self._close_input_chunks()
-        self.log(f'{job.jobIndex:3}/{job.jobCount:3} - execute - END')
+        self.log(f'{job.id:3}/{job.total:3} - execute - END')
         return JobReport(outputChecksum=0)
 
     def run(self, *args, **kwargs):
