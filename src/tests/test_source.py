@@ -33,7 +33,7 @@ class SourceExample(Task):
     def get_jobs(self):
         return [Job(id_=0, total=2), Job(id_=1, total=2)]
 
-    def source_iterator(self):
+    def source_iterator(self, parameters):
         for k in range(self.sampleLength):
             yield (k, )
 
@@ -50,7 +50,7 @@ class BadIteratorSourceExample(Task):
     def get_jobs(self):
         return [Job(id_=0, total=2), Job(id_=1, total=2)]
 
-    def source_iterator(self):
+    def source_iterator(self, parameters):
         for k in range(self.sampleLength):
             # This should be `yield k`
             return (k, )

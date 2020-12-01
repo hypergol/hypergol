@@ -124,7 +124,10 @@ class BaseTask(Repr):
             if inputDataset.chunkCount != chunkCount:
                 raise ValueError(f'{self.__class__.__name__}: All datasets must have the same number of chunks: {inputDataset.name} != {chunkCount}')
 
-    def source_iterator(self):
+    # TODO(Laszlo): rename this to something better
+    def source_iterator(self, parameters):
+        if len(parameters) > 0:
+            raise ValueError('source_iterators in Tasks with inputDatasets cannot have job parameters, pass data as member variables of the Task')
         for inputValues in zip(*self.inputChunks):
             yield inputValues
 

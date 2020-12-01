@@ -37,7 +37,7 @@ class Pipeline:
                 raise DatasetAlreadyExistsException(f"Dataset {task.outputDataset.defFilename} already exist, delete the dataset first with Dataset.delete()")
         for task in self.tasks:
             if not isinstance(task, Task):
-                raise ValueError('Task must be of type Task or Source')
+                raise ValueError('Task must be of type Task')
             pool = Pool(task.threads or threads)
             jobReports = pool.map(task.execute, task.get_jobs())
             task.finalise(jobReports=jobReports, threads=task.threads or threads)
