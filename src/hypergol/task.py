@@ -29,19 +29,21 @@ class Task(Repr):
         Parameters
         ----------
 
-        inputDatasets: List[Dataset]
-            Chunks of these will be loaded line by line and passed onto the ``.run()`` function in each thread
         outputDataset: Dataset
-            Return value of ``.run()`` will be saved into the chunks of this dataset
+            Return values of ``.run()`` functions will be saved into the chunks of this dataset.
+        inputDatasets: List[Dataset]
+            Chunks of these will be loaded line by line and passed onto the ``.run()`` function in each thread.
         loadedInputDatasets: List[Dataset] = None
-            Data from these will be available in each job.
-        threads=None
+            Data from these will be available in each job as a list.
+        logger: Logger
+            Standard logger class for each of the jobs
+        threads: int = None
             Number of threads this task should run parallel
-        force=False
+        force: bool = False
             All input object's hashes must match in a single run() call. Use ``force=True`` to override this.
         """
-        self.inputDatasets = inputDatasets or []
         self.outputDataset = outputDataset
+        self.inputDatasets = inputDatasets or []
         self.loadedInputDatasets = loadedInputDatasets or []
         for inputDataset in self.inputDatasets:
             self.outputDataset.add_dependency(dataset=inputDataset)
@@ -50,9 +52,9 @@ class Task(Repr):
         self.logger = logger or Logger()
         self.threads = threads
         self.force = force
+        self.output = None      # <------- Append data modell instances to this variable in the run() function to be saved in the output dataset
         self.inputChunks = None
         self.loadedData = None
-        self.output = None
         self.temporaryDatasetFactory = DatasetFactory(
             location=outputDataset.location,
             project=outputDataset.project,
