@@ -76,7 +76,7 @@ class Task(Repr):
         chunkCounts = {v.chunkCount for v in self.inputDatasets + self.loadedInputDatasets}
         if len(chunkCounts) > 1:
             raise ValueError(f'{self.__class__.__name__}: All datasets must have the same number of chunks: {chunkCounts}')
-        jobs = [Job(id_=id_, total=self.outputDataset.chunkCount) for id_ in range(self.outputDataset.chunkCount)]
+        jobs = [Job(id_=id_, total=self.inputDatasets[0].chunkCount) for id_ in range(self.inputDatasets[0].chunkCount)]
         for inputDataset in self.inputDatasets:
             for id_, inputChunk in enumerate(inputDataset.get_data_chunks(mode='r')):
                 jobs[id_].inputChunks.append(inputChunk)
@@ -84,6 +84,27 @@ class Task(Repr):
             for id_, loadedInputChunk in enumerate(loadedInputDataset.get_data_chunks(mode='r')):
                 jobs[id_].loadedInputChunks.append(loadedInputChunk)
         return jobs
+
+    def execute(self, job: Job):
+        """Organising the execution of the task, see Tutorial/Task for a detailed description of steps
+
+        Parameters
+        ----------
+        job : Job
+            parameters of chunks to be opened
+        """
+        self.log(f'{job.id:3}/{job.total:3} - execute - START')
+        self.initialise()
+        self._open_input_chunks(job)
+        with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
+            sourceIterator = self.source_iterator(parameters=job.parameters)
+            if not isinstance(sourceIterator, GeneratorType):
+                raise SourceIteratorNotIterableException(f'{self.__class__.__name__}.source_iterator is not iterable, use yield instead of return')
+            for inputData in sourceIterator:
+                self.run(*inputData, *self.loadedData)
+        self._close_input_chunks()
+        self.log(f'{job.id:3}/{job.total:3} - execute - END')
+        return JobReport(jobId=job.id, success=True)
 
     def initialise(self):
         """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes and calls the task's custom `init()`"""
@@ -125,27 +146,6 @@ class Task(Repr):
         """Closes input chunks"""
         for inputChunk in self.inputChunks:
             inputChunk.close()
-
-    def execute(self, job: Job):
-        """Organising the execution of the task, see Tutorial/Task for a detailed description of steps
-
-        Parameters
-        ----------
-        job : Job
-            parameters of chunks to be opened
-        """
-        self.initialise()
-        self.log(f'{job.id:3}/{job.total:3} - execute - START')
-        self._open_input_chunks(job)
-        with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
-            sourceIterator = self.source_iterator(parameters=job.parameters)
-            if not isinstance(sourceIterator, GeneratorType):
-                raise SourceIteratorNotIterableException(f'{self.__class__.__name__}.source_iterator is not iterable, use yield instead of return')
-            for inputData in sourceIterator:
-                self.run(*inputData, *self.loadedData)
-        self._close_input_chunks()
-        self.log(f'{job.id:3}/{job.total:3} - execute - END')
-        return JobReport(jobId=job.id, success=True)
 
     def finalise(self, jobReports, threads):
         """After func:`execute` finished, all the temporary datasets are opened and copied into the output dataset in a multithreaded way.

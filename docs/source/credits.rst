@@ -17,8 +17,7 @@ Original Authors
 Contributors
 ^^^^^^^^^^^^
 
-Optionally, add your desired name and include a few relevant links. The order
-is partially historical, and now, mostly arbitrary.
+Optionally, add your desired name and include a few relevant links. The order is partially historical, and now, mostly arbitrary.
 
 - Laszlo Sragner `xLaszlo <https://github.com/xLaszlo>`_
 - Rhys Patten

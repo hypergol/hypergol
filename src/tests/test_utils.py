@@ -1,5 +1,3 @@
-# TODO(Laszlo): test "Mode related file operations here"
-
 from unittest import TestCase
 
 class RequirementsText(TestCase):
