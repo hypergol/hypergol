@@ -210,7 +210,7 @@ class TestTask(HypergolTestCase):
                 jobReports.append(jobReport)
         taskCopy.finalise(jobReports=jobReports, threads=3)
 
-    def test_task2(self):
+    def test_task_with_loaded_dataset(self):
         jobReports = []
         task = TaskExample3(
             inputDatasets=[self.dataset1, self.dataset2],
