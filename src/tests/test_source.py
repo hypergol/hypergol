@@ -1,7 +1,7 @@
 import os
 
-from hypergol.base_task import Job
-from hypergol.base_task import SourceIteratorNotIterableException
+from hypergol.job import Job
+from hypergol.task import SourceIteratorNotIterableException
 from hypergol.task import Task
 from hypergol.dataset import Dataset
 from hypergol.base_data import BaseData
@@ -103,7 +103,7 @@ class TestSource(HypergolTestCase):
         jobReports = []
         for job in sourceExample.get_jobs():
             jobReports.append(sourceExample.execute(job))
-        sourceExample.finalise(jobReports, 0)
+        sourceExample.finalise(jobReports, 1)
         data = set(self.outputDataset.open('r'))
         self.assertSetEqual(data, self.expectedData)
 
