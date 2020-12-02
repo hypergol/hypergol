@@ -7,11 +7,11 @@ from hypergol.hypergol_project import HypergolProject
 
 
 def create_task(className, *args, projectDirectory='.', dryrun=None, force=None, source=False):
-    """Generates task class from the parameters derived from :class:`.Source`,  or :class:`.Task` (default)
+    """Generates task class from the parameters derived from :class:`.Task`
 
-    Fails if the target file already exists unless ``force=True`` or ``--force`` in CLI is set.
+    Fails if the target file already exists unless ``force=True`` or ``--force`` in the CLI is set.
 
-    The base class can be set by either ``--source`` or ``--simple`` switches.
+    Setting the ``--source`` will generate a different template that have stubs with the functions that need to be overwritten.
 
     Parameters
     ----------
@@ -24,7 +24,7 @@ def create_task(className, *args, projectDirectory='.', dryrun=None, force=None,
     force : bool (default=None)
         If set to ``True`` it overwrites the target file
     source : bool (default=False)
-        If set to ``True`` the class will be derived from :class:`.Source`
+        If set to ``True`` the class will generate stubs for functions to be overwritten
     *args : List of strings (CamelCase)
         Classes to be imported into the generated code from the datamodel, fails if class not found
 

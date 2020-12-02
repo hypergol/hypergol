@@ -218,64 +218,78 @@ A dataset can be opened for writing with ``open('r')``, this returns a ``dataset
 Creating a task class
 ---------------------
 
-Task classes are computational elements that run on data model classes, the pipeline takes care of handling the datasets and the multiple threads the processing happens. You only write the code that needs to run.
+Task classes are computational elements that run on data model classes or create data model classes (in ``Hypergol`` terminology "source"), the pipeline takes care of handling the datasets and the multiple threads where the processing happens. You only write the code that needs to run.
 
 There are three types of tasks:
 
 Source
 ~~~~~~
 
-This is the entry point into a processing pipeline, it doesn't have input, and it runs in a single thread. Its purpose is to format any data into a dataset that can be parallel processed by later tasks.
+This is the entry point into a processing pipeline, it doesn't have input dataset. Its purpose is to format any data into a dataset that can be parallel processed by later tasks.
 
 .. code:: bash
 
     $ python3 -m hypergol.cli.create_task LoadData OtherExample --source
 
-This will create ``tasks/load_data.py`` with the skeleton of the code. You need to implement two functions whose signature is in the code:
+This will create ``tasks/load_data.py`` with the skeleton of the code. You need to implement three functions whose signature is in the code:
 
 .. code-block:: python
 
-    def source_iterator(self):
-        yield data
+    def get_jobs(self):
+        return [Job(id, total, parameters) for k, parameter in enumerate(...)]
+
+    def source_iterator(self, parameters):
+        # read
+        yield (data, )
 
     def run(self, data):
-        return OtherExample(...)
+        self.output.append(OtherExample(...))
 
-The pipeline will call the iterator and passes the resulting data to the ``run()`` function, which does the processing you want and return a single class. If you need to do some initialisation you can implement it in the ``__init__`` function as this class doesn't run in a multithreaded way. You will see how to connect these to a pipeline in a pipelines section.
+The pipeline will generate the jobs by calling ``get_jobs()`` and create a Task class instance for each and pass the job to its ``execute`` function. For example, if your source data is in multiple files create one job for each file and pass the file's path in the ``parameters`` argument. Then pipeline will call the iterator with the parameters and starts yielding data which is then passed to the ``run()`` function which will process it and create a datamodel class. This class is appended to a specific member class in the task ``self.output`` which will ensure that it is saved into the tasks output dataset. ``Source`` classes are derived from the ``Task`` class as well and their mechanisms are the same apart from more functions need to be implemented. See detailed works of the ``Task`` class below:
 
-SimpleTask
-~~~~~~~~~~
+Task
+~~~~
 
-To structure your code correctly, it's worth splitting long operations into shorter ones, especially if there is a logical separation between the parts. ``SimpleTask`` is just for this. Each ``run()`` execution will get the objects with the same id and output an object also with the same id.  This enables logical separation of each step, and you can define a different data class on the output of each of them to further logical separation.
+If a task's inputs are in a ``Hypergol`` datasets then most of the above functionalities are taken care of automatically. You only need to focus on the ``run()`` function. To structure your code correctly, it's worth splitting long operations into shorter ones, especially if there is a logical separation between the parts. Tasks can have multiple inputs, but only one output dataset and all the inputs must have the same number of chunks.
 
 For example, if you process text with NLP, you can have domain classes as RawText, CleanText, ProcessedText, LabeledText. For these, you can create datasets as rawTexts, cleanTexts, processedTexts, labelledTexts, and tasks: Source, CleanTextCreatorTask, TextProcessorTask, LabellerTask. This enables logically encapsulate each into its own task so maintenance will be easier.
 
-The task can have multiple inputs, but only one output dataset and all of them must have the same number of chunks. To create a SimpleTask class run:
+To create a task class, executre in the terminal (List dataclasses to import after the task name):
 
 .. code:: bash
 
-    $ python3 -m hypergol.cli.create_task ExampleSimpleTask OtherExample --simple
+    $ python3 -m hypergol.cli.create_task ExampleTask OtherExample
 
-This will create a ``tasks/example_simple_task.py`` with stubs for two functions ``init()`` and ``run()``. The pipeline will execute the task in the following way:
+This will create a ``tasks/example_task.py`` with stubs for two functions ``init()`` and ``run()``. The task can have multiple inputs, but only one output dataset and all the inputs must have the same number of chunks. It can also have a list "loaded" datasets that will be entirely loaded before any ``run()`` calls.
 
-- Create the chunks for each input/output dataset
-- Creates ``Jobs`` for each chunk in the (probably multiple) input datasets and the output dataset
-- For each job, it serialises the task and passes it onto one of the threads in the pool
-- For each job, it serialises the job and passes it onto the thread
-- A copy of the task is created in the thread
-- log ``execute - START`` message
-- all input chunks are opened for reading
-- all objects from the ``loadedInputs`` chunks are loaded. (more on this later)
-- Delayed classes are created (more on this later)
-- init() function is called (once per thread)
-- output chunk is opened for writing
-- each thread start to iterate on their respective chunks calling ``run(object1, object2)`` and outputting a single output object
-- output object is saved into the output chunk
-- all chunks are closed
-- log ``execute - END``
-- the thread returns
-- once all threads finished, the pipeline calls the task ``finalise `` function that generates the output dataset's ``.chk`` file
-- execution moves to the next task
+One of the main constraint of python parallelisation is that all classes that are passed to a thread must be pickle-able. This means that certain classes cannot be member variables and must be constructed in a delayed manner. Hypergol's Task class takes care of this see the ``Delayed`` section.
+
+The pipeline will execute the task in the following way:
+
+- At construction:
+    - Adds the input datasets to the output dataset as dependenices.
+    - Creates a dataset factory for the temporary datasets.
+- Calls the task's ``get_job()`` function that will:
+    - Create a job for each chunk of the input dataset.
+    - Add the right input chunks to each job.
+- A copy of a task object is created in a thread.
+- Initialise the task:
+    - Constructs any ``Delayed`` input.
+    - Calls the user defined ``init()`` function (Load any large variable here, e.g., spacy models).
+- Open input chunks for reading:
+    - "Loaded" ones are entirely loaded and available as a list. (more on this later)
+- Create a temporary dataset for the output.
+    - Because the hashes might not match all chunks are opened for writing at once.
+    - The temporary dataset will be the task's ``output`` member variable and in the run function you need to append to this.
+- Create the ``sourceIterator``, this will yield the input data that together with loaded data will be passed to the ``run()`` function.
+- Call the iterator in a loop and call the ``run()`` function with the yielded data.
+- Close the input chunks.
+- At this point the thread stops and execution returns to the main thread to "finalise" the output dataset.
+    - Finalise copies data from all temporary datasets in a _multithreaded_ way.
+    - Calculates the chunks hash.
+    - Creates the output dataset (with ``.def`` and ``.chk`` files as well).
+    - Deletes all temporary datasets.
+    - Calls the user defined ``finish()`` function.
 
 To facilitate this, you need to implement just two functions:
 
@@ -285,11 +299,11 @@ To facilitate this, you need to implement just two functions:
         # TODO: initialise members that are NOT "Delayed" here (e.g. load a spacy model)
         pass
 
-    def run(self, inputObject1, inputObject2):
+    def run(self, exampleInputObject1, exampleInputObject2):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
-        return outputObject
+        self.output.append(data)
 
-If you don't have any heavy-duty initialisation, you can delete the ``init()`` function. The run function will get a tuple of objects, one from each iteration (this must match the order of input datasets in the instantiation of the task in the pipeline), and return one object that will be saved into the output dataset.
+If you don't have any heavy-duty initialisation, you can delete the ``init()`` function. The run function will get a tuple of objects, one from each iteration (this must match the order of input datasets in the instantiation of the task in the pipeline), and append any output values to ``self.output`` which will be saved into the output dataset.
 
 Loaded Inputs
 ~~~~~~~~~~~~~
@@ -308,29 +322,6 @@ Having the same id on the input and the output is a strong restriction. To circu
     def run(self, inputObject1, inputObject2):
         value = self.map1.get(inputObject2.get_id(), None)
         return outputObject
-
-Task
-~~~~
-
-Sometimes the simple pipelining even with the loaded data is not enough, and for each input object in each ``run()`` function multiple output classes with different ids need to be created. To facilitate this, the last task type is available.
-
-.. code:: bash
-
-    $ python3 -m hypergol.cli.create_task ExampleTask OtherExample
-
-This will generate the following stubs:
-
-.. code-block:: python
-
-    def init(self):
-        # TODO: initialise members that are NOT "Delayed" here (e.g. load a spacy model)
-        pass
-
-    def run(self, exampleInputObject1, exampleInputObject2):
-        raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
-        self.output.append(data)
-
-From interface purposes it works exactly as ``SimpleTask``, apart from a ``self.output`` field is available in the ``run()`` function. The ``run()`` function can create any number of objects that match the output dataset's type and append it to the self.output field. Regardless of its id/hash_id it will end up in the right chunk in the output dataset. The pipeline will solve the sorting in the ``finalise`` function by launching a smaller, I/O only multithreaded task.
 
 Creating a pipeline
 -------------------
@@ -371,7 +362,7 @@ Sometimes a class must be passed onto a task that cannot be pickled (e.g. loggin
         value2=canPickle
     )
 
-This will result in delaying the creation of ``CannotPickle`` object until the task object is recreated inside the thread. This happens exactly between the ``loadedInputs`` loading and the ``init()`` function, can be used in the latter.
+This will result in delaying the creation of ``CannotPickle`` object until the task object is recreated inside the thread. This happens exactly between the ``loadedInputs`` loading and the ``init()`` function, so it can be used in the latter. The ``Delayed`` mechanism is recursive so any also non-pickleable classes can be pass on.
 
 Creating a Tensorflow model
 ---------------------------

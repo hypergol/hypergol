@@ -29,8 +29,7 @@ It accelerates a project's start in experimental phase by code generation. It al
 Free software
 -------------
 
-Hypergol is free software; you can redistribute it and/or modify it under the
-terms of the :doc:`MIT </license>` license.  We welcome contributions.
+Hypergol is free software; you can redistribute it and/or modify it under the terms of the :doc:`MIT </license>` license.  We welcome contributions.
 
 Join us
 -------

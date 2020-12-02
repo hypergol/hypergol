@@ -14,10 +14,14 @@ class {{ className }}(Task):
         # TODO: (e.g. for a DB connection), see the documentation <add link here>
         self.exampleParameter = exampleParameter
 
+    def init(self):
+        # TODO: initialise members that are NOT "Delayed" here (e.g. load spacy model)
+        pass
+
     def get_jobs(self):
         raise NotImplementedError(f'{self.__class__.__name__} must implement get_jobs()')
         # TODO: Return a list of Job classes here that will be passed on to the source_iterator
-        return [Job(id_=k, total= ..., parameters={...} for k, ... in enumerate(...)]
+        return [Job(id_=k, total= ..., parameters={...}) for k, ... in enumerate(...)]
 
     def source_iterator(self, parameters):
         raise NotImplementedError(f'{self.__class__.__name__} must implement source_iterator()')
@@ -29,4 +33,4 @@ class {{ className }}(Task):
     def run(self, exampleData):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
         # TODO: Use the exampleData from source_iterator to construct a domain object
-        return exampleOutputObject
+        self.output.append(exampleOutputObject)

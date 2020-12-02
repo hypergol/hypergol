@@ -48,24 +48,9 @@ DatasetFactory - Convenience class to create datasets
 .. currentmodule:: hypergol
 .. autoclass:: DatasetFactory
 
-********************
-Task Related Classes
-********************
-
-===============================
-BaseTask - Base class for tasks
-===============================
-
-.. currentmodule:: hypergol.base_task
-.. autoclass:: BaseTask
-    :private-members:
-
-==================================================
-Source - Class for creating datasets from raw data
-==================================================
-
-.. currentmodule:: hypergol
-.. autoclass:: Source
+**************************
+Pipelining Related Classes
+**************************
 
 ====================================================
 Task - Class for create datasets from other datasets
@@ -74,10 +59,6 @@ Task - Class for create datasets from other datasets
 .. currentmodule:: hypergol
 .. autoclass:: Task
     :private-members:
-
-**************************
-Pipelining Related Classes
-**************************
 
 ===========================================================
 Pipeline - Class for organising tasks and datasets together
@@ -90,14 +71,14 @@ Pipeline - Class for organising tasks and datasets together
 Job - Class for passing information on chunks to tasks
 ======================================================
 
-.. currentmodule:: hypergol.base_task
+.. currentmodule:: hypergol.job
 .. autoclass:: Job
 
 ====================================================================
 JobReport - Class for passing results of a task back to the pipeline
 ====================================================================
 
-.. currentmodule:: hypergol.base_task
+.. currentmodule:: hypergol.job_report
 .. autoclass:: JobReport
 
 ============================================================

@@ -5,7 +5,7 @@ from .delayed import Delayed
 from .dataset import Dataset
 from .dataset_factory import DatasetFactory
 from .repo_data import RepoData
-from .base_task import Job
+from .job import Job
 from .task import Task
 from .repr import Repr
 from .logger import Logger
