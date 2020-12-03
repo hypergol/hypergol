@@ -206,28 +206,28 @@ class HypergolProject:
         return None
 
     def create_model_directory(self, modelName):
-        create_directory(Path(self.modelsPath, modelName.asSnake), self.mode)
+        create_directory(path=Path(self.modelsPath, modelName.asSnake), mode=self.mode)
 
     def create_project_directory(self):
-        create_directory(self.projectDirectory, self.mode)
+        create_directory(path=self.projectDirectory, mode=self.mode)
 
     def create_data_models_directory(self):
-        create_directory(self.dataModelsPath, self.mode)
+        create_directory(path=self.dataModelsPath, mode=self.mode)
 
     def create_tasks_directory(self):
-        create_directory(self.tasksPath, self.mode)
+        create_directory(path=self.tasksPath, mode=self.mode)
 
     def create_pipelines_directory(self):
-        create_directory(self.pipelinesPath, self.mode)
+        create_directory(path=self.pipelinesPath, mode=self.mode)
 
     def create_blocks_directory(self):
-        create_directory(self.blocksPath, self.mode)
+        create_directory(path=self.blocksPath, mode=self.mode)
 
     def create_models_directory(self):
-        create_directory(self.modelsPath, self.mode)
+        create_directory(path=self.modelsPath, mode=self.mode)
 
     def create_tests_directory(self):
-        create_directory(self.testsPath, self.mode)
+        create_directory(path=self.testsPath, mode=self.mode)
 
     def is_data_model_class(self, value: NameString):
         """Checks if a name is a data_model class (based on if the snakecase .py file exists)"""
@@ -270,7 +270,7 @@ class HypergolProject:
 
     def make_file_executable(self, filePath):
         print(f'Making file {filePath} executable.{self.modeMessage}')
-        self._test_existence(filePath, 'File')
+        self._test_existence(path=filePath, objectName='File')
         if self.mode != Mode.DRY_RUN:
             fileStat = os.stat(filePath)
             if os.getuid() == fileStat.st_uid:
@@ -284,7 +284,7 @@ class HypergolProject:
                 raise ValueError(f'{objectName} {path} does not exist.{self.modeMessage}')
 
     def render_executable(self, templateName, templateData, filePath):
-        content = self.render(templateName, templateData, filePath)
+        content = self.render(templateName=templateName, templateData=templateData, filePath=filePath)
         self.make_file_executable(filePath=filePath)
         return content
 
@@ -316,7 +316,7 @@ class HypergolProject:
                         values = {**data, **data['repo']}
                         values['location'] = self.dataDirectory
                         values['commitMessage'] = values['commitMessage'].replace('\n', '\\n')
-                        values['dataTypeFile'] = NameString(values['dataType']).asSnake
+                        values['dataTypeFile'] = NameString(name=values['dataType']).asSnake
                         values['projectDirectory'] = self.projectDirectory
                         print(DATASET_TEMPLATE.format(**values))
         return result
