@@ -41,11 +41,11 @@ class TensorflowModelManager:
         tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures={'signature_default': self.model.get_outputs})
         for modelBlock in self.model.get_model_blocks():
             json.dump(modelBlock.get_config(), open(f'{modelDirectory}/{modelBlock.blockName}.json', 'w'))
-        self.model.save_weights(f'{modelDirectory}/{self.model.modelName}.h5', save_format='h5')
+        self.model.save_weights(filepath=f'{modelDirectory}/{self.model.modelName}.h5', save_format='h5')
 
     def restore_model_weights(self):
         """Restores TensorFlow model weights """
-        self.model.load_weights(f'{self.restoreWeightsPath}/{self.model.modelName}.h5')
+        self.model.load_weights(filepath=f'{self.restoreWeightsPath}/{self.model.modelName}.h5')
 
     def train(self, withTracing):
         """Runs a single training step for the model

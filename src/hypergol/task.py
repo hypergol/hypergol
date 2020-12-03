@@ -95,7 +95,7 @@ class Task(Repr):
         """
         self.log(f'{job.id:3}/{job.total:3} - execute - START')
         self.initialise()
-        self._open_input_chunks(job)
+        self._open_input_chunks(job=job)
         with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
             sourceIterator = self.source_iterator(parameters=job.parameters)
             if not isinstance(sourceIterator, GeneratorType):
@@ -182,7 +182,7 @@ class Task(Repr):
         except OSError as ex:
             self.log(f'temporary directory cannot be deleted {ex}')
         self.outputDataset.chkFile.make_chk_file(checksums=checksums)
-        self.finish(jobReports, threads)
+        self.finish(jobReports=jobReports, threads=threads)
 
     def finish(self, jobReports, threads):
         """User-defined finalisation in each thread. Close file handlers or release memory of non-python objects here if necessary"""
