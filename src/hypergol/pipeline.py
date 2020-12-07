@@ -34,7 +34,7 @@ class Pipeline:
         self.logger.log(f'{self.__class__.__name__} - Pipeline - START')
         for task in self.tasks:
             if task.outputDataset.exists():
-                raise DatasetAlreadyExistsException(f"Dataset {task.outputDataset.defFilename} already exist, delete the dataset first with Dataset.delete()")
+                raise DatasetAlreadyExistsException(f"Dataset {task.outputDataset.directory} already exist, delete the dataset first with Dataset.delete()")
         for task in self.tasks:
             if not isinstance(task, Task):
                 raise ValueError('Task must be of type Task')
