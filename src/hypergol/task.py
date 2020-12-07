@@ -24,7 +24,7 @@ class Task(Repr):
     """Class to create other datasets, created domain objects in :func:`run()` must be appended to the output with ``self.output.append(object)`` (any number of the same type)
     """
 
-    def __init__(self, outputDataset: Dataset, inputDatasets: List[Dataset] = None, loadedInputDatasets: List[Dataset] = None, logger=None, threads=None, force=False):
+    def __init__(self, outputDataset: Dataset, inputDatasets: List[Dataset] = None, loadedInputDatasets: List[Dataset] = None, logger=None, threads=None, logAtEachN=0, force=False):
         """
         Parameters
         ----------
@@ -39,6 +39,8 @@ class Task(Repr):
             Standard logger class for each of the jobs
         threads: int = None
             Number of threads this task should run parallel
+        logAtEachN: int = 0
+            Log progress at each of the value, default = 0 means no logs
         force: bool = False
             All input object's hashes must match in a single run() call. Use ``force=True`` to override this.
         """
@@ -51,10 +53,13 @@ class Task(Repr):
             self.outputDataset.add_dependency(dataset=loadedInputDataset)
         self.logger = logger or Logger()
         self.threads = threads
+        self.logAtEachN = logAtEachN
+        self.counter = 0
         self.force = force
         self.output = None      # <------- Append data modell instances to this variable in the run() function to be saved in the output dataset
         self.inputChunks = None
         self.loadedData = None
+        self.results = None
         self.temporaryDatasetFactory = DatasetFactory(
             location=outputDataset.location,
             project=outputDataset.project,
@@ -93,7 +98,9 @@ class Task(Repr):
         job : Job
             parameters of chunks to be opened
         """
-        self.log(f'{job.id:3}/{job.total:3} - execute - START')
+        def _log(message):
+            self.log(f'{job.id:3}/{job.total:3} - {message}')
+        _log('Execute - START')
         self.initialise()
         self._open_input_chunks(job=job)
         with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
@@ -101,16 +108,22 @@ class Task(Repr):
             if not isinstance(sourceIterator, GeneratorType):
                 raise SourceIteratorNotIterableException(f'{self.__class__.__name__}.source_iterator is not iterable, use yield instead of return')
             for inputData in sourceIterator:
+                self.counter += 1
+                if self.logAtEachN != 0 and self.counter % self.logAtEachN == 0:
+                    _log(f'Processed: {self.counter}')
                 self.run(*inputData, *self.loadedData)
         self._close_input_chunks()
-        self.log(f'{job.id:3}/{job.total:3} - execute - END')
-        return JobReport(jobId=job.id, success=True)
+        if self.logAtEachN != 0:
+            _log(f'Processed: {self.counter}')
+        _log('Execute - END')
+        return JobReport(jobId=job.id, success=True, results=self.results)
 
     def initialise(self):
-        """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes and calls the task's custom `init()`"""
+        """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes, initialises the results to be returned in JobReports and calls the task's custom `init()`"""
         for k, v in self.__dict__.items():
             if isinstance(v, Delayed):
                 setattr(self, k, v.make())
+        self.results = {}
         self.init()
 
     def init(self):

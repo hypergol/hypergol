@@ -78,7 +78,7 @@ This will execute the model manager's run() function with the prescribed schedul
 In the generated `models/serve_example.py` function specify the directory of the model to be served at:
 
 ```
-MODEL_DIRECTORY = '<data_directory>/Example/<branch>/models/example/<epoch_number>'
+MODEL_DIRECTORY = '<data_directory>/example/<branch>/models/<ModelName>/<epoch_number>'
 ```
 
 then start serving with (port and host can be set in the shell script):

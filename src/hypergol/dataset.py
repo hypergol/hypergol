@@ -91,7 +91,7 @@ class Dataset(Repr):
         """
         if mode == 'w':
             if self.exists():
-                raise DatasetAlreadyExistsException(f"Dataset {self.defFile.defFilename} already exist, delete the dataset first with Dataset.delete()")
+                raise DatasetAlreadyExistsException(f"Dataset {self.directory} already exist, delete the dataset first with Dataset.delete()")
             self.defFile.make_def_file()
         elif mode == 'r':
             if not self.exists():
