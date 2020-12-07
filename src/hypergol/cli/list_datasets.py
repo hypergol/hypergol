@@ -18,7 +18,7 @@ def list_datasets(dataDirectory, projectDirectory='.', pattern=None):
 
     """
     project = HypergolProject(projectDirectory=projectDirectory, dataDirectory=dataDirectory, dryrun=False, force=False)
-    project.list_datasets(pattern=pattern, ascode=True)
+    project.list_datasets(pattern=pattern, asCode=True)
 
 
 if __name__ == "__main__":
