@@ -10,11 +10,11 @@ Hypergol is heavily integrated with git, all projects must be in a git repositor
 
 Initialise git with:
 
-`git init .`
+```git init .```
 
 Create the first commit (datasets record the last commit when they are created and without this there is nothing to record):
 
-`git commit -m "First Commit!"`
+```git commit -m "First Commit!"```
 
 The project now (and any time a file is changed but the change is not committed to the repo) is in a "dirty" stage. If you run a pipeline or train a model, the last commit will be recorded but that commit will not represent the code that is running! Add changes and commit:
 
@@ -37,6 +37,7 @@ deactivate
 source .venv/bin/activate
 ```
 
+
 ### How to list existing Datasets (in Jupyter)
 
 ```
@@ -50,6 +51,7 @@ project.list_datasets(pattern='.*', asCode=True);
 
 This will list all existing datasets that matches `pattern` as self contained executable code.
 
+
 ### How to start Tensorboard
 
 It is recommended to start it in a screen session (`screen -S tensorboard`) so you can close the terminal window or if you disconnect from a remote Linux machine (reconnect with `screen -x tensorboard`). In the project directory:
@@ -59,6 +61,7 @@ screen -S tensorboard
 source .venv/bin/activate
 tensorboard --logdir=<data_directory>/alpha/tensorboard/
 ```
+
 
 ### How to train your model
 
@@ -75,7 +78,7 @@ This will execute the model manager's run() function with the prescribed schedul
 In the generated `models/serve_alpha.py` function specify the directory of the model to be served at:
 
 ```
-MODEL_DIRECTORY = '<data_directory>/alpha/<branch>/models/alpha/<epoch_number>'
+MODEL_DIRECTORY = '<data_directory>/alpha/<branch>/models/<ModelName>/<epoch_number>'
 ```
 
 then start serving with (port and host can be set in the shell script):
@@ -83,6 +86,7 @@ then start serving with (port and host can be set in the shell script):
 ```
 ./serve_alpha.sh
 ```
+
 
 ### How to call your model from python with requests
 

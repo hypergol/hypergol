@@ -113,5 +113,5 @@ class TestCreateProject(HypergolCreateTestCase):
         self.assertEqual(runPylintScript, RUN_PYLINT_SCRIPT)
         self.assertEqual(requirementsContent, REQUIREMENTS_CONTENT)
         self.assertEqual(gitignoreContent, GITIGNORE_CONTENT)
-        self.assertEqual(len(readmeContent), 4703)
+        self.assertEqual(len(readmeContent), 4702)
         self.assertEqual(len(pylintrcContent), 18741)

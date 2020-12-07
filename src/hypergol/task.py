@@ -59,6 +59,7 @@ class Task(Repr):
         self.output = None      # <------- Append data modell instances to this variable in the run() function to be saved in the output dataset
         self.inputChunks = None
         self.loadedData = None
+        self.results = None
         self.temporaryDatasetFactory = DatasetFactory(
             location=outputDataset.location,
             project=outputDataset.project,
@@ -115,13 +116,14 @@ class Task(Repr):
         if self.logAtEachN != 0:
             _log(f'Processed: {self.counter}')
         _log('Execute - END')
-        return JobReport(jobId=job.id, success=True)
+        return JobReport(jobId=job.id, success=True, results=self.results)
 
     def initialise(self):
-        """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes and calls the task's custom `init()`"""
+        """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes, initialises the results to be returned in JobReports and calls the task's custom `init()`"""
         for k, v in self.__dict__.items():
             if isinstance(v, Delayed):
                 setattr(self, k, v.make())
+        self.results = {}
         self.init()
 
     def init(self):
