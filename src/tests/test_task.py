@@ -4,6 +4,7 @@ import pickle
 from hypergol.task import Task
 from hypergol.base_data import BaseData
 from hypergol.dataset import Dataset
+from hypergol.dataset import DatasetAlreadyExistsException
 
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import DataClass2
@@ -169,13 +170,13 @@ class TestTask(HypergolTestCase):
             self.delete_if_exists(dataset=Dataset(
                 dataType=OutputDataClass,
                 location=self.outputDataset.location,
-                project=self.outputDataset.project,
+                project='temp',
                 branch=f'{self.outputDataset.name}_temp',
                 name=f'{self.outputDataset.name}_{jobId:03}',
                 chunkCount=self.outputDataset.chunkCount,
                 repoData=self.outputDataset.repoData
             ))
-        tempBranchDirectory = f'{self.outputDataset.location}/{self.outputDataset.project}/{self.outputDataset.name}_temp'
+        tempBranchDirectory = f'{self.outputDataset.location}/temp/{self.outputDataset.name}_temp'
         if os.path.exists(tempBranchDirectory):
             os.rmdir(tempBranchDirectory)
         self.clean_directories()
@@ -186,7 +187,8 @@ class TestTask(HypergolTestCase):
             inputDatasets=[self.dataset1],
             outputDataset=self.outputDataset,
             loadedInputDatasets=[],
-            repeat=3
+            repeat=3,
+            debug=True
         )
         for job in task.get_jobs():
             taskCopy = pickle.loads(pickle.dumps(task))
@@ -201,7 +203,8 @@ class TestTask(HypergolTestCase):
             inputDatasets=[self.dataset1, self.reversedDataset],
             outputDataset=self.outputDataset,
             loadedInputDatasets=[self.dataset3],
-            increment=1
+            increment=1,
+            debug=True
         )
         with self.assertRaises(ValueError):
             for job in task.get_jobs():
@@ -216,7 +219,8 @@ class TestTask(HypergolTestCase):
             inputDatasets=[self.dataset1, self.dataset2],
             outputDataset=self.outputDataset2,
             loadedInputDatasets=[self.dataset3],
-            increment=1
+            increment=1,
+            debug=True
         )
         for job in task.get_jobs():
             taskCopy = pickle.loads(pickle.dumps(task))
@@ -224,3 +228,27 @@ class TestTask(HypergolTestCase):
             jobReports.append(jobReport)
         task.finalise(jobReports=jobReports, threads=3)
         self.assertEqual(set(self.outputDataset2.open('r')), self.expectedOutputDataset2)
+
+    def test_check_if_output_exists_raises_if_dataset_already_exists(self):
+        task = TaskExample(
+            inputDatasets=[self.dataset1],
+            outputDataset=self.dataset2,
+            loadedInputDatasets=[],
+            repeat=3,
+            debug=True
+        )
+        with self.assertRaises(DatasetAlreadyExistsException):
+            task.check_if_output_exists()
+
+    def test_check_if_output_exists_raises_if_temporary_directory_already_exists(self):
+        task = TaskExample(
+            inputDatasets=[self.dataset1],
+            outputDataset=self.outputDataset,
+            loadedInputDatasets=[],
+            repeat=3,
+            debug=True
+        )
+        os.mkdir(task.temporaryDatasetFactory.projectDirectory)
+        os.mkdir(task.temporaryDatasetFactory.branchDirectory)
+        with self.assertRaises(DatasetAlreadyExistsException):
+            task.check_if_output_exists()

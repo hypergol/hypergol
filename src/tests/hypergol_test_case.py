@@ -102,6 +102,10 @@ class HypergolTestCase(TestCase):
         except FileNotFoundError:
             pass
         try:
+            os.rmdir(f'{self.datasetFactory.location}/temp')
+        except FileNotFoundError:
+            pass
+        try:
             os.rmdir(f'{self.datasetFactory.location}/{self.datasetFactory.project}')
         except FileNotFoundError:
             pass

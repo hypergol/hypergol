@@ -14,6 +14,7 @@ from hypergol.job_report import JobReport
 from hypergol.repr import Repr
 from hypergol.logger import Logger
 from hypergol.dataset_factory import DatasetFactory
+from hypergol.dataset import DatasetAlreadyExistsException
 
 
 class SourceIteratorNotIterableException(Exception):
@@ -24,7 +25,7 @@ class Task(Repr):
     """Class to create other datasets, created domain objects in :func:`run()` must be appended to the output with ``self.output.append(object)`` (any number of the same type)
     """
 
-    def __init__(self, outputDataset: Dataset, inputDatasets: List[Dataset] = None, loadedInputDatasets: List[Dataset] = None, logger=None, threads=None, logAtEachN=0, force=False):
+    def __init__(self, outputDataset: Dataset, inputDatasets: List[Dataset] = None, loadedInputDatasets: List[Dataset] = None, logger=None, threads=None, logAtEachN=0, debug=False, force=False):
         """
         Parameters
         ----------
@@ -41,6 +42,8 @@ class Task(Repr):
             Number of threads this task should run parallel
         logAtEachN: int = 0
             Log progress at each of the value, default = 0 means no logs
+        debug: bool = False
+            If true errors during execution stop the pipeline, otherwise they just get logged.
         force: bool = False
             All input object's hashes must match in a single run() call. Use ``force=True`` to override this.
         """
@@ -54,19 +57,29 @@ class Task(Repr):
         self.logger = logger or Logger()
         self.threads = threads
         self.logAtEachN = logAtEachN
-        self.counter = 0
+        self.debug = debug
         self.force = force
         self.output = None      # <------- Append data modell instances to this variable in the run() function to be saved in the output dataset
         self.inputChunks = None
         self.loadedData = None
         self.results = None
+        self.exceptions = False
+        self.counter = 0
+        self.jobId = None
+        self.jobTotal = None
         self.temporaryDatasetFactory = DatasetFactory(
             location=outputDataset.location,
-            project=outputDataset.project,
+            project='temp',
             branch=f'{outputDataset.name}_temp',
             chunkCount=outputDataset.chunkCount,
             repoData=outputDataset.repoData
         )
+
+    def check_if_output_exists(self):
+        if self.outputDataset.exists():
+            raise DatasetAlreadyExistsException(f"Dataset {self.outputDataset.directory} already exists, delete the dataset first with Dataset.delete()")
+        if os.path.exists(self.temporaryDatasetFactory.branchDirectory):
+            raise DatasetAlreadyExistsException(f"Temporary data location {self.temporaryDatasetFactory.branchDirectory} already exists, delete the directory first")
 
     def _get_temporary_dataset(self, jobId):
         """Based on the input chunk creates a temporary dataset and opens all chunks for writing so that the various output classes can be appended to the right chunk"""
@@ -74,7 +87,18 @@ class Task(Repr):
 
     def log(self, message):
         """Standard logging"""
-        self.logger.info(f'{self.__class__.__name__} - {message}')
+        self.logger.info(f'{self.__class__.__name__} - {self.jobId:3}/{self.jobTotal:3} - {message}')
+
+    def log_exception(self, ex):
+        self.log(ex)
+        self.exceptions = True
+        if self.debug:
+            raise ex
+
+    def log_counter(self, final=False):
+        self.counter += 1
+        if self.logAtEachN != 0 and (self.counter % self.logAtEachN == 0 or final):
+            self.log(f'Processed: {self.counter}')
 
     def get_jobs(self):
         """Generates a list of :class:`Job` to be processed"""
@@ -98,25 +122,28 @@ class Task(Repr):
         job : Job
             parameters of chunks to be opened
         """
-        def _log(message):
-            self.log(f'{job.id:3}/{job.total:3} - {message}')
-        _log('Execute - START')
-        self.initialise()
-        self._open_input_chunks(job=job)
-        with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
-            sourceIterator = self.source_iterator(parameters=job.parameters)
-            if not isinstance(sourceIterator, GeneratorType):
-                raise SourceIteratorNotIterableException(f'{self.__class__.__name__}.source_iterator is not iterable, use yield instead of return')
-            for inputData in sourceIterator:
-                self.counter += 1
-                if self.logAtEachN != 0 and self.counter % self.logAtEachN == 0:
-                    _log(f'Processed: {self.counter}')
-                self.run(*inputData, *self.loadedData)
-        self._close_input_chunks()
-        if self.logAtEachN != 0:
-            _log(f'Processed: {self.counter}')
-        _log('Execute - END')
-        return JobReport(jobId=job.id, success=True, results=self.results)
+        self.jobId = job.id
+        self.jobTotal = job.total
+        self.log('Execute - START')
+        try:
+            self.initialise()
+            self._open_input_chunks(job=job)
+            with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
+                sourceIterator = self.source_iterator(parameters=job.parameters)
+                if not isinstance(sourceIterator, GeneratorType):
+                    raise SourceIteratorNotIterableException(f'{self.__class__.__name__}.source_iterator is not iterable, use yield instead of return')
+                for inputData in sourceIterator:
+                    self.log_counter()
+                    try:
+                        self.run(*inputData, *self.loadedData)
+                    except Exception as ex:  # pylint: disable=broad-except
+                        self.log_exception(ex)
+            self._close_input_chunks()
+            self.log_counter(final=True)
+        except Exception as ex:  # pylint: disable=broad-except
+            self.log_exception(ex)
+        self.log('Execute - END')
+        return JobReport(jobId=job.id, exceptions=self.exceptions, results=self.results)
 
     def initialise(self):
         """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes, initialises the results to be returned in JobReports and calls the task's custom `init()`"""
@@ -188,7 +215,7 @@ class Task(Repr):
         for jobId in range(len(jobReports)):
             temporaryDataset = self._get_temporary_dataset(jobId=jobId)
             temporaryDataset.delete()
-        temporayBranchDirectory = Path(self.outputDataset.location, self.outputDataset.project, f'{self.outputDataset.name}_temp')
+        temporayBranchDirectory = Path(self.outputDataset.location, 'temp', f'{self.outputDataset.name}_temp')
         try:
             if os.path.exists(temporayBranchDirectory):
                 os.rmdir(temporayBranchDirectory)
@@ -211,7 +238,7 @@ def _merge_function(job):
     logger.log(f'{job.parameters["name"]} - {job.id:3}/{job.total:3} - finish - START')
     chunk.open()
     pattern = str(Path(
-        chunk.dataset.location, chunk.dataset.project, f'{chunk.dataset.name}_temp',
+        chunk.dataset.location, 'temp', f'{chunk.dataset.name}_temp',
         f'{chunk.dataset.name}_*', f'*_{chunk.chunkId}.jsonl.gz'
     ))
     for filePath in sorted(glob.glob(pattern)):

@@ -44,7 +44,7 @@ source .venv/bin/activate
 from hypergol import HypergolProject
 project = HypergolProject(
     projectDirectory='<project_directory>/example',
-    dataDirectory=f'<data_directory>'
+    dataDirectory='<data_directory>'
 )
 project.list_datasets(pattern='.*', asCode=True);
 ```

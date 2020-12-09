@@ -115,8 +115,12 @@ class HypergolProject:
             raise ValueError('Both force and dryrun are set')
         if projectDirectory is None:
             projectDirectory = os.getcwd()
+        if projectDirectory.endswith('/'):
+            projectDirectory = projectDirectory[:-1]
+        if dataDirectory.endswith('/'):
+            dataDirectory = dataDirectory[:-1]
         if repoManager is None:
-            repoManager = RepoManager(repoDirectory=projectDirectory)
+            repoManager = RepoManager(repoDirectory=projectDirectory, raiseIfDirty=not force)
         self.repoManager = repoManager
         self.projectName = NameString(os.path.basename(projectDirectory))
         self.projectDirectory = projectDirectory
