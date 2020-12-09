@@ -63,7 +63,7 @@ class Task(Repr):
         self.inputChunks = None
         self.loadedData = None
         self.results = None
-        self.success = True
+        self.exceptions = False
         self.counter = 0
         self.jobId = None
         self.jobTotal = None
@@ -91,7 +91,7 @@ class Task(Repr):
 
     def log_exception(self, ex):
         self.log(ex)
-        self.success = False
+        self.exceptions = True
         if self.debug:
             raise ex
 
@@ -143,7 +143,7 @@ class Task(Repr):
         except Exception as ex:  # pylint: disable=broad-except
             self.log_exception(ex)
         self.log('Execute - END')
-        return JobReport(jobId=job.id, success=self.success, results=self.results)
+        return JobReport(jobId=job.id, exceptions=self.exceptions, results=self.results)
 
     def initialise(self):
         """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes, initialises the results to be returned in JobReports and calls the task's custom `init()`"""

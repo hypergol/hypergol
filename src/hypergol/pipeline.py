@@ -18,8 +18,12 @@ class Pipeline:
         logger: Logger
             logger class
         """
+        self.exceptions = {}
         self.tasks = tasks
         self.logger = logger or Logger()
+
+    def log(self, message):
+        self.logger.log(f'{self.__class__.__name__} - {message}')
 
     def run(self, threads=1):
         """Runs each task
@@ -30,7 +34,7 @@ class Pipeline:
         threads : int = 1
             Number of threads to run
         """
-        self.logger.log(f'{self.__class__.__name__} - Pipeline - START')
+        self.log('START')
         for task in self.tasks:
             task.check_if_output_exists()
         for task in self.tasks:
@@ -38,8 +42,11 @@ class Pipeline:
                 raise ValueError('Task must be of type Task')
             pool = Pool(task.threads or threads)
             jobReports = pool.map(task.execute, task.get_jobs())
+            self.exceptions[task.__class__.__name__] = any(jobReport.exceptions for jobReport in jobReports)
             task.finalise(jobReports=jobReports, threads=task.threads or threads)
             pool.close()
             pool.join()
             pool.terminate()
-        self.logger.log(f'{self.__class__.__name__} - Pipeline - END')
+        for taskName, exceptions in self.exceptions.items():
+            self.log(f'{taskName}: exceptions: {exceptions}')
+        self.log('END')
