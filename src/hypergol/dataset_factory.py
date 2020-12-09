@@ -33,13 +33,15 @@ class DatasetFactory(Repr):
     def branchDirectory(self):
         return Path(self.location, self.project, self.branch)
 
-    def get(self, dataType, name, chunkCount=None):
+    def get(self, dataType, name, branch=None, chunkCount=None):
         """Creates a dataset with the parameters given and the factory's own parameters
 
         Parameters
         ----------
         dataType : BaseData
             Type of the dataset
+        branc : str=None
+            Name of the branch to load the dataset from (if None, defaults to current)
         name : str
             Name of the dataset (recommended to be in snakecase)
         chunkCount : int=None
@@ -47,11 +49,13 @@ class DatasetFactory(Repr):
         """
         if chunkCount is None:
             chunkCount = self.chunkCount
+        if branch is None:
+            branch = self.branchDirectory
         return Dataset(
             dataType=dataType,
             location=self.location,
             project=self.project,
-            branch=self.branch,
+            branch=branch,
             name=name,
             chunkCount=chunkCount,
             repoData=self.repoData
