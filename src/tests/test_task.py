@@ -4,6 +4,7 @@ import pickle
 from hypergol.task import Task
 from hypergol.base_data import BaseData
 from hypergol.dataset import Dataset
+from hypergol.dataset import DatasetAlreadyExistsException
 
 from tests.hypergol_test_case import DataClass1
 from tests.hypergol_test_case import DataClass2
@@ -224,3 +225,24 @@ class TestTask(HypergolTestCase):
             jobReports.append(jobReport)
         task.finalise(jobReports=jobReports, threads=3)
         self.assertEqual(set(self.outputDataset2.open('r')), self.expectedOutputDataset2)
+
+    def test_check_if_output_exists_raises_if_dataset_already_exists(self):
+        task = TaskExample(
+            inputDatasets=[self.dataset1],
+            outputDataset=self.dataset2,
+            loadedInputDatasets=[],
+            repeat=3
+        )
+        with self.assertRaises(DatasetAlreadyExistsException):
+            task.check_if_output_exists()
+
+    def test_check_if_output_exists_raises_if_temporary_directory_already_exists(self):
+        task = TaskExample(
+            inputDatasets=[self.dataset1],
+            outputDataset=self.outputDataset,
+            loadedInputDatasets=[],
+            repeat=3
+        )
+        os.mkdir(task.temporaryDatasetFactory.branchDirectory)
+        with self.assertRaises(DatasetAlreadyExistsException):
+            task.check_if_output_exists()

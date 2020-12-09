@@ -3,7 +3,6 @@ from multiprocessing import Pool
 
 from hypergol.logger import Logger
 from hypergol.task import Task
-from hypergol.dataset import DatasetAlreadyExistsException
 
 
 class Pipeline:
@@ -33,8 +32,7 @@ class Pipeline:
         """
         self.logger.log(f'{self.__class__.__name__} - Pipeline - START')
         for task in self.tasks:
-            if task.outputDataset.exists():
-                raise DatasetAlreadyExistsException(f"Dataset {task.outputDataset.directory} already exist, delete the dataset first with Dataset.delete()")
+            task.check_if_output_exists()
         for task in self.tasks:
             if not isinstance(task, Task):
                 raise ValueError('Task must be of type Task')

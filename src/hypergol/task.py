@@ -14,6 +14,7 @@ from hypergol.job_report import JobReport
 from hypergol.repr import Repr
 from hypergol.logger import Logger
 from hypergol.dataset_factory import DatasetFactory
+from hypergol.dataset import DatasetAlreadyExistsException
 
 
 class SourceIteratorNotIterableException(Exception):
@@ -67,6 +68,12 @@ class Task(Repr):
             chunkCount=outputDataset.chunkCount,
             repoData=outputDataset.repoData
         )
+
+    def check_if_output_exists(self):
+        if self.outputDataset.exists():
+            raise DatasetAlreadyExistsException(f"Dataset {self.outputDataset.directory} already exists, delete the dataset first with Dataset.delete()")
+        if os.path.exists(self.temporaryDatasetFactory.branchDirectory):
+            raise DatasetAlreadyExistsException(f"Temporary data location {self.temporaryDatasetFactory.branchDirectory} already exists, delete the directory first")
 
     def _get_temporary_dataset(self, jobId):
         """Based on the input chunk creates a temporary dataset and opens all chunks for writing so that the various output classes can be appended to the right chunk"""

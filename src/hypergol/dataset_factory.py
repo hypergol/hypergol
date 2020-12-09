@@ -1,3 +1,4 @@
+from pathlib import Path
 from hypergol.repr import Repr
 from hypergol.dataset import Dataset
 from hypergol.repo_data import RepoData
@@ -27,6 +28,10 @@ class DatasetFactory(Repr):
         self.branch = branch
         self.chunkCount = chunkCount
         self.repoData = repoData or RepoData.get_dummy()
+
+    @property
+    def branchDirectory(self):
+        return Path(self.location, self.project, self.branch)
 
     def get(self, dataType, name, chunkCount=None):
         """Creates a dataset with the parameters given and the factory's own parameters
