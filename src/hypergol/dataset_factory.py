@@ -40,7 +40,7 @@ class DatasetFactory(Repr):
         ----------
         dataType : BaseData
             Type of the dataset
-        branc : str=None
+        branch : str=None
             Name of the branch to load the dataset from (if None, defaults to current)
         name : str
             Name of the dataset (recommended to be in snakecase)
@@ -50,7 +50,7 @@ class DatasetFactory(Repr):
         if chunkCount is None:
             chunkCount = self.chunkCount
         if branch is None:
-            branch = self.branchDirectory
+            branch = self.branch
         return Dataset(
             dataType=dataType,
             location=self.location,
