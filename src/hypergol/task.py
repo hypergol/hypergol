@@ -57,13 +57,16 @@ class Task(Repr):
         self.logger = logger or Logger()
         self.threads = threads
         self.logAtEachN = logAtEachN
-        self.counter = 0
         self.debug = debug
         self.force = force
         self.output = None      # <------- Append data modell instances to this variable in the run() function to be saved in the output dataset
         self.inputChunks = None
         self.loadedData = None
         self.results = None
+        self.success = True
+        self.counter = 0
+        self.jobId = None
+        self.jobTotal = None
         self.temporaryDatasetFactory = DatasetFactory(
             location=outputDataset.location,
             project='temp',
@@ -84,7 +87,18 @@ class Task(Repr):
 
     def log(self, message):
         """Standard logging"""
-        self.logger.info(f'{self.__class__.__name__} - {message}')
+        self.logger.info(f'{self.__class__.__name__} - {self.jobId:3}/{self.jobTotal:3} - {message}')
+
+    def log_exception(self, ex):
+        self.log(ex)
+        self.success = False
+        if self.debug:
+            raise ex
+
+    def log_counter(self, final=False):
+        self.counter += 1
+        if self.logAtEachN != 0 and (self.counter % self.logAtEachN == 0 or final):
+            self.log(f'Processed: {self.counter}')
 
     def get_jobs(self):
         """Generates a list of :class:`Job` to be processed"""
@@ -108,9 +122,9 @@ class Task(Repr):
         job : Job
             parameters of chunks to be opened
         """
-        def _log(message):
-            self.log(f'{job.id:3}/{job.total:3} - {message}')
-        _log('Execute - START')
+        self.jobId = job.id
+        self.jobTotal = job.total
+        self.log('Execute - START')
         try:
             self.initialise()
             self._open_input_chunks(job=job)
@@ -119,24 +133,17 @@ class Task(Repr):
                 if not isinstance(sourceIterator, GeneratorType):
                     raise SourceIteratorNotIterableException(f'{self.__class__.__name__}.source_iterator is not iterable, use yield instead of return')
                 for inputData in sourceIterator:
-                    self.counter += 1
-                    if self.logAtEachN != 0 and self.counter % self.logAtEachN == 0:
-                        _log(f'Processed: {self.counter}')
+                    self.log_counter()
                     try:
                         self.run(*inputData, *self.loadedData)
-                    except Exception as ex:
-                        _log(f'Exception in run(): {str(ex)}')
-                        if self.debug:
-                            raise ex
+                    except Exception as ex:  # pylint: disable=broad-except
+                        self.log_exception(ex)
             self._close_input_chunks()
-            if self.logAtEachN != 0:
-                _log(f'Processed: {self.counter}')
-        except Exception as ex:
-            _log(f'Exception in execute(): {str(ex)}')
-            if self.debug:
-                raise ex
-        _log('Execute - END')
-        return JobReport(jobId=job.id, success=True, results=self.results)
+            self.log_counter(final=True)
+        except Exception as ex:  # pylint: disable=broad-except
+            self.log_exception(ex)
+        self.log('Execute - END')
+        return JobReport(jobId=job.id, success=self.success, results=self.results)
 
     def initialise(self):
         """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes, initialises the results to be returned in JobReports and calls the task's custom `init()`"""
