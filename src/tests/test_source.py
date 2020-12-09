@@ -7,7 +7,6 @@ from hypergol.dataset import Dataset
 from hypergol.base_data import BaseData
 
 from tests.hypergol_test_case import HypergolTestCase
-from tests.hypergol_test_case import DataClass1
 
 
 class OutputDataClass(BaseData):
@@ -98,7 +97,8 @@ class TestSource(HypergolTestCase):
     def test_source_execute_creates_dataset(self):
         sourceExample = SourceExample(
             outputDataset=self.outputDataset,
-            sampleLength=self.sampleLength
+            sampleLength=self.sampleLength,
+            debug=True
         )
         jobReports = []
         for job in sourceExample.get_jobs():
@@ -110,7 +110,8 @@ class TestSource(HypergolTestCase):
     def test_execute_raises_error_if_bad_iterator(self):
         badIteratorSourceExample = BadIteratorSourceExample(
             outputDataset=self.outputDataset,
-            sampleLength=self.sampleLength
+            sampleLength=self.sampleLength,
+            debug=True
         )
         with self.assertRaises(SourceIteratorNotIterableException):
             for job in badIteratorSourceExample.get_jobs():
