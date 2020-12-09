@@ -116,7 +116,7 @@ class HypergolProject:
         if projectDirectory is None:
             projectDirectory = os.getcwd()
         if repoManager is None:
-            repoManager = RepoManager(repoDirectory=projectDirectory)
+            repoManager = RepoManager(repoDirectory=projectDirectory, raiseIfDirty=not force)
         self.repoManager = repoManager
         self.projectName = NameString(os.path.basename(projectDirectory))
         self.projectDirectory = projectDirectory
