@@ -170,13 +170,13 @@ class TestTask(HypergolTestCase):
             self.delete_if_exists(dataset=Dataset(
                 dataType=OutputDataClass,
                 location=self.outputDataset.location,
-                project=self.outputDataset.project,
+                project='temp',
                 branch=f'{self.outputDataset.name}_temp',
                 name=f'{self.outputDataset.name}_{jobId:03}',
                 chunkCount=self.outputDataset.chunkCount,
                 repoData=self.outputDataset.repoData
             ))
-        tempBranchDirectory = f'{self.outputDataset.location}/{self.outputDataset.project}/{self.outputDataset.name}_temp'
+        tempBranchDirectory = f'{self.outputDataset.location}/temp/{self.outputDataset.name}_temp'
         if os.path.exists(tempBranchDirectory):
             os.rmdir(tempBranchDirectory)
         self.clean_directories()
@@ -243,6 +243,7 @@ class TestTask(HypergolTestCase):
             loadedInputDatasets=[],
             repeat=3
         )
+        os.mkdir(task.temporaryDatasetFactory.projectDirectory)
         os.mkdir(task.temporaryDatasetFactory.branchDirectory)
         with self.assertRaises(DatasetAlreadyExistsException):
             task.check_if_output_exists()

@@ -30,6 +30,10 @@ class DatasetFactory(Repr):
         self.repoData = repoData or RepoData.get_dummy()
 
     @property
+    def projectDirectory(self):
+        return Path(self.location, self.project)
+
+    @property
     def branchDirectory(self):
         return Path(self.location, self.project, self.branch)
 

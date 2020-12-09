@@ -63,7 +63,7 @@ class Task(Repr):
         self.results = None
         self.temporaryDatasetFactory = DatasetFactory(
             location=outputDataset.location,
-            project=outputDataset.project,
+            project='temp',
             branch=f'{outputDataset.name}_temp',
             chunkCount=outputDataset.chunkCount,
             repoData=outputDataset.repoData
@@ -195,7 +195,7 @@ class Task(Repr):
         for jobId in range(len(jobReports)):
             temporaryDataset = self._get_temporary_dataset(jobId=jobId)
             temporaryDataset.delete()
-        temporayBranchDirectory = Path(self.outputDataset.location, self.outputDataset.project, f'{self.outputDataset.name}_temp')
+        temporayBranchDirectory = Path(self.outputDataset.location, 'temp', f'{self.outputDataset.name}_temp')
         try:
             if os.path.exists(temporayBranchDirectory):
                 os.rmdir(temporayBranchDirectory)
@@ -218,7 +218,7 @@ def _merge_function(job):
     logger.log(f'{job.parameters["name"]} - {job.id:3}/{job.total:3} - finish - START')
     chunk.open()
     pattern = str(Path(
-        chunk.dataset.location, chunk.dataset.project, f'{chunk.dataset.name}_temp',
+        chunk.dataset.location, 'temp', f'{chunk.dataset.name}_temp',
         f'{chunk.dataset.name}_*', f'*_{chunk.chunkId}.jsonl.gz'
     ))
     for filePath in sorted(glob.glob(pattern)):
