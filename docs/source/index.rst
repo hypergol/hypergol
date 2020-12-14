@@ -34,7 +34,7 @@ Hypergol is free software; you can redistribute it and/or modify it under the te
 Join us
 -------
 
-Join us on `GitHub <https://github.com/hypergol/hypergol>`_ or on `Slack <https://hypergol.ml/slack>`_.
+Join us on `GitHub <https://github.com/hypergol/hypergol>`_ or on `Discord <https://hypergol.ml/discord>`_.
 
 History
 -------
