@@ -1,6 +1,5 @@
 import os
 import glob
-from multiprocessing import Pool
 from pathlib import Path
 
 from hypergol.datachunk import DataChunk
@@ -170,22 +169,6 @@ class DatasetReader(Repr):
                     yield elem
             finally:
                 chunk.close()
-
-    def load(self, threads):
-        def _load(chunk):
-            try:
-                return list(chunk.open())
-            finally:
-                chunk.close()
-        pool = Pool(threads)
-        elemLists = pool.map(_load, self.dataChunks)
-        pool.close()
-        pool.join()
-        pool.terminate()
-        elems = []
-        for elemList in elemLists:
-            elems.append(elemList)
-        return elems
 
 
 class DatasetWriter(Repr):
