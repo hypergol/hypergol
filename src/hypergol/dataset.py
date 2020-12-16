@@ -1,6 +1,5 @@
 import os
 import glob
-
 from pathlib import Path
 
 from hypergol.datachunk import DataChunk
