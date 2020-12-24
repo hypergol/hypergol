@@ -94,10 +94,10 @@ class Dataset(Repr):
             self.defFile.make_def_file()
         elif mode == 'r':
             if not self.exists():
-                raise DatasetDoesNotExistException(f'Dataset {self.name} does not exist')
+                raise DatasetDoesNotExistException(f'Dataset {self.directory} does not exist')
             self.defFile.check_def_file()
         else:
-            raise ValueError(f'Invalid mode: {mode} in {self.name}')
+            raise ValueError(f'Invalid mode: {mode} in {self.directory}')
 
     def open(self, mode):
         """Opens the dataset for reading or writing

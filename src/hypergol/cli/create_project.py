@@ -28,6 +28,7 @@ def create_project(projectName, dryrun=None, force=None):
         - ``requirements.txt``
         - ``.gitignore``
         - ``README.md``
+        - ``LICENSE`` <- Don't forget to add current year and your name or change it to the one you want
         - ``pylintrc``
 
     Parameters
@@ -60,8 +61,9 @@ def create_project(projectName, dryrun=None, force=None):
     requirementsContent = project.render_simple(templateName='requirements.txt.j2', filePath=Path(project.projectDirectory, 'requirements.txt'))
     gitignoreContent = project.render_simple(templateName='.gitignore.j2', filePath=Path(project.projectDirectory, '.gitignore'))
     readmeContent = project.render_simple(templateName='README.md.j2', filePath=Path(project.projectDirectory, 'README.md'))
+    licenseContent = project.render_simple(templateName='LICENSE.j2', filePath=Path(project.projectDirectory, 'LICENSE'))
     pylintrcContent = project.render_simple(templateName='pylintrc.j2', filePath=Path(project.projectDirectory, 'pylintrc'))
-    allContent = (makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, pylintrcContent)
+    allContent = (makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, licenseContent, pylintrcContent)
     return project.cli_final_message(creationType='Project', name=projectName, content=allContent)
 
 

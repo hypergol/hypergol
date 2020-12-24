@@ -19,3 +19,11 @@ class CreateArticlesTask(Task):
     def run(self, exampleInputObject1, exampleInputObject2):
         raise NotImplementedError(f'{self.__class__.__name__} must implement run()')
         self.output.append(exampleOutputObject)
+
+    def finish_job(self, jobReport):
+        # TODO: Update jobReport after the last iteration. Close file handlers or release memory of non-python objects here if necessary
+        pass
+
+    def finish_task(self, jobReports, threads):
+        # User-defined finalisation at the end of the task.
+        pass

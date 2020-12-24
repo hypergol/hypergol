@@ -1,3 +1,4 @@
+import numpy as np
 from unittest import TestCase
 
 from hypergol.base_data import BaseData
@@ -47,6 +48,22 @@ class DataClassWithBadCopyToData(BaseData):
         return data
 
 
+class DataClassWithObject(BaseData):
+
+    def __init__(self, value: object):
+        self.value = value
+
+    def to_data(self):
+        data = self.__dict__.copy()
+        data['value'] = BaseData.to_string(data['value'])
+        return data
+
+    @classmethod
+    def from_data(cls, data):
+        data['value'] = BaseData.from_string(data['value'])
+        return cls(**data)
+
+
 class TestBaseDataTestToData(TestCase):
 
     def setUp(self):
@@ -63,6 +80,7 @@ class TestBaseDataTestToData(TestCase):
             classId=1,
             smallDataClass=SmallDataClass(value=1)
         )
+        self.dataClassWithObject = DataClassWithObject(value=np.array([1.0, 2.0]))
 
     def test_test_to_data_returns_true(self):
         self.assertEqual(self.dataClassWithGoodToData.test_to_data(), True)
@@ -74,3 +92,7 @@ class TestBaseDataTestToData(TestCase):
     def test_test_to_data_throws_error_if_self_not_serializable(self):
         with self.assertRaises(TypeError):
             self.dataClassWithBadCopyToData.test_to_data()
+
+    def test_object_conversion(self):
+        dataClassWithObjectCopy = DataClassWithObject.from_data(self.dataClassWithObject.to_data())
+        np.testing.assert_array_equal(dataClassWithObjectCopy.value, self.dataClassWithObject.value)

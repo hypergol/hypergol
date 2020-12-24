@@ -41,12 +41,15 @@ source .venv/bin/activate
 ### How to list existing Datasets (in Jupyter)
 
 ```
+sys.path.insert(0, '<project_directory>/{{ name.asSnake }}')
 from hypergol import HypergolProject
+from data_models.example_datamodel_class import ExampleDatamodelClass
 project = HypergolProject(
     projectDirectory='<project_directory>/{{ name.asSnake }}',
     dataDirectory='<data_directory>'
 )
-project.list_datasets(pattern='.*', asCode=True);
+ds = project.datasetFactory.get(dataType=ExampleDatamodelClass, name='sentences')
+# project.list_datasets(pattern='.*', asCode=True);
 ```
 
 This will list all existing datasets that matches `pattern` as self contained executable code.
@@ -104,13 +107,10 @@ To get the response of the model to a list of objects, see example below. Replac
 sys.path.insert(0, '<project_directory>/{{ name.asSnake }}')
 import requests
 from itertools import islice
-
-from data_models.example_output import ExampleOutput
-
+from data_models.example_model_output import ExampleModelOutput
 
 with ds.open('r') as dsr:
     values = [value.to_data() for value in islice(dsr, 10)]
-
 
 response = requests.post(
     'http://0.0.0.0:8000/output',
@@ -120,7 +120,7 @@ response = requests.post(
     },
     data=json.dumps(values)
 )
-outputs = [ExampleOutput.from_data(v) for v in json.loads(response.text)]
+outputs = [ExampleModelOutput.from_data(v) for v in json.loads(response.text)]
 modelLongName = response.headers['x-model-long-name']
 ```
 

@@ -51,7 +51,7 @@ class BaseData(Repr):
 
     @staticmethod
     def from_string(data):
-        return pickle.loads(base64.b64decode(data['inputs'].encode('utf-8')))
+        return pickle.loads(base64.b64decode(data.encode('utf-8')))
 
     @classmethod
     def from_data(cls, data):

@@ -143,7 +143,9 @@ class Task(Repr):
         except Exception as ex:  # pylint: disable=broad-except
             self.log_exception(ex)
         self.log('Execute - END')
-        return JobReport(jobId=job.id, exceptions=self.exceptions, results=self.results)
+        jobReport = JobReport(jobId=job.id, exceptions=self.exceptions, results=self.results)
+        self.finish_job(jobReport=jobReport)
+        return jobReport
 
     def initialise(self):
         """After opening input chunks and loading loaded inputs, creates :term:`delayed` classes, initialises the results to be returned in JobReports and calls the task's custom `init()`"""
@@ -187,6 +189,9 @@ class Task(Repr):
         for inputChunk in self.inputChunks:
             inputChunk.close()
 
+    def finish_job(self, jobReport):
+        """User-defined finalisation in each thread. Close file handlers or release memory of non-python objects here if necessary"""
+
     def finalise(self, jobReports, threads):
         """After func:`execute` finished, all the temporary datasets are opened and copied into the output dataset in a multithreaded way.
 
@@ -222,10 +227,10 @@ class Task(Repr):
         except OSError as ex:
             self.log(f'temporary directory cannot be deleted {ex}')
         self.outputDataset.chkFile.make_chk_file(checksums=checksums)
-        self.finish(jobReports=jobReports, threads=threads)
+        self.finish_task(jobReports=jobReports, threads=threads)
 
-    def finish(self, jobReports, threads):
-        """User-defined finalisation in each thread. Close file handlers or release memory of non-python objects here if necessary"""
+    def finish_task(self, jobReports, threads):
+        """User-defined finalisation at the end of the task."""
 
 
 def _merge_function(job):

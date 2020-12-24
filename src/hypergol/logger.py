@@ -11,7 +11,7 @@ class Logger:
     DEBUG = logging.DEBUG
     NOTSET = logging.NOTSET
 
-    def __init__(self, path=None, level=logging.INFO, overWrite=False):
+    def __init__(self, path=None, level=logging.INFO, overWrite=False, enabled=True):
         """
         Parameters
         ----------
@@ -25,6 +25,7 @@ class Logger:
         self.path = path
         self.level = level
         self.overWrite = overWrite
+        self.enabled = enabled
 
         self._logger = logging.getLogger()
         self._logger.setLevel(level=self.level)
@@ -41,9 +42,21 @@ class Logger:
             handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
             handler.setLevel(level=self.level)
             self._logger.addHandler(handler)
+        self._set_logger_disabled()
+
+    def _set_logger_disabled(self):
+        self._logger.disabled = not self.enabled
+
+    def disable(self):
+        self.enabled = False
+        self._set_logger_disabled()
+
+    def enable(self):
+        self.enabled = True
+        self._set_logger_disabled()
 
     def __reduce_ex__(self, protocol):
-        return self.__class__, (self.path, self.level, self.overWrite)
+        return self.__class__, (self.path, self.level, self.overWrite, self.enabled)
 
     def log(self, message):
         """Convenience method for ``Logger.INFO`` level"""

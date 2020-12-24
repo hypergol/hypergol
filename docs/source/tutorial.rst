@@ -284,12 +284,13 @@ The pipeline will execute the task in the following way:
 - Create the ``sourceIterator``, this will yield the input data that together with loaded data will be passed to the ``run()`` function.
 - Call the iterator in a loop and call the ``run()`` function with the yielded data.
 - Close the input chunks.
+- Call the user defined ``finish_job()`` function.
 - At this point the thread stops and execution returns to the main thread to "finalise" the output dataset.
     - Finalise copies data from all temporary datasets in a _multithreaded_ way.
     - Calculates the chunks hash.
     - Creates the output dataset (with ``.def`` and ``.chk`` files as well).
     - Deletes all temporary datasets.
-    - Calls the user defined ``finish()`` function.
+    - Calls the user defined ``finish_task()`` function.
 
 To facilitate this, you need to implement just two functions:
 

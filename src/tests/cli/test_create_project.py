@@ -31,7 +31,7 @@ fire==0.3.1
 nose2==0.9.2
 pylint==2.5.3
 hypergol
-tensorflow==2.2.1
+tensorflow==2.4.0
 pydantic==1.6.1
 fastapi==0.61.0
 uvicorn==0.11.8
@@ -69,6 +69,7 @@ class TestCreateProject(HypergolCreateTestCase):
             Path(self.projectDirectory, 'pipelines', '__init__.py'),
             Path(self.projectDirectory, 'pipelines'),
             Path(self.projectDirectory, 'README.md'),
+            Path(self.projectDirectory, 'LICENSE'),
             Path(self.projectDirectory, 'make_venv.sh'),
             Path(self.projectDirectory, 'run_tests.sh'),
             Path(self.projectDirectory, 'run_pylint.sh'),
@@ -107,11 +108,12 @@ class TestCreateProject(HypergolCreateTestCase):
 
     def test_create_project_creates_content(self):
         allContent = create_project(self.projectName, dryrun=True)
-        makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, pylintrcContent = allContent
+        makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, licenseContent, pylintrcContent = allContent
         self.assertEqual(makeVenvScript, MAKE_VENV_SCRIPT)
         self.assertEqual(runTestScript, RUN_TEST_SCRIPT)
         self.assertEqual(runPylintScript, RUN_PYLINT_SCRIPT)
         self.assertEqual(requirementsContent, REQUIREMENTS_CONTENT)
         self.assertEqual(gitignoreContent, GITIGNORE_CONTENT)
-        self.assertEqual(len(readmeContent), 4701)
+        self.assertEqual(len(readmeContent), 4923)
+        self.assertEqual(len(licenseContent), 1070)
         self.assertEqual(len(pylintrcContent), 18741)
