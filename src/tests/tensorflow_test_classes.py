@@ -106,7 +106,7 @@ class TensorflowModelExample(BaseTensorflowModel):
     def produce_metrics(self, targets, training, globalStep, ids, input1):
         return input1
 
-    @ tf.function(input_signature=[
+    @tf.function(input_signature=[
         tf.TensorSpec(shape=[None], dtype=tf.int32, name="ids"),
         tf.TensorSpec(shape=[None, 3], dtype=tf.float32, name="input1")
     ])

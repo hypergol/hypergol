@@ -38,7 +38,7 @@ class TensorflowModelManager:
         """Saves TensorFlow model, block definitions, and weights """
         modelDirectory = Path(self.project.modelDataPath, self.model.modelName, str(self.globalStep))
         modelDirectory.mkdir(parents=True, exist_ok=False)
-        tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures={'signature_default': self.model.get_outputs})
+        tf.saved_model.save(self.model, export_dir=str(modelDirectory), signatures={'output': self.model.get_outputs})
         for modelBlock in self.model.get_model_blocks():
             json.dump(modelBlock.get_config(), open(f'{modelDirectory}/{modelBlock.blockName}.json', 'w'))
         self.model.save_weights(filepath=f'{modelDirectory}/{self.model.modelName}.h5', save_format='h5')
@@ -110,6 +110,7 @@ class TensorflowModelManager:
         self.batchProcessor.start()
         if self.restoreWeightsPath is not None:
             self.evaluate(withTracing=False)  # model call needed to initialize layers/weights before reloading
+            self.model.built = True
             self.restore_model_weights()
 
     def run(self, stepCount, evaluationSteps, tracingSteps):
