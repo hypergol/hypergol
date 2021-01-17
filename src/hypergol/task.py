@@ -126,8 +126,8 @@ class Task(Repr):
         self.jobTotal = job.total
         self.log('Execute - START')
         try:
-            self.initialise()
             self._open_input_chunks(job=job)
+            self.initialise()
             with self._get_temporary_dataset(jobId=job.id).open('w') as self.output:
                 sourceIterator = self.source_iterator(parameters=job.parameters)
                 if not isinstance(sourceIterator, GeneratorType):
