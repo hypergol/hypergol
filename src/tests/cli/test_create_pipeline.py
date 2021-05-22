@@ -17,7 +17,7 @@ from tasks.other_task import OtherTask
 from data_models.data_model_test_class import DataModelTestClass
 
 
-def test_pipeline(threads=1, force=False):
+def test_pipeline(threads=1, force=False, onlyTasks=None):
     project = HypergolProject(dataDirectory='.', force=force)
     dataModelTestClasses = project.datasetFactory.get(dataType=DataModelTestClass, name='data_model_test_classes')
     exampleSource = ExampleSource(
@@ -35,7 +35,7 @@ def test_pipeline(threads=1, force=False):
             otherTask,
         ]
     )
-    pipeline.run(threads=threads)
+    pipeline.run(threads=threads, onlyTasks=onlyTasks)
 
 
 if __name__ == '__main__':
