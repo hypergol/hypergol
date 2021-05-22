@@ -9,7 +9,7 @@ from data_models.{{ name.asSnake }} import {{ name }}
 {%- endfor %}
 
 
-def {{ snakeName }}(threads=1, force=False):
+def {{ snakeName }}(threads=1, force=False, onlyTasks=None):
     project = HypergolProject(dataDirectory='.', force=force)
 
 {%- for name in dataModelDependencies %}
@@ -30,7 +30,7 @@ def {{ snakeName }}(threads=1, force=False):
 {%- endfor %}
         ]
     )
-    pipeline.run(threads=threads)
+    pipeline.run(threads=threads, onlyTasks=onlyTasks)
 
 
 if __name__ == '__main__':

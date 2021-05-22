@@ -11,7 +11,7 @@ from data_models.article_page import ArticlePage
 from data_models.sentence import Sentence
 
 
-def process_blogposts(threads=1, force=False):
+def process_blogposts(threads=1, force=False, onlyTasks=None):
     project = HypergolProject(dataDirectory='.', force=force)
     articles = project.datasetFactory.get(dataType=Article, name='articles')
     articleTexts = project.datasetFactory.get(dataType=ArticleText, name='article_texts')
@@ -42,7 +42,7 @@ def process_blogposts(threads=1, force=False):
             createSentencesTask,
         ]
     )
-    pipeline.run(threads=threads)
+    pipeline.run(threads=threads, onlyTasks=onlyTasks)
 
 
 if __name__ == '__main__':

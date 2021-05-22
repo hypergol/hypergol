@@ -25,7 +25,7 @@ class Pipeline:
     def log(self, message):
         self.logger.log(f'{self.__class__.__name__} - {message}')
 
-    def run(self, threads=1):
+    def run(self, threads=1, onlyTasks=None):
         """Runs each task
         Opens a set of threads, creates the list of job and calls the task's ``execute()`` function. Upon finishing it calls ``finalise`` to create the ``.chk`` file of the output dataset.
 
@@ -33,11 +33,19 @@ class Pipeline:
         ----------
         threads : int = 1
             Number of threads to run
+        onlyTasks : list = None
+            list of task numbers in the task list to run (for debugging purpose). Add --onlyTasks=0 or --onlyTasks=1,2 parameter to the shell script in the CLI
         """
         self.log('START')
-        for task in self.tasks:
+        if onlyTasks is not None:
+            if isinstance(onlyTasks, int):
+                onlyTasks = [onlyTasks]
+            tasksToRun = [self.tasks[k] for k in onlyTasks]
+        else:
+            tasksToRun = self.tasks
+        for task in tasksToRun:
             task.check_if_output_exists()
-        for task in self.tasks:
+        for task in tasksToRun:
             if not isinstance(task, Task):
                 raise ValueError('Task must be of type Task')
             pool = Pool(task.threads or threads)
