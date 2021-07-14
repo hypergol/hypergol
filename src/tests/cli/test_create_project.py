@@ -1,4 +1,6 @@
 import os
+import hypergol
+
 from pathlib import Path
 
 from hypergol.utils import HypergolFileAlreadyExistsException
@@ -30,12 +32,12 @@ REQUIREMENTS_CONTENT = """
 fire==0.3.1
 nose2==0.9.2
 pylint==2.5.3
-hypergol
+hypergol==VERSION
 tensorflow==2.5.0
 pydantic==1.6.2
 fastapi==0.65.2
 uvicorn==0.11.8
-""".lstrip()
+""".replace('VERSION', hypergol.__version__).lstrip()
 
 GITIGNORE_CONTENT = """
 .venv/

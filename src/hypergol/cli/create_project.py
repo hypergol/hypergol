@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import fire
+import hypergol
 
 from hypergol.name_string import NameString
 from hypergol.hypergol_project import HypergolProject
@@ -55,10 +56,14 @@ def create_project(projectName, dryrun=None, force=None):
     project.create_blocks_directory()
     project.render_simple(templateName='__init__.py.j2', filePath=Path(project.blocksPath, '__init__.py'))
     project.create_tests_directory()
+    requirementsContent = project.render(
+        templateName='requirements.txt.j2',
+        templateData={'hypergolVersion': hypergol.__version__},
+        filePath=Path(project.projectDirectory, 'requirements.txt')
+    )
     makeVenvScript = project.render_executable(templateName='make_venv.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'make_venv.sh'))
     runTestScript = project.render_executable(templateName='run_tests.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'run_tests.sh'))
     runPylintScript = project.render_executable(templateName='run_pylint.sh.j2', templateData={}, filePath=Path(project.projectDirectory, 'run_pylint.sh'))
-    requirementsContent = project.render_simple(templateName='requirements.txt.j2', filePath=Path(project.projectDirectory, 'requirements.txt'))
     gitignoreContent = project.render_simple(templateName='.gitignore.j2', filePath=Path(project.projectDirectory, '.gitignore'))
     readmeContent = project.render_simple(templateName='README.md.j2', filePath=Path(project.projectDirectory, 'README.md'))
     licenseContent = project.render_simple(templateName='LICENSE.j2', filePath=Path(project.projectDirectory, 'LICENSE'))
