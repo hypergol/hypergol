@@ -12,7 +12,7 @@ MAKE_VENV_SCRIPT = """
 python3 -m venv .venv
 source .venv/bin/activate
 pip3 install --upgrade pip
-pip3 install setuptools==47.1.1
+pip3 install setuptools==57.1.0
 pip3 install wheel
 pip3 install -r requirements.txt
 """.lstrip()
@@ -33,7 +33,7 @@ pylint==2.5.3
 hypergol
 tensorflow==2.5.0
 pydantic==1.6.2
-fastapi==0.61.0
+fastapi==0.65.2
 uvicorn==0.11.8
 """.lstrip()
 
