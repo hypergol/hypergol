@@ -1,4 +1,6 @@
 import os
+import hypergol
+
 from pathlib import Path
 
 from hypergol.utils import HypergolFileAlreadyExistsException
@@ -30,12 +32,12 @@ REQUIREMENTS_CONTENT = """
 fire==0.3.1
 nose2==0.9.2
 pylint==2.5.3
-hypergol
+hypergol==VERSION
 tensorflow==2.5.0
 pydantic==1.6.2
 fastapi==0.65.2
 uvicorn==0.11.8
-""".lstrip()
+""".replace('VERSION', hypergol.__version__).lstrip()
 
 GITIGNORE_CONTENT = """
 .venv/
@@ -114,6 +116,6 @@ class TestCreateProject(HypergolCreateTestCase):
         self.assertEqual(runPylintScript, RUN_PYLINT_SCRIPT)
         self.assertEqual(requirementsContent, REQUIREMENTS_CONTENT)
         self.assertEqual(gitignoreContent, GITIGNORE_CONTENT)
-        self.assertEqual(len(readmeContent), 4923)
+        self.assertEqual(len(readmeContent), 5744)
         self.assertEqual(len(licenseContent), 1070)
         self.assertEqual(len(pylintrcContent), 18741)

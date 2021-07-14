@@ -1,4 +1,8 @@
 import sys
+
+from pkg_resources import get_distribution
+from pkg_resources import DistributionNotFound
+
 from .pipeline import Pipeline
 from .base_data import BaseData
 from .delayed import Delayed
@@ -17,3 +21,8 @@ if '-m' not in sys.argv:
     from .base_batch_processor import BaseBatchProcessor
     from .base_tensorflow_model_block import BaseTensorflowModelBlock
     from .base_tensorflow_model import BaseTensorflowModel
+
+try:
+    __version__ = get_distribution('hypergol').version
+except DistributionNotFound:
+    __version__ = open('version', 'rt').read().strip()

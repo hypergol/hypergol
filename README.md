@@ -18,7 +18,7 @@ Join our community at our [Discord](https://hypergol.ml/discord) server.
 
 Install it with:
 
-```
+``` 
 pip install hypergol
 ```
 

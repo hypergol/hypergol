@@ -37,23 +37,42 @@ deactivate
 source .venv/bin/activate
 ```
 
-
-### How to list existing Datasets (in Jupyter)
+### How to load a dataset (in Jupyter)
 
 ```
 sys.path.insert(0, '<project_directory>/{{ name.asSnake }}')
 from hypergol import HypergolProject
-from data_models.example_datamodel_class import ExampleDatamodelClass
+from data_models.data_type import DataType
 project = HypergolProject(
     projectDirectory='<project_directory>/{{ name.asSnake }}',
-    dataDirectory='<data_directory>'
+    dataDirectory='<data_directory>',
+    force=True
 )
-ds = project.datasetFactory.get(dataType=ExampleDatamodelClass, name='sentences')
-# project.list_datasets(pattern='.*', asCode=True);
+
+dataTypeDataset = project.datasetFactory.get(dataType=DataType, name='data_types')
+with dataTypeDataset.open('r') as dsr:
+    dataTypes = [value.to_data() for value in islice(dsr, 10)]
+
+# Or convert straight into pandas
+import pandas as pd
+dataTypeDataframe = pd.DataFrame([value.to_data() for value in islice(dataTypeDataset.open('r'), 10)])
 ```
+
+`<project_directory>` is the repo's directory.
+`<data_directory>` is the *parent* data directory.
+
+If the project is called `my_project` and the code is located in `~/my_project` and the project data is in `~/data/my_project`, `<data_directory>` is `~/data`.
+Set `branch` argument in `datasetFactory.get()` if you need anything else other than the current branch.
+
+The `force` argument allows you to load the data even if your repo has uncommitted code, this is usually not a problem unless you plan to write into dataframes from Jupyter.
+
+### How to list existing Datasets
 
 This will list all existing datasets that matches `pattern` as self contained executable code.
 
+```
+project.list_datasets(pattern='.*', asCode=True);
+```
 
 ### How to start Tensorboard
 
@@ -64,7 +83,6 @@ screen -S tensorboard
 source .venv/bin/activate
 tensorboard --logdir=<data_directory>/{{ name.asSnake }}/tensorboard/
 ```
-
 
 ### How to train your model
 
@@ -89,7 +107,6 @@ then start serving with (port and host can be set in the shell script):
 ```
 ./serve_{{ name.asSnake }}.sh
 ```
-
 
 ### How to call your model from python with requests
 
