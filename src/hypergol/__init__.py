@@ -25,4 +25,4 @@ if '-m' not in sys.argv:
 try:
     __version__ = get_distribution('hypergol').version
 except DistributionNotFound:
-    __version__ = open('../version', 'rt').read().strip()
+    __version__ = open('version', 'rt').read().strip()
