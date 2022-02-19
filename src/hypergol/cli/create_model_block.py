@@ -6,7 +6,7 @@ from hypergol.name_string import NameString
 from hypergol.hypergol_project import HypergolProject
 
 
-def create_model_block(className, projectDirectory='.', dryrun=None, force=None):
+def create_model_block(className, projectDirectory='.', dryrun=None, force=None, pt=False):
     """Generates a Model Block class.
 
     The file will be located in ``project_name/models/blocks/block_name.py``
@@ -20,7 +20,7 @@ def create_model_block(className, projectDirectory='.', dryrun=None, force=None)
     className = NameString(className)
 
     content = project.render(
-        templateName='model_block.py.j2',
+        templateName='model_block_pt.py.j2' if pt else 'model_block.py.j2',
         templateData={'className': className},
         filePath=Path(projectDirectory, 'models', 'blocks', className.asFileName)
     )

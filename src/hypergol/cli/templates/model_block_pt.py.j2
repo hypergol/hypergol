@@ -1,0 +1,16 @@
+import torch
+import torch.nn as nn
+from hypergol import BaseTensorflowModelBlock
+
+
+class {{ className }}(BaseTorchModelBlock):
+
+    def __init__(self, exampleParameter1, exampleParameter2, **kwargs):
+        super({{ className }}, self).__init__(**kwargs)
+        self.exampleParameter1 = exampleParameter1
+        self.exampleParameter2 = exampleParameter2
+        # create pytorch variables or nn layers here
+
+    def get_example(self, tensor1, tensor2):
+        # do pytorch calculations here using arguments and the member variables from the constructor
+        pass
