@@ -58,9 +58,8 @@ class TorchModelManager:
             pass
             # tf.summary.trace_on(graph=True, profiler=False)
 
-        with tf.GradientTape() as tape:
-            loss = self.model.get_loss(targets=targets, training=True, **inputs)
-        grads = tape.gradient(loss, self.model.trainable_variables)
+        loss = self.model.get_loss(targets=targets, training=True, **inputs)
+        
         self.optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
 
         # Watch this issue: https://github.com/PyCQA/pylint/issues/3596
