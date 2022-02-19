@@ -53,24 +53,27 @@ class TorchModelManager:
         withTracing: bool
             log TensorFlow graph metadata for the step
         """
+        self.model.train()
         inputs, targets = next(self.batchProcessor)
         if withTracing:
             pass
             # tf.summary.trace_on(graph=True, profiler=False)
 
         loss = self.model.get_loss(targets=targets, training=True, **inputs)
-        
-        self.optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
 
-        # Watch this issue: https://github.com/PyCQA/pylint/issues/3596
-        with self.trainingSummaryWriter.as_default():  # pylint: disable=not-context-manager
-            tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-            if withTracing:
-                tf.summary.trace_export(
-                    name=f'{self.model.modelName}{self.globalStep}',
-                    step=self.globalStep,
-                    profiler_outdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'trainGraph'))
-                )
+        # # Watch this issue: https://github.com/PyCQA/pylint/issues/3596
+        # with self.trainingSummaryWriter.as_default():  # pylint: disable=not-context-manager
+        #     tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
+        #     if withTracing:
+        #         tf.summary.trace_export(
+        #             name=f'{self.model.modelName}{self.globalStep}',
+        #             step=self.globalStep,
+        #             profiler_outdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'trainGraph'))
+        #         )
+        self.trainingSummaryWriter.add_scalar(tag='Loss', scalar_value=loss, global_step=self.globalStep)
         self.globalStep += 1
         return loss
 
@@ -80,22 +83,25 @@ class TorchModelManager:
         Parameters
         ----------
         withTracing: bool
-            log TensorFlow graph metadata for step
+            TODO: what's this is torch?????? log TensorFlow graph metadata for step
         """
+        self.model.eval()
         inputs, targets = next(self.batchProcessor)
         if withTracing:
-            tf.summary.trace_on(graph=True, profiler=False)
+            # tf.summary.trace_on(graph=True, profiler=False)
+            pass
         loss = self.model.get_loss(targets=targets, training=False, **inputs)
         outputs = self.model.get_evaluation_outputs(**inputs)
-        with self.evaluationSummaryWriter.as_default():  # pylint: disable=not-context-manager
-            tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-            self.model.produce_metrics(targets=targets, training=False, globalStep=self.globalStep, **inputs)
-            if withTracing:
-                tf.summary.trace_export(
-                    name=f'{self.model.modelName}{self.globalStep}',
-                    step=self.globalStep,
-                    profiler_outdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'evaluateGraph'))
-                )
+        # with self.evaluationSummaryWriter.as_default():  # pylint: disable=not-context-manager
+        #     tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
+        #     self.model.produce_metrics(targets=targets, training=False, globalStep=self.globalStep, **inputs)
+        #     if withTracing:
+        #         tf.summary.trace_export(
+        #             name=f'{self.model.modelName}{self.globalStep}',
+        #             step=self.globalStep,
+        #             profiler_outdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'evaluateGraph'))
+        #         )
+        self.trainingSummaryWriter.add_scalar(tag='Loss', scalar_value=loss, global_step=self.globalStep)
         self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
         return loss
 
@@ -103,12 +109,10 @@ class TorchModelManager:
         """Prepares to run the training cycle by creating the model data directories, create the ``SummaryWriters`` for Tensorboard for training and evaluation, initialises the batchprocessor (opens the output dataset for writing) and reloads the weights if ``restoreWeightsPath`` is specified.
         """
         Path(self.project.tensorboardPath, self.model.modelName).mkdir(parents=True, exist_ok=True)
-        self.trainingSummaryWriter = torch.utils.(logdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'train')))
-        self.evaluationSummaryWriter = tf.summary.create_file_writer(logdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'evaluate')))
+        self.trainingSummaryWriter = torch.utils.tensorboard.SummaryWriter(log_dir=str(Path(self.project.tensorboardPath, self.model.modelName, 'train')))
+        self.evaluationSummaryWriter = torch.utils.tensorboard.SummaryWriter(log_dir=str(Path(self.project.tensorboardPath, self.model.modelName, 'evaluate')))
         self.batchProcessor.start()
         if self.restoreWeightsPath is not None:
-            self.evaluate(withTracing=False)  # model call needed to initialize layers/weights before reloading
-            self.model.built = True
             self.restore_model_weights()
 
     def run(self, stepCount, evaluationSteps, tracingSteps):
