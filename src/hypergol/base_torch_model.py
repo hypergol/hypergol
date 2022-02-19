@@ -75,6 +75,7 @@ class BaseTorchModel(nn.Module):
         **kwargs :
             Input values as keyword arguments
         """
+        raise ValueError('produce_metrics not implemented yet for torch')
         raise NotImplementedError('Must implement `produce_metrics` function')
 
     def get_outputs(self, **kwargs):

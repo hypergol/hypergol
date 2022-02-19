@@ -6,12 +6,12 @@ from hypergol.name_string import NameString
 from hypergol.hypergol_project import HypergolProject
 
 
-def create_model(modelName, trainingClass, evaluationClass, inputClass, outputClass, *args, projectDirectory='.', dryrun=None, force=None):
-    """Generates stubs for the Tensorflow model, data processing class and training script and shell script to run it from the command line. Shell scripts will be located in the project main directory (which should be the current directory when running them) and model files will be located in ``project_name/models/model_name/*.py``.
+def create_model(modelName, trainingClass, evaluationClass, inputClass, outputClass, *args, projectDirectory='.', dryrun=None, force=None, torch=False):
+    """Generates stubs for the Tensorflow/Torch model, data processing class and training script and shell script to run it from the command line. Shell scripts will be located in the project main directory (which should be the current directory when running them) and model files will be located in ``project_name/models/model_name/*.py``.
 
     After creation the user must implement the ``process_training_batch()`` , ``process_evaluation_batch()``, ``process_input_batch()`` and ``process_output_batch`` member functions that take  ``trainingClass``, ``evaluationClass``, ``inputClass`` and ``outputClass`` respectively.
 
-    The model must implement the ``get_loss()``, ``produce_metrics()`` and ``get_outputs()`` functions (see documentation of :class:`.BaseTensorflowModel` and the ``Tutorial`` for more detailed instructions)
+    The model must implement the ``get_loss()``, ``produce_metrics()`` and ``get_outputs()`` functions (see documentation of :class:`.BaseTensorflowModel` or :class:`.BaseTorchModel` and the ``Tutorial`` for more detailed instructions)
 
     The training script is generated with example stubs that should be modified to align with the created model.
 
@@ -27,7 +27,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
         Datamodel class (must exist) that will be used as the input when serving the model
     outputClass : BaseData
         Datamodel class (must exist) that will be returned as output when serving the model
-    *args : BaseTensorflowModelBlock
+    *args : BaseTensorflowModelBlock / BaseTorchModelBlock
         Names of blocks that will build up the model
     """
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
@@ -43,7 +43,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
     project.render_simple(templateName='__init__.py.j2', filePath=Path(project.modelsPath, modelName.asSnake, '__init__.py'))
 
     content = project.render(
-        templateName='model.py.j2',
+        templateName='model_torch.py.j2' if torch else 'model.py.j2',
         templateData={
             'name': modelName,
         },
