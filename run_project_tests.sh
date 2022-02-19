@@ -25,8 +25,8 @@ python -m hypergol.cli.create_model_block --projectDirectory=example LstmBlock &
 python -m hypergol.cli.create_model_block --projectDirectory=example OutputBlock && \
 python -m hypergol.cli.create_data_model --projectDirectory=example ModelOutput articleId:int:id sentenceId:int:id "posTags:List[str]" && \
 python -m hypergol.cli.create_model --projectDirectory=example MyTestModel Sentence EvaluationOutput Sentence ModelOutput EmbeddingBlock LstmBlock OutputBlock && \
-python -m hypergol.cli.create_model_block --pt --projectDirectory=example TorchEmbeddingBlock && \
-python -m hypergol.cli.create_model_block --pt --projectDirectory=example TorchLstmBlock && \
-python -m hypergol.cli.create_model_block --pt --projectDirectory=example TorchOutputBlock && \
-python -m hypergol.cli.create_model --pt --projectDirectory=example MyTorchTestModel Sentence EvaluationOutput Sentence ModelOutput TorchEmbeddingBlock TorchLstmBlock TorchOutputBlock &&
+python -m hypergol.cli.create_model_block --torch --projectDirectory=example TorchEmbeddingBlock && \
+python -m hypergol.cli.create_model_block --torch --projectDirectory=example TorchLstmBlock && \
+python -m hypergol.cli.create_model_block --torch --projectDirectory=example TorchOutputBlock && \
+python -m hypergol.cli.create_model --torch --projectDirectory=example MyTorchTestModel Sentence EvaluationOutput Sentence ModelOutput TorchEmbeddingBlock TorchLstmBlock TorchOutputBlock
 # diff --suppress-common-lines --no-ignore-file-name-case --recursive example/ src/test_projects/example/
