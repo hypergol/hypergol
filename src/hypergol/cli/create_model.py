@@ -51,7 +51,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
     )
 
     batchProcessorContent = project.render(
-        templateName='batch_processor.py.j2',
+        templateName='batch_processor_torch.py.j2' if torch else 'batch_processor.py.j2',
         templateData={
             'name': modelName,
             'evaluationClass': evaluationClass,
@@ -61,7 +61,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
     )
 
     trainModelContent = project.render(
-        templateName='train_model.py.j2',
+        templateName='train_model_torch.py.j2' if torch else 'train_model.py.j2',
         templateData={
             'modelName': modelName,
             'trainingClass': trainingClass,
@@ -78,7 +78,7 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
     )
 
     serveContent = project.render(
-        templateName='serve_model.py.j2',
+        templateName='serve_model_torch.py.j2' if torch else 'serve_model.py.j2',
         templateData={
             'modelName': modelName,
             'inputClass': inputClass,

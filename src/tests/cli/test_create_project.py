@@ -34,6 +34,7 @@ nose2==0.9.2
 pylint==2.5.3
 hypergol==VERSION
 tensorflow==2.5.3
+torch==1.10.2
 pydantic==1.6.2
 fastapi==0.65.2
 uvicorn==0.11.8
