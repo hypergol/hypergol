@@ -1,3 +1,4 @@
+# pylint: skip-file
 # pylint: disable=E0611, W0235
 
 import inspect
