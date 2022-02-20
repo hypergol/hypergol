@@ -1,0 +1,53 @@
+from datetime import date
+
+import fire
+import torch
+from hypergol import HypergolProject
+from hypergol import TorchModelManager
+
+from models.{{ modelName.asSnake }}.{{ modelName.asSnake }}_batch_processor import {{ modelName }}BatchProcessor
+from models.{{ modelName.asSnake }}.{{ modelName.asSnake }} import {{ modelName }}
+{%- for name in blockDependencies %}
+from models.blocks.{{ name.asSnake }} import {{ name }}
+{%- endfor %}
+from data_models.{{ trainingClass.asSnake }} import {{ trainingClass }}
+from data_models.{{ evaluationClass.asSnake }} import {{ evaluationClass }}
+
+
+def train_{{ modelName.asSnake }}(force=False):
+    project = HypergolProject(dataDirectory='.', force=force)
+
+    batchProcessor = {{ modelName }}BatchProcessor(
+        inputDataset=project.datasetFactory.get(dataType={{ trainingClass }}, name='inputs'),
+        inputBatchSize=16,
+        outputDataset=project.datasetFactory.get(dataType={{ evaluationClass }}, name='outputs'),
+        exampleArgument=''
+    )
+    {{ modelName.asVariable }} = {{ modelName }}(
+        modelName={{ modelName }}.__name__,
+        longName=f'{{ '{' }}{{ modelName }}.__name__{{ '}' }}_{date.today().strftime("%Y%m%d")}_{project.repoManager.commitHash}',
+        inputDatasetChkFileChecksum=f'{batchProcessor.inputDataset.chkFile.get_checksum()}',
+        {%- for name in blockDependencies %}
+        {{ name.asVariable }}={{ name }}(
+            blockArgument1='',
+            blockArgument2='',
+        ),
+        {%- endfor %}
+    )
+    modelManager = TorchModelManager(
+        model={{ modelName.asVariable }},
+        optimizer=torch.optim.Adam(lr=1),
+        batchProcessor=batchProcessor,
+        project=project,
+        restoreWeightsPath=None
+    )
+    modelManager.run(
+        stepCount=100,
+        evaluationSteps=list(range(0, 100, 10)),
+        tracingSteps=list(range(0, 100, 5))
+    )
+
+
+if __name__ == '__main__':
+    #TODO:Fix this: tf.get_logger().setLevel('ERROR')
+    fire.Fire(train_{{ modelName.asSnake }})
