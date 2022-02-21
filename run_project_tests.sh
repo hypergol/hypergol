@@ -2,11 +2,6 @@
 cd src
 pip3 install --upgrade -e .
 cd ..
-python -m hypergol.cli.create_project alpha && \
-python -m hypergol.cli.create_data_model Article articleId:int url:str title:str text:str --projectDirectory=alpha && \
-python -m hypergol.cli.create_data_model Sentence startChar:int endChar:int articleId:int sentenceId:int --projectDirectory=alpha && \
-diff --suppress-common-lines --no-ignore-file-name-case --recursive alpha/ src/test_projects/alpha/
-
 python -m hypergol.cli.create_project example && \
 python -m hypergol.cli.create_data_model --projectDirectory=example Token i:int startChar:int endChar:int depType:str depHead:int depLeftEdge:int depRightEdge:int posType:str posFineType:str lemma:str text:str && \
 python -m hypergol.cli.create_data_model --projectDirectory=example Sentence startChar:int endChar:int articleId:int:id sentenceId:int:id "tokens:List[Token]" && \
@@ -28,5 +23,5 @@ python -m hypergol.cli.create_model --projectDirectory=example MyTestModel Sente
 python -m hypergol.cli.create_model_block --torch --projectDirectory=example TorchEmbeddingBlock && \
 python -m hypergol.cli.create_model_block --torch --projectDirectory=example TorchLstmBlock && \
 python -m hypergol.cli.create_model_block --torch --projectDirectory=example TorchOutputBlock && \
-python -m hypergol.cli.create_model --torch --projectDirectory=example MyTorchTestModel Sentence EvaluationOutput Sentence ModelOutput TorchEmbeddingBlock TorchLstmBlock TorchOutputBlock
-# diff --suppress-common-lines --no-ignore-file-name-case --recursive example/ src/test_projects/example/
+python -m hypergol.cli.create_model --torch --projectDirectory=example MyTorchTestModel Sentence EvaluationOutput Sentence ModelOutput TorchEmbeddingBlock TorchLstmBlock TorchOutputBlock && \
+diff --suppress-common-lines --no-ignore-file-name-case --recursive example/ src/test_projects/example/
