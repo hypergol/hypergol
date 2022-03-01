@@ -181,35 +181,32 @@ from typing import List
 
 import fire
 import uvicorn
-import tensorflow as tf
+import torch
 from fastapi import FastAPI
 from fastapi import Request
 from hypergol.utils import create_pydantic_type
 
-from models.test_model.test_model_batch_processor import TestModelBatchProcessor
+from models.test_torch_model.test_torch_model_batch_processor import TestTorchModelBatchProcessor
 from data_models.test_input import TestInput
 from data_models.test_output import TestOutput
 
-TITLE = 'Serve TestModel'
+TITLE = 'Serve TestTorchModel'
 VERSION = '0.1'
-DESCRIPTION = 'FastApi wrapper on TestModel, see /docs for API details'
+DESCRIPTION = 'FastApi wrapper on TestTorchModel, see /docs for API details'
 USE_GPU = False
 THREADS = None
-MODEL_DIRECTORY = '<data directory>/<project>/<branch>/models/TestModel/<epoch>'
+MODEL_DIRECTORY = '<data directory>/<project>/<branch>/models/TestTorchModel/<epoch>'
 
 
 def load_model(modelDirectory, threads, useGPU):
-    if not useGPU:
-        tf.config.experimental.set_visible_devices([], 'GPU')
-    if threads is not None:
-        tf.config.threading.set_inter_op_parallelism_threads(threads)
-        tf.config.threading.set_intra_op_parallelism_threads(threads)
-    return tf.saved_model.load(export_dir=modelDirectory)
+    if useGPU:
+        return torch.jit.load(f'{modelDirectory}/saved_model_cuda.pt').cuda()
+    return torch.jit.load(f'{modelDirectory}/saved_model.pt')
 
 
 app = FastAPI(title=TITLE, version=VERSION, description=DESCRIPTION)
 model = load_model(modelDirectory=MODEL_DIRECTORY, threads=THREADS, useGPU=USE_GPU)
-batchProcessor = TestModelBatchProcessor(
+batchProcessor = TestTorchModelBatchProcessor(
     inputDataset=None,
     inputBatchSize=0,
     maxTokenCount=100,
@@ -223,7 +220,7 @@ pyDanticTestOutput = create_pydantic_type(TestOutput)
 async def add_headers(request: Request, call_next):
     startTime = time.time()
     response = await call_next(request)
-    response.headers["X-Model-Long-Name"] = model.get_long_name().numpy().decode('utf-8')
+    response.headers["X-Model-Long-Name"] = model.get_long_name()
     response.headers["X-Process-Time"] = str(time.time() - startTime)
     return response
 
@@ -234,7 +231,7 @@ def test_main():
         'title': TITLE,
         'version': VERSION,
         'description': DESCRIPTION,
-        'model': model.get_long_name().numpy().decode('utf-8')
+        'model': model.get_long_name()
     }
 
 
@@ -247,20 +244,19 @@ def get_outputs(testInputs: List[pyDanticTestInput]):
     return [pyDanticTestOutput.parse_raw(json.dumps(testOutput.to_data())) for testOutput in testOutputs]
 
 
-def uvicorn_serve_test_model_run(port=8000, host='0.0.0.0'):
-    uvicorn.run("serve_test_model:app", port=port, host=host, reload=True)
+def uvicorn_serve_test_torch_model_run(port=8000, host='0.0.0.0'):
+    uvicorn.run("serve_test_torch_model:app", port=port, host=host, reload=True)
 
 
 if __name__ == "__main__":
-    tf.get_logger().setLevel('ERROR')
-    fire.Fire(uvicorn_serve_test_model_run)
+    fire.Fire(uvicorn_serve_test_torch_model_run)
 """.lstrip()
 
 TEST_SERVE_SCRIPT = """
 export PYTHONPATH="${PWD}/..:${PWD}/../..:"
 
 python3 \\
-    ./models/test_model/serve_test_model.py \\
+    ./models/test_torch_model/serve_test_torch_model.py \\
     --port=8000 \\
     --host="0.0.0.0"
 """.lstrip()
