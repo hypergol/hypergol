@@ -119,4 +119,4 @@ class TestCreateProject(HypergolCreateTestCase):
         self.assertEqual(gitignoreContent, GITIGNORE_CONTENT)
         self.assertEqual(len(readmeContent), 5744)
         self.assertEqual(len(licenseContent), 1070)
-        self.assertEqual(len(pylintrcContent), 18741)
+        self.assertEqual(len(pylintrcContent), 18757)
