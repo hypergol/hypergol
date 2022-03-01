@@ -114,30 +114,30 @@ TEST_TRAIN_MODEL = """
 from datetime import date
 
 import fire
-import tensorflow as tf
+import torch
 from hypergol import HypergolProject
-from hypergol import TensorflowModelManager
+from hypergol import TorchModelManager
 
-from models.test_model.test_model_batch_processor import TestModelBatchProcessor
-from models.test_model.test_model import TestModel
+from models.test_torch_model.test_torch_model_batch_processor import TestTorchModelBatchProcessor
+from models.test_torch_model.test_torch_model import TestTorchModel
 from models.blocks.test_block1 import TestBlock1
 from models.blocks.test_block2 import TestBlock2
 from data_models.test_training_class import TestTrainingClass
 from data_models.test_evaluation_class import TestEvaluationClass
 
 
-def train_test_model(force=False):
+def train_test_torch_model(force=False):
     project = HypergolProject(dataDirectory='.', force=force)
 
-    batchProcessor = TestModelBatchProcessor(
+    batchProcessor = TestTorchModelBatchProcessor(
         inputDataset=project.datasetFactory.get(dataType=TestTrainingClass, name='inputs'),
         inputBatchSize=16,
         outputDataset=project.datasetFactory.get(dataType=TestEvaluationClass, name='outputs'),
         exampleArgument=''
     )
-    testModel = TestModel(
-        modelName=TestModel.__name__,
-        longName=f'{TestModel.__name__}_{date.today().strftime("%Y%m%d")}_{project.repoManager.commitHash}',
+    testTorchModel = TestTorchModel(
+        modelName=TestTorchModel.__name__,
+        longName=f'{TestTorchModel.__name__}_{date.today().strftime("%Y%m%d")}_{project.repoManager.commitHash}',
         inputDatasetChkFileChecksum=f'{batchProcessor.inputDataset.chkFile.get_checksum()}',
         testBlock1=TestBlock1(
             blockArgument1='',
@@ -148,9 +148,9 @@ def train_test_model(force=False):
             blockArgument2='',
         ),
     )
-    modelManager = TensorflowModelManager(
-        model=testModel,
-        optimizer=tf.keras.optimizers.Adam(lr=1),
+    modelManager = TorchModelManager(
+        model=testTorchModel,
+        optimizer=torch.optim.Adam(myTorchTestModel.parameters()),
         batchProcessor=batchProcessor,
         project=project,
         restoreWeightsPath=None
@@ -163,15 +163,14 @@ def train_test_model(force=False):
 
 
 if __name__ == '__main__':
-    tf.get_logger().setLevel('ERROR')
-    fire.Fire(train_test_model)
+    fire.Fire(train_test_torch_model)
 """.lstrip()
 
 TEST_SCRIPT = """
 export PYTHONPATH="${PWD}/..:${PWD}/../..:"
 
 python3 \\
-    ./models/test_model/train_test_model.py \\
+    ./models/test_torch_model/train_test_torch_model.py \\
     $1
 """.lstrip()
 

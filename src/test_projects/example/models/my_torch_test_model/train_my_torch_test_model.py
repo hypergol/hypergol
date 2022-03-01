@@ -37,7 +37,7 @@ def train_my_torch_test_model(force=False):
     )
     modelManager = TorchModelManager(
         model=myTorchTestModel,
-        optimizer=torch.optim.Adam(lr=1),
+        optimizer=torch.optim.Adam(myTorchTestModel.parameters()),
         batchProcessor=batchProcessor,
         project=project,
         restoreWeightsPath=None
@@ -50,5 +50,4 @@ def train_my_torch_test_model(force=False):
 
 
 if __name__ == '__main__':
-    #TODO:Fix this: tf.get_logger().setLevel('ERROR')
     fire.Fire(train_my_torch_test_model)
