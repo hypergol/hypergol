@@ -9,7 +9,6 @@ from models.my_torch_test_model.my_torch_test_model_batch_processor import MyTor
 from models.my_torch_test_model.my_torch_test_model import MyTorchTestModel
 from models.blocks.torch_embedding_block import TorchEmbeddingBlock
 from models.blocks.torch_lstm_block import TorchLstmBlock
-from models.blocks.torch_output_block import TorchOutputBlock
 from data_models.sentence import Sentence
 from data_models.evaluation_output import EvaluationOutput
 
@@ -32,10 +31,6 @@ def train_my_torch_test_model(force=False):
             blockArgument2='',
         ),
         torchLstmBlock=TorchLstmBlock(
-            blockArgument1='',
-            blockArgument2='',
-        ),
-        torchOutputBlock=TorchOutputBlock(
             blockArgument1='',
             blockArgument2='',
         ),
