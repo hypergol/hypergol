@@ -9,8 +9,8 @@ class {{ className }}(BaseTorchModelBlock):
         super({{ className }}, self).__init__(**kwargs)
         self.exampleParameter1 = exampleParameter1
         self.exampleParameter2 = exampleParameter2
-        # create torch variables or nn layers here
+        # you must create all pytorch layers here so PytorchScript can save it
 
     def get_example(self, tensor1, tensor2):
-        # do torch calculations here using arguments and the member variables from the constructor
+        # do pytorch calculations here using arguments and the member variables from the constructor
         pass

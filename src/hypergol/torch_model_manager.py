@@ -1,5 +1,4 @@
 # pylint: skip-file
-import json
 from pathlib import Path
 
 import torch
@@ -40,11 +39,19 @@ class TorchModelManager:
         """Saves Torch model"""
         modelDirectory = Path(self.project.modelDataPath, self.model.modelName, str(self.globalStep))
         modelDirectory.mkdir(parents=True, exist_ok=False)
-        torch.save(self.model.state_dict(), f'{modelDirectory}/model.pt')
+        scriptModel = torch.jit.script(self.model)
+        scriptModel.save(f'{modelDirectory}/saved_model.pt')
+        if torch.cuda.is_available():
+            model = model.cuda()
+            cudaScriptModel = torch.jit.script(self.model)
+            cudaScriptModel.save(f'{modelDirectory}/saved_model_cuda.pt')
+            model = model.cpu()
+        # TODO: This is not equivalent to TF, doesn't support block by block saving/loading
+        torch.save(self.model.state_dict(), f'{modelDirectory}/model_state.pt')
 
     def restore_model_weights(self):
         """Restores Torch model weights """
-        self.model.load_state_dict(torch.load(f'{self.restoreWeightsPath}/model.pt'))
+        self.model.load_state_dict(torch.load(f'{self.restoreWeightsPath}/model_state.pt'))
 
     def train(self, withTracing):
         """Runs a single training step for the model
@@ -60,21 +67,14 @@ class TorchModelManager:
             pass
             # tf.summary.trace_on(graph=True, profiler=False)
 
-        loss = self.model.get_loss(targets=targets, training=True, **inputs)
+        loss = self.model.get_loss(targets=targets, **inputs)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-
-        # # Watch this issue: https://github.com/PyCQA/pylint/issues/3596
-        # with self.trainingSummaryWriter.as_default():  # pylint: disable=not-context-manager
-        #     tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-        #     if withTracing:
-        #         tf.summary.trace_export(
-        #             name=f'{self.model.modelName}{self.globalStep}',
-        #             step=self.globalStep,
-        #             profiler_outdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'trainGraph'))
-        #         )
         self.trainingSummaryWriter.add_scalar(tag='Loss', scalar_value=loss, global_step=self.globalStep)
+        if withTracing:
+            # no tracing in pytorch
+            pass
         self.globalStep += 1
         return loss
 
@@ -84,34 +84,30 @@ class TorchModelManager:
         Parameters
         ----------
         withTracing: bool
-            TODO: what's this is torch?????? log TensorFlow graph metadata for step
+            TODO: what's this in torch?????? log TensorFlow graph metadata for step
         """
         self.model.eval()
         inputs, targets = next(self.batchProcessor)
         if withTracing:
-            # tf.summary.trace_on(graph=True, profiler=False)
+            # no tracing in pytorch
             pass
-        loss = self.model.get_loss(targets=targets, training=False, **inputs)
+        loss = self.model.get_loss(targets=targets, **inputs)
         outputs = self.model.get_evaluation_outputs(**inputs)
-        # with self.evaluationSummaryWriter.as_default():  # pylint: disable=not-context-manager
-        #     tf.summary.scalar(name='Loss', data=loss, step=self.globalStep)
-        #     self.model.produce_metrics(targets=targets, training=False, globalStep=self.globalStep, **inputs)
-        #     if withTracing:
-        #         tf.summary.trace_export(
-        #             name=f'{self.model.modelName}{self.globalStep}',
-        #             step=self.globalStep,
-        #             profiler_outdir=str(Path(self.project.tensorboardPath, self.model.modelName, 'evaluateGraph'))
-        #         )
-        self.trainingSummaryWriter.add_scalar(tag='Loss', scalar_value=loss, global_step=self.globalStep)
+        self.evaluationSummaryWriter.add_scalar(tag='Loss', scalar_value=loss, global_step=self.globalStep)
+        for tag, value in self.model.produce_metrics(targets=targets, **inputs).items():
+            self.evaluationSummaryWriter.add_scalar(tag=tag, scalar_value=value, global_step=self.globalStep)
         self.batchProcessor.save_batch(inputs=inputs, targets=targets, outputs=outputs)
+        if withTracing:
+            # no tracing in pytorch
+            pass
         return loss
 
     def start(self):
         """Prepares to run the training cycle by creating the model data directories, create the ``SummaryWriters`` for Tensorboard for training and evaluation, initialises the batchprocessor (opens the output dataset for writing) and reloads the weights if ``restoreWeightsPath`` is specified.
         """
         Path(self.project.tensorboardPath, self.model.modelName).mkdir(parents=True, exist_ok=True)
-        self.trainingSummaryWriter = torch.utils.tensorboard.SummaryWriter(log_dir=str(Path(self.project.tensorboardPath, self.model.modelName, 'train')))
-        self.evaluationSummaryWriter = torch.utils.tensorboard.SummaryWriter(log_dir=str(Path(self.project.tensorboardPath, self.model.modelName, 'evaluate')))
+        self.trainingSummaryWriter = SummaryWriter(log_dir=str(Path(self.project.tensorboardPath, self.model.modelName, 'train')))
+        self.evaluationSummaryWriter = SummaryWriter(log_dir=str(Path(self.project.tensorboardPath, self.model.modelName, 'evaluate')))
         self.batchProcessor.start()
         if self.restoreWeightsPath is not None:
             self.restore_model_weights()

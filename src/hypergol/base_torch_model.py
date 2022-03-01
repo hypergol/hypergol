@@ -3,7 +3,8 @@
 
 import inspect
 
-from torch import nn
+import torch
+import torch.nn as nn
 
 from hypergol.base_torch_model_block import BaseTorchModelBlock
 
@@ -34,9 +35,11 @@ class BaseTorchModel(nn.Module):
         self.longName = longName or self.modelName
         self.inputDatasetChkFileChecksum = inputDatasetChkFileChecksum or ''
 
+    @torch.jit.export
     def get_long_name(self):
         return self.longName
 
+    @torch.jit.export
     def get_input_dataset_chk_file_checksum(self):
         return self.inputDatasetChkFileChecksum
 
