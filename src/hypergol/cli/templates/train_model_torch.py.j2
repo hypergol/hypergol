@@ -36,7 +36,7 @@ def train_{{ modelName.asSnake }}(force=False):
     )
     modelManager = TorchModelManager(
         model={{ modelName.asVariable }},
-        optimizer=torch.optim.Adam(lr=1),
+        optimizer=torch.optim.Adam(myTorchTestModel.parameters()),
         batchProcessor=batchProcessor,
         project=project,
         restoreWeightsPath=None
@@ -49,5 +49,4 @@ def train_{{ modelName.asSnake }}(force=False):
 
 
 if __name__ == '__main__':
-    #TODO:Fix this: tf.get_logger().setLevel('ERROR')
     fire.Fire(train_{{ modelName.asSnake }})

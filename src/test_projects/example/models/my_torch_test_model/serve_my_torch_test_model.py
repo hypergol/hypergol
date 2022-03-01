@@ -20,14 +20,11 @@ USE_GPU = False
 THREADS = None
 MODEL_DIRECTORY = '<data directory>/<project>/<branch>/models/MyTorchTestModel/<epoch>'
 
-# TODO:
-# def load_model(modelDirectory, threads, useGPU):
-#     if not useGPU:
-#         tf.config.experimental.set_visible_devices([], 'GPU')
-#     if threads is not None:
-#         tf.config.threading.set_inter_op_parallelism_threads(threads)
-#         tf.config.threading.set_intra_op_parallelism_threads(threads)
-#     return tf.saved_model.load(export_dir=modelDirectory)
+
+def load_model(modelDirectory, threads, useGPU):
+    if useGPU:
+        return torch.jit.load(f'{modelDirectory}/saved_model_cuda.pt').cuda()
+    return torch.jit.load(f'{modelDirectory}/saved_model.pt')
 
 
 app = FastAPI(title=TITLE, version=VERSION, description=DESCRIPTION)
@@ -46,7 +43,7 @@ pyDanticModelOutput = create_pydantic_type(ModelOutput)
 async def add_headers(request: Request, call_next):
     startTime = time.time()
     response = await call_next(request)
-    response.headers["X-Model-Long-Name"] = model.get_long_name().numpy().decode('utf-8')
+    response.headers["X-Model-Long-Name"] = model.get_long_name()
     response.headers["X-Process-Time"] = str(time.time() - startTime)
     return response
 
@@ -57,7 +54,7 @@ def test_main():
         'title': TITLE,
         'version': VERSION,
         'description': DESCRIPTION,
-        'model': model.get_long_name().numpy().decode('utf-8')
+        'model': model.get_long_name()
     }
 
 
@@ -75,5 +72,4 @@ def uvicorn_serve_my_torch_test_model_run(port=8000, host='0.0.0.0'):
 
 
 if __name__ == "__main__":
-    # tf.get_logger().setLevel('ERROR')
     fire.Fire(uvicorn_serve_my_torch_test_model_run)
