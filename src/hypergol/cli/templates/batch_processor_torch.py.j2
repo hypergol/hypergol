@@ -26,7 +26,7 @@ class {{ name }}BatchProcessor(BaseBatchProcessor):
         #     'exampleInput2': torch.FloatTensor(exampleInput2),
         # }
         # logic can be combined with process_training_batch
-        # all return values must be torch Tensors!!!! including ids!!!
+        # all return values must be torch Tensors!!!! including ids!!!
         return inputs
 
     def process_training_batch(self, batch):
@@ -41,10 +41,10 @@ class {{ name }}BatchProcessor(BaseBatchProcessor):
         #     exampleInput2.append(len(exampleValue.exampleList))
         #     exampleOutput.append(exampleValue.exampleOutputList)
         # inputs = {
-        #     'exampleInput1': torch.IntTensor(exampleInput1)
+        #     'exampleInput1': torch.IntTensor(exampleInput1),
         #     'exampleInput2': torch.FloatTensor(exampleInput2),
         # }
-        # targets = torch.FloatTensor(...),
+        # targets = torch.FloatTensor(...)
         return inputs, targets
 
     def process_output_batch(self, outputs):
