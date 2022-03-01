@@ -10,34 +10,35 @@ from tests.cli.hypergol_create_test_case import HypergolCreateTestCase
 
 
 TEST_CONTENT = """
-import tensorflow as tf
-from hypergol import BaseTensorflowModel
+import torch
+import torch.nn as nn
+from hypergol import BaseTorchModel
 
 
-class TestModel(BaseTensorflowModel):
+class TestTorchModel(BaseTorchModel):
 
     def __init__(self, block1, block2, **kwargs):
-        super(TestModel, self).__init__(**kwargs)
+        super(TestTorchModel, self).__init__(**kwargs)
         self.block1 = block1
         self.block2 = block2
+        # you must create all pytorch layers here so PytorchScript can save it
 
     def get_loss(self, targets, training, exampleInput1, exampleInput2):
-        raise NotImplementedError('BaseTensorflowModel must implement get_loss()')
+        raise NotImplementedError('BaseTorchModel must implement get_loss()')
         # calculate loss here and return it
         # input arguments must be the same in all three functions
         # and match with the keys of the return value of BatchProcessor.process_training_batch()
 
-    @tf.function(input_signature=[
-        tf.TensorSpec(shape=[None, None], dtype=tf.int32, name='exampleInput1'),
-        tf.TensorSpec(shape=[None, None], dtype=tf.string, name='exampleInput2')
-    ])
+    @torch.jit.export
     def get_outputs(self, exampleInput1, exampleInput2):
-        raise NotImplementedError('BaseTensorflowModel must implement get_outputs()')
+        raise NotImplementedError('BaseTorchModel must implement get_outputs()')
         # calculate the output here and return it, update the decorator accordingly
+        # use @torch.jit.export to make this function callable in serving by PytorchScript
+        # all parameters must be tensors
 
     def produce_metrics(self, targets, training, globalStep, exampleInput1, exampleInput2s):
-        # use tf.summary to record statistics in training/evaluation cycles like
-        # tf.summary.scalar(name='exampleName', data=value, step=globalStep)
+        # return a dictionary of {'tag': value} that will be pass to SummariWriter as
+        # SummaryWriter.add_scalar(tag=tag, scalar_value=value, global_step=self.globalStep)
         pass
 """.lstrip()
 
@@ -263,20 +264,20 @@ python3 \\
 """.lstrip()
 
 
-class TestCreateModel(HypergolCreateTestCase):
+class TestCreateTorchModel(HypergolCreateTestCase):
 
     def __init__(self, methodName):
-        super(TestCreateModel, self).__init__(projectName='TestProject', methodName=methodName)
+        super(TestCreateTorchModel, self).__init__(projectName='TestProject', methodName=methodName)
         self.allPaths = [
-            Path(self.projectDirectory, 'models', 'test_model', 'test_model.py'),
-            Path(self.projectDirectory, 'models', 'test_model', 'test_model_batch_processor.py'),
-            Path(self.projectDirectory, 'models', 'test_model', 'train_test_model.py'),
-            Path(self.projectDirectory, 'models', 'test_model', 'serve_test_model.py'),
-            Path(self.projectDirectory, 'models', 'test_model', '__init__.py'),
-            Path(self.projectDirectory, 'models', 'test_model'),
+            Path(self.projectDirectory, 'models', 'test_torch_model', 'test_torch_model.py'),
+            Path(self.projectDirectory, 'models', 'test_torch_model', 'test_torch_model_batch_processor.py'),
+            Path(self.projectDirectory, 'models', 'test_torch_model', 'train_test_torch_model.py'),
+            Path(self.projectDirectory, 'models', 'test_torch_model', 'serve_test_torch_model.py'),
+            Path(self.projectDirectory, 'models', 'test_torch_model', '__init__.py'),
+            Path(self.projectDirectory, 'models', 'test_torch_model'),
             Path(self.projectDirectory, 'models'),
-            Path(self.projectDirectory, 'train_test_model.sh'),
-            Path(self.projectDirectory, 'serve_test_model.sh'),
+            Path(self.projectDirectory, 'train_test_torch_model.sh'),
+            Path(self.projectDirectory, 'serve_test_torch_model.sh'),
             Path(self.projectDirectory)
         ]
         self.project = None
@@ -294,7 +295,7 @@ class TestCreateModel(HypergolCreateTestCase):
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.check_dependencies')
     def test_create_model_creates_files(self, mock_check_dependencies):
         create_model(
-            modelName='TestModel',
+            modelName='TestTorchModel',
             trainingClass='TestTrainingClass',
             evaluationClass='TestEvaluationClass',
             inputClass='TestInput',
@@ -308,7 +309,7 @@ class TestCreateModel(HypergolCreateTestCase):
     @mock.patch('hypergol.cli.create_pipeline.HypergolProject.is_model_block_class', side_effect=lambda x: x.asClass in ['TestBlock1', 'TestBlock2'])
     def test_create_model_creates_content(self, mock_is_model_block_class, mock_check_dependencies):
         content, batchProcessorContent, trainModelContent, scriptContent, serveContent, serveScriptContent = create_model(
-            'TestModel', 'TestTrainingClass', 'TestEvaluationClass', 'TestInput', 'TestOutput', 'TestBlock1', 'TestBlock2', projectDirectory=self.projectDirectory, dryrun=True)
+            'TestTorchModel', 'TestTrainingClass', 'TestEvaluationClass', 'TestInput', 'TestOutput', 'TestBlock1', 'TestBlock2', projectDirectory=self.projectDirectory, torch=True, dryrun=True)
         self.assertEqual(content, TEST_CONTENT)
         self.assertEqual(batchProcessorContent, TEST_BATCH_PROCESSOR)
         self.assertEqual(trainModelContent, TEST_TRAIN_MODEL)
