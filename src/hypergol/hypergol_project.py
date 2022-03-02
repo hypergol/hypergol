@@ -302,8 +302,7 @@ class HypergolProject:
     def render_notebook(self, notebookName, filePath):
         templateNotebookPath = f"{Path(hypergol.__path__[0], 'cli', 'templates')}/{notebookName}"
         content = open(templateNotebookPath, 'rt').read()
-        with open(filePath, 'wt') as outputFile:
-            outputFile.write(content)
+        self.create_text_file(filePath=filePath, content=content)
         return content
 
     def list_datasets(self, pattern=None, asCode=False):

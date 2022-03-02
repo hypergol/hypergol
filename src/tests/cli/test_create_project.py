@@ -38,20 +38,16 @@ torch==1.10.2
 pydantic==1.6.2
 fastapi==0.65.2
 uvicorn==0.11.8
+jupyter==1.0.0
 """.replace('VERSION', hypergol.__version__).lstrip()
 
 GITIGNORE_CONTENT = """
 .venv/
 .vscode/
 .idea/
+.ipynb_checkpoints/
 __pycache__
 __pycache__/*
-""".lstrip()
-
-README_CONTENT = """
-""".lstrip()
-
-PYLINTRC_CONTENT = """
 """.lstrip()
 
 
@@ -113,12 +109,13 @@ class TestCreateProject(HypergolCreateTestCase):
 
     def test_create_project_creates_content(self):
         allContent = create_project(self.projectName, dryrun=True)
-        makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, licenseContent, pylintrcContent = allContent
+        makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, licenseContent, pylintrcContent, notebookContent= allContent
         self.assertEqual(makeVenvScript, MAKE_VENV_SCRIPT)
         self.assertEqual(runTestScript, RUN_TEST_SCRIPT)
         self.assertEqual(runPylintScript, RUN_PYLINT_SCRIPT)
         self.assertEqual(requirementsContent, REQUIREMENTS_CONTENT)
         self.assertEqual(gitignoreContent, GITIGNORE_CONTENT)
-        self.assertEqual(len(readmeContent), 6145)
+        self.assertEqual(len(readmeContent), 6350)
         self.assertEqual(len(licenseContent), 1070)
         self.assertEqual(len(pylintrcContent), 18757)
+        self.assertEqual(len(notebookContent), 2455)
