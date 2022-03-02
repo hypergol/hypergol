@@ -302,7 +302,6 @@ class HypergolProject:
     def render_notebook(self, notebookName, filePath):
         templateNotebookPath = f"{Path(hypergol.__path__[0], 'cli', 'templates')}/{notebookName}"
         content = open(templateNotebookPath, 'rt').read()
-        print(content)
         with open(filePath, 'wt') as outputFile:
             outputFile.write(content)
         return content
