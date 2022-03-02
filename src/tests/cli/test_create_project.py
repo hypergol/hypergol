@@ -71,6 +71,8 @@ class TestCreateProject(HypergolCreateTestCase):
             Path(self.projectDirectory, 'models'),
             Path(self.projectDirectory, 'pipelines', '__init__.py'),
             Path(self.projectDirectory, 'pipelines'),
+            Path(self.projectDirectory, 'notebooks', 'HypergolExample.ipynb'),
+            Path(self.projectDirectory, 'notebooks'),
             Path(self.projectDirectory, 'README.md'),
             Path(self.projectDirectory, 'LICENSE'),
             Path(self.projectDirectory, 'make_venv.sh'),
