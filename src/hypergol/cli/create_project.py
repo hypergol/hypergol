@@ -32,7 +32,7 @@ def create_project(projectName, dryrun=None, force=None):
         - ``README.md``
         - ``LICENSE`` <- Don't forget to add current year and your name or change it to the one you want
         - ``pylintrc``
-        - ``notebooks\HypergolExample.ipynb``
+        - ``notebooks\\HypergolExample.ipynb``
 
     Parameters
     ----------
