@@ -12,4 +12,4 @@ class BaseTorchModelBlock(nn.Module):
 
     def forward(self, x):
         """This function is obsolete"""
-        raise Exception(f'nn.Module.forward() was called in Hypergol model {self.name}')
+        raise Exception('nn.Module.forward() was called in Hypergol model BaseTorchModelBlock')

@@ -11,7 +11,7 @@ from tests.cli.hypergol_create_test_case import delete_if_exists
 
 
 MAKE_VENV_SCRIPT = """
-python3 -m venv .venv
+python3.8 -m venv .venv
 source .venv/bin/activate
 pip3 install --upgrade pip
 pip3 install setuptools==57.1.0
@@ -117,6 +117,6 @@ class TestCreateProject(HypergolCreateTestCase):
         self.assertEqual(runPylintScript, RUN_PYLINT_SCRIPT)
         self.assertEqual(requirementsContent, REQUIREMENTS_CONTENT)
         self.assertEqual(gitignoreContent, GITIGNORE_CONTENT)
-        self.assertEqual(len(readmeContent), 5744)
+        self.assertEqual(len(readmeContent), 6145)
         self.assertEqual(len(licenseContent), 1070)
         self.assertEqual(len(pylintrcContent), 18757)

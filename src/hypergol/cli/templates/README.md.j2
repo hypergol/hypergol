@@ -31,6 +31,8 @@ Alternatively individual files can be added to git with `git add <filename>`.
 
 Having dedicated virtual environment fully described by the projects `requirements.txt` is the recommended practice. Don't forget to `deactivate` the current virtual environment! Files from the environment are included in the projects `.gitignore` file and will ignored by git.
 
+Check the generated `make_venv.sh` file to find out which is the right python version and install it from here: [https://www.python.org/downloads/](https://www.python.org/downloads/). Check that the alias points to the right version in `make_venv.sh` with `which python3.X`. This will ensure that when the virtual environment is activated it will point to the interpreter in the virtual environment.
+
 ```
 deactivate
 ./make_venv.sh
