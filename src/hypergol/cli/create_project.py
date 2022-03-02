@@ -18,6 +18,7 @@ def create_project(projectName, dryrun=None, force=None):
         - ``tasks`` with ``__init__.py``
         - ``models`` with ``__init__.py``
         - ``models\blocks`` with ``__init__.py``
+        - ``notebooks``
         - ``tests``
 
     Executables:
@@ -31,6 +32,7 @@ def create_project(projectName, dryrun=None, force=None):
         - ``README.md``
         - ``LICENSE`` <- Don't forget to add current year and your name or change it to the one you want
         - ``pylintrc``
+        - ``notebooks\\HypergolExample.ipynb``
 
     Parameters
     ----------
@@ -56,6 +58,7 @@ def create_project(projectName, dryrun=None, force=None):
     project.create_blocks_directory()
     project.render_simple(templateName='__init__.py.j2', filePath=Path(project.blocksPath, '__init__.py'))
     project.create_tests_directory()
+    project.create_notebooks_directory()
     requirementsContent = project.render(
         templateName='requirements.txt.j2',
         templateData={'hypergolVersion': hypergol.__version__},
@@ -68,7 +71,8 @@ def create_project(projectName, dryrun=None, force=None):
     readmeContent = project.render_simple(templateName='README.md.j2', filePath=Path(project.projectDirectory, 'README.md'))
     licenseContent = project.render_simple(templateName='LICENSE.j2', filePath=Path(project.projectDirectory, 'LICENSE'))
     pylintrcContent = project.render_simple(templateName='pylintrc.j2', filePath=Path(project.projectDirectory, 'pylintrc'))
-    allContent = (makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, licenseContent, pylintrcContent)
+    notebookContent = project.render_notebook(notebookName='HypergolExample.ipynb', filePath=Path(project.notebooksPath, 'HypergolExample.ipynb'))
+    allContent = (makeVenvScript, runTestScript, runPylintScript, requirementsContent, gitignoreContent, readmeContent, licenseContent, pylintrcContent, notebookContent)
     return project.cli_final_message(creationType='Project', name=projectName, content=allContent)
 
 

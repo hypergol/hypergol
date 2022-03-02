@@ -131,6 +131,7 @@ class HypergolProject:
         self.modelsPath = Path(projectDirectory, 'models')
         self.blocksPath = Path(projectDirectory, 'models', 'blocks')
         self.testsPath = Path(projectDirectory, 'tests')
+        self.notebooksPath = Path(projectDirectory, 'notebooks')
         self._init_known_class_lists()
         self.templateEnvironment = jinja2.Environment(
             loader=jinja2.FileSystemLoader(
@@ -233,6 +234,9 @@ class HypergolProject:
     def create_tests_directory(self):
         create_directory(path=self.testsPath, mode=self.mode)
 
+    def create_notebooks_directory(self):
+        create_directory(path=self.notebooksPath, mode=self.mode)
+
     def is_data_model_class(self, value: NameString):
         """Checks if a name is a data_model class (based on if the snakecase .py file exists)"""
         return value in self._dataModelClasses
@@ -294,6 +298,12 @@ class HypergolProject:
 
     def render_simple(self, templateName, filePath):
         return self.render(templateName=templateName, templateData={'name': self.projectName}, filePath=filePath)
+
+    def render_notebook(self, notebookName, filePath):
+        templateNotebookPath = f"{Path(hypergol.__path__[0], 'cli', 'templates')}/{notebookName}"
+        content = open(templateNotebookPath, 'rt').read()
+        self.create_text_file(filePath=filePath, content=content)
+        return content
 
     def list_datasets(self, pattern=None, asCode=False):
         """Convenience function to list datasets for a project

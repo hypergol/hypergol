@@ -10,6 +10,7 @@ class BaseTorchModelBlock(nn.Module):
         super(BaseTorchModelBlock, self).__init__(*args, **kwargs)
         self.blockName = blockName or self.__class__.__name__
 
-    def forward(self, x):
+    def forward(self, x): # pylint: disable=R0201
+        # R0201: Method could be a function (no-self-use)
         """This function is obsolete"""
-        raise Exception(f'nn.Module.forward() was called in Hypergol model {self.name}')
+        raise Exception('nn.Module.forward() was called in Hypergol model BaseTorchModelBlock')
