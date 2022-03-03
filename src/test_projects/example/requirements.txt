@@ -1,7 +1,7 @@
 fire==0.3.1
 nose2==0.9.2
 pylint==2.5.3
-hypergol==0.1.20
+hypergol==0.2.1
 tensorflow==2.5.0
 torch==1.10.2
 pydantic==1.6.2
