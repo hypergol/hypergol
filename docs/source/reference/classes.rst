@@ -94,33 +94,30 @@ Delayed - Helper class to allow passing any class to threads
 Model Creation Related Classes
 ******************************
 
-==================================================================
-BaseBatchProcessor - Class for handling input/output for the model
-==================================================================
+================================================================
+BaseBatchProcessor - Class for handling input/output for a model
+================================================================
 
 .. currentmodule:: hypergol
 .. autoclass:: BaseBatchProcessor
 
 ===============================================================
-BaseTensorflowModelBlock - Class for organising Tensorflow code
+Classes for organising Tensorflow code
 ===============================================================
 
 .. currentmodule:: hypergol
 .. autoclass:: BaseTensorflowModelBlock
-
-==========================================================
-BaseTensorflowModel - Class for organising Tensorflow code
-==========================================================
-
-.. currentmodule:: hypergol
 .. autoclass:: BaseTensorflowModel
+.. autoclass:: TensorflowModelManager
 
-=========================================================================
-TensorflowModelManager - Class for managing model training and evaluation
-=========================================================================
+===============================================================
+Classes for organising Torch code
+===============================================================
 
 .. currentmodule:: hypergol
-.. autoclass:: TensorflowModelManager
+.. autoclass:: BaseTorchModelBlock
+.. autoclass:: BaseTorchModel
+.. autoclass:: TorchModelManager
 
 *********************
 Miscellaneous Classes

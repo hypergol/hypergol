@@ -47,16 +47,16 @@ create_pipeline - Autogenerate processing pipelines
 .. currentmodule:: hypergol.cli.create_pipeline
 .. autofunction:: create_pipeline
 
-=========================================================
-create_model_block - Autogenerate Tensorflow model blocks
-=========================================================
+===============================================================
+create_model_block - Autogenerate Tensorflow/Torch model blocks
+===============================================================
 
 .. currentmodule:: hypergol.cli.create_model_block
 .. autofunction:: create_model_block
 
-=============================================
-create_model - Autogenerate Tensorflow models
-=============================================
+===================================================
+create_model - Autogenerate Tensorflow/Torch models
+===================================================
 
 Also generates training script and batch data manager class
 
