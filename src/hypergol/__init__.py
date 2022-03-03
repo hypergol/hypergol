@@ -15,7 +15,7 @@ from .repr import Repr
 from .logger import Logger
 from .hypergol_project import RepoManager
 from .hypergol_project import HypergolProject
-# This spicy hack allows not to load TF each time we run CLI command which of course doesn't use TF - Laszlo
+# This spicy hack allows not to load TF each time we run CLI command which of course doesn't use TF/Torch - Laszlo
 if '-m' not in sys.argv:
     from .base_batch_processor import BaseBatchProcessor
 

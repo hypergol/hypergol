@@ -15,6 +15,8 @@ def create_model_block(className, projectDirectory='.', dryrun=None, force=None,
     ----------
     className : string (CamelCase)
         Name of the class to be created
+    torch : bool = False
+        Set to true to generate blocks for a Torch model
     """
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     className = NameString(className)

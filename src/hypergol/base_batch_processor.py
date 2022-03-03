@@ -4,7 +4,7 @@ class BaseBatchProcessor:
     """
     Base class for batch processors.
 
-    Converts Hypergol datasets to batches for training models and converts TensorFlow model outputs to data model classes and then saves them.
+    Converts Hypergol datasets to batches for training models and converts TensorFlow/Torch model outputs to data model classes and then saves them.
     """
 
     def __init__(self, inputDataset, inputBatchSize, outputDataset):

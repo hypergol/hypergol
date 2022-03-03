@@ -365,6 +365,19 @@ Sometimes a class must be passed onto a task that cannot be pickled (e.g. loggin
 
 This will result in delaying the creation of ``CannotPickle`` object until the task object is recreated inside the thread. This happens exactly between the ``loadedInputs`` loading and the ``init()`` function, so it can be used in the latter. The ``Delayed`` mechanism is recursive so any also non-pickleable classes can be pass on.
 
+Creating a Torch model
+----------------------
+
+The structure for creating Torch models is very similar to Tensorflow models. For ``create_model_block`` and ``create_model`` functions use the ``--torch`` switch and you will get Torch dependent templates.
+
+Use the ``@torch.jit.export`` decorator on functions you want to expose with TorchScript (``get_outputs`` will be decorated by default in the template).
+
+``forward()`` is not used by default and :class:`TorchModelManager` uses the default functions to operate the model.
+
+``produce_metrics`` should return a ``{'tag':value, ...}`` dictionary of scalars to be recorded to TensorBoard.
+
+Otherwise (training, serving) the treatment of the two types of models should be the same. Contact us if you find this otherwise.
+
 Creating a Tensorflow model
 ---------------------------
 
@@ -500,6 +513,18 @@ The ``/output`` endpoint accepts a list of the same types that ``BatchProcessor.
 From version 0.0.10 the response header contains the model long name as well in the ``x-model-long-name`` field, so the caller client can record it and use for end-to-end data lineage.
 
 For large scale analysis, it is not recommended to use the deployed model due to multiple factors: The network latency, the conversion back and forth and the single-threaded ness of the execution. If a large set of outputs must be calculated a dedicated pipeline with many threads is the best way forward. Use the implementation of the ``/output`` endpoint for reference (without the ``pydantic`` conversion.
+
+Jupyter notebooks
+-----------------
+
+Hypergol creates a notebook directory with an example notebook when creating a project. The example shows how to load data from datasets and how to call a deployed model.
+
+.. code-block:: bash
+
+    $ cd notebooks
+    $ jupyter notebooks --port=8889
+
+Set the port as you see suited.
 
 Utilities
 ---------

@@ -63,7 +63,6 @@ class BaseTorchModel(nn.Module):
         raise NotImplementedError('Must implement `get_loss` function')
 
     def produce_metrics(self, targets, training, globalStep, **kwargs):
-        # TODO: Figure out how to do logging
         """This function records values for TensorBoard, it runs in the context of a ``torch.utils.tensorboard.SummaryWriter`` so the implementation just need to call ``tf.summary.scalar`` or any other summary functions to record data to TensorBoard. See `https://www.tensorflow.org/api_docs/python/tf/summary <https://www.tensorflow.org/api_docs/python/tf/summary>`__ for further documentation on this.
 
         It should not return anything as it will be discarded.
@@ -79,7 +78,6 @@ class BaseTorchModel(nn.Module):
         **kwargs :
             Input values as keyword arguments
         """
-        raise ValueError('produce_metrics not implemented yet for torch')
         raise NotImplementedError('Must implement `produce_metrics` function')
 
     def get_outputs(self, **kwargs):

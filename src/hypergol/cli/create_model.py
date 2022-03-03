@@ -29,6 +29,8 @@ def create_model(modelName, trainingClass, evaluationClass, inputClass, outputCl
         Datamodel class (must exist) that will be returned as output when serving the model
     *args : BaseTensorflowModelBlock / BaseTorchModelBlock
         Names of blocks that will build up the model
+    torch : bool = False
+        Set to true to generate a Torch model
     """
     project = HypergolProject(projectDirectory=projectDirectory, dryrun=dryrun, force=force)
     modelName = NameString(modelName)

@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('../../src/hypergol/cli'))
 # -- Project information -----------------------------------------------------
 
 project = 'Hypergol'
-copyright = '2020, Laszlo Sragner'
+copyright = '2020-2022, Laszlo Sragner'
 author = 'Laszlo Sragner'
 
 # The full version, including alpha/beta/rc tags
