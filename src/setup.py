@@ -23,6 +23,6 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.8',
-    install_requires=['fire', 'Jinja2', 'GitPython', 'numpy==1.19.2', 'tensorflow==2.5.0', 'torch==1.10.2', 'tqdm', 'pydantic', 'fastapi', 'uvicorn'],
+    install_requires=['fire', 'Jinja2', 'GitPython', 'numpy==1.22.0', 'tensorflow==2.5.0', 'torch==1.10.2', 'tqdm', 'pydantic', 'fastapi', 'uvicorn'],
     include_package_data=True
 )
