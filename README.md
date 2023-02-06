@@ -1,5 +1,7 @@
 # Hypergol
 
+## This project is not in active developement, for any enquiries see discord link below.
+
 Hypergol is a Data Science productivity toolkit to accelerate small team projects into production at the shortest possible time while still maintaining high standard of code. This is achieved by autogenerating structure and code in a form that is easy to extend, so only the project-specific code needs to be written.
 
 Hypergol provides parallel execution capabilities with little restrictions. This enables a small team to accelerate time-consuming tasks by renting larger instances from a cloud provider, but with no additional infrastructure, reducing the time and cost of setting up.
